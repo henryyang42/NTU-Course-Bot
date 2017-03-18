@@ -1,5 +1,7 @@
 # coding: utf-8
 ntu_course_dpt_search_url = 'http://nol2.aca.ntu.edu.tw/nol/coursesearch/search_for_02_dpt.php'
+base_url = 'http://nol2.aca.ntu.edu.tw/nol/coursesearch/'
+
 all_dept = {
     "1000": "1000 文學院",
     "1010": "1010 中國文學系",

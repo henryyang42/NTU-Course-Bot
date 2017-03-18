@@ -1,5 +1,13 @@
+# Static files
+html
+
+# Mac
 .DS_Store
+
+# Django
 migrations
+*.sqlite3
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

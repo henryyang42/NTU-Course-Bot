@@ -59,22 +59,30 @@ class Course(models.Model):
 
     semester = models.CharField(max_length=10)
     serial_no = models.CharField(max_length=10, unique=True)
-    designated_for = models.ForeignKey(Department, blank=True)
+    # designated_for = models.ForeignKey(Department, blank=True, null=True)
+    designated_for = models.CharField(max_length=10, blank=True)
     curriculum_no = models.CharField(max_length=20, blank=True)
     class_no = models.CharField(max_length=10, blank=True)
     title = models.CharField(max_length=20, blank=True)
     credits = models.CharField(max_length=10, blank=True)
     curriculum_identity_no = models.CharField(max_length=20, blank=True)
-    instructor = models.ForeignKey(Instructor, blank=True)
+    full_half_yr = models.CharField(max_length=10, blank=True)
+    required_elective = models.CharField(max_length=10, blank=True)
+    # instructor = models.ForeignKey(Instructor, blank=True, null=True)
+    instructor = models.CharField(max_length=10, blank=True)
+    instructor_url = models.TextField(blank=True)
     sel_method = models.CharField(max_length=10, choices=SEL_METHOD_CHOICES, default='0')
-    schedule = models.ManyToManyField(Schedule)
+    schedule = models.ManyToManyField(Schedule, blank=True)
     schedule_str = models.CharField(max_length=20, blank=True)
-    classroom = models.ForeignKey(Classroom, blank=True)
+    # classroom = models.ForeignKey(Classroom, blank=True, null=True)
+    classroom = models.CharField(max_length=20, blank=True)
+    classroom_url = models.TextField(blank=True)
     capacity = models.CharField(max_length=10, blank=True)
     course_limits = models.TextField(blank=True)
     remarks = models.TextField(blank=True)
 
     # Syllabus related
+    syllabus_url = models.TextField(blank=True)
     description = models.TextField(blank=True)
     goal = models.TextField(blank=True)
     requirements = models.TextField(blank=True)
@@ -83,6 +91,12 @@ class Course(models.Model):
     grading = models.TextField(blank=True)
     progress = models.TextField(blank=True)
     course_url = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('semester', 'serial_no')
+
+    def __str__(self):
+        return '%s - %s' % (self.serial_no, self.title)
 
 
 class Review(models.Model):
@@ -94,7 +108,7 @@ class Review(models.Model):
         ('4', '中上'),
         ('5', '重'),
     )
-    course = models.ForeignKey(Course)
+    course = models.ForeignKey(Course, blank=True, null=True)
     title = models.TextField(blank=True)
     loading = models.CharField(max_length=2, choices=LOADING_CHOICES, default='0')
     sweetness = models.CharField(max_length=2, choices=LOADING_CHOICES, default='0')
@@ -105,4 +119,4 @@ class Review(models.Model):
 class User(models.Model):
     sid = models.CharField(max_length=20)
     name = models.CharField(max_length=20)
-    selected_course = models.ManyToManyField(Course)
+    selected_course = models.ManyToManyField(Course, blank=True)
