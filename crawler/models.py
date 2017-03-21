@@ -58,7 +58,7 @@ class Course(models.Model):
     )
 
     semester = models.CharField(max_length=10)
-    serial_no = models.CharField(max_length=10, unique=True)
+    serial_no = models.CharField(max_length=10)
     # designated_for = models.ForeignKey(Department, blank=True, null=True)
     designated_for = models.CharField(max_length=10, blank=True)
     curriculum_no = models.CharField(max_length=20, blank=True)
@@ -96,7 +96,7 @@ class Course(models.Model):
         unique_together = ('semester', 'serial_no')
 
     def __str__(self):
-        return '%s - %s' % (self.serial_no, self.title)
+        return '(%s) - %s - %s' % (self.semester, self.serial_no, self.title)
 
 
 class Review(models.Model):
