@@ -47,7 +47,7 @@ def create_dept(filename):
         for row in rows:
             try:
                 Course.objects.update_or_create(
-                    semester=filename.split('/')[1],
+                    semester=filename.split('/')[2],
                     serial_no=row['serial_no'],
                     defaults=row
                 )
@@ -62,6 +62,6 @@ if __name__ == '__main__':
         for f in files:
             if '.html' in f:
                 filenames.append(os.path.join(root, f))
-    print (filenames)
+
     for filename in filenames:
         create_dept(filename)
