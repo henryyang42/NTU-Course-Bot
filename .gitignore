@@ -6,6 +6,8 @@ __MACOSX
 # Static
 .DS_Store
 *.zip
+*.sqlite3-journal
+*.sqlite3
 
 # Django
 migrations
