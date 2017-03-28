@@ -2,6 +2,7 @@
 html
 *.png
 __MACOSX
+request_template
 
 # Static
 .DS_Store
