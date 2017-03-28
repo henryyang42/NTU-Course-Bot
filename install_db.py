@@ -1,7 +1,12 @@
+import django
 import os
 import re
 from bs4 import BeautifulSoup
-from const import base_url
+from crawler.const import base_url
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "NTUCB.settings")
+django.setup()
+
 from crawler.models import *
 
 
@@ -51,7 +56,7 @@ def create_dept(filename):
 
 
 if __name__ == '__main__':
-    list_dirs = os.walk('html')
+    list_dirs = os.walk('crawler/html')
     filenames = []
     for root, dirs, files in list_dirs:
         for f in files:

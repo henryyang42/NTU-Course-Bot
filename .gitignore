@@ -1,9 +1,11 @@
 # Static files
 html
 *.png
+__MACOSX
 
-# Mac
+# Static
 .DS_Store
+*.zip
 
 # Django
 migrations

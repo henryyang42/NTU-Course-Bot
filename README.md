@@ -1,10 +1,8 @@
 # NTUCB
 
-```sh
-python3 manage.py makemigrations
-python3 manage.py makemigrations crawler
-python3 manage.py migrate
-python3 manage.py createsuperuser
-python3 manage.py runserver
-```
-http://localhost:8000/admin
+## Installation
+Run ``sh install.sh`` and you may access django admin by [http://localhost:8000/admin](http://localhost:8000/admin) or make queries using ``python3 manage.py shell``
+
+
+## Current DB schema:
+![](db_schema.png)
