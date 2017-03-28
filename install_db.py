@@ -60,7 +60,8 @@ if __name__ == '__main__':
     filenames = []
     for root, dirs, files in list_dirs:
         for f in files:
-            if 'html' in f:
+            if '.html' in f:
                 filenames.append(os.path.join(root, f))
+    print (filenames)
     for filename in filenames:
         create_dept(filename)
