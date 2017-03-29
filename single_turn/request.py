@@ -1,4 +1,5 @@
-from crawler import *
+from crawler.models import *
+import numpy as np
 
 
 def query_course(goal=None, **kwargs):
@@ -15,7 +16,7 @@ def query_course(goal=None, **kwargs):
     """
     ans = []
     courses = Course.objects.filter(**kwargs).filter(semester='105-2')
-    for course in courses :
+    for course in courses:
         eval('ans.append(course.%s)' % goal)
-        
-    return ans
+
+    return np.unique(ans)
