@@ -1,6 +1,7 @@
 import django
 import os
 import re
+import pandas as pd
 from bs4 import BeautifulSoup
 from crawler.const import base_url
 
@@ -52,11 +53,30 @@ def create_dept(filename):
                     defaults=row
                 )
             except Exception as e:
-                print ('%s-%s - %s' % (row['serial_no'], row['title'], e))
+                print('%s-%s - %s' % (row['serial_no'], row['title'], e))
+
+
+def put_review():
+    course = pd.read_csv('./crawler/NTUCourse-comment_sentiment.csv')
+    ge = pd.read_csv('./crawler/NTUCourse-comment_all_ge_sentiment.csv')
+    for i in range(course.shape[0]):
+        Review.objects.update_or_create(
+            content=course.content[i],
+            title=course.article_title[i],
+            sentiment=course.sentiment[i],
+            probability=course.probability[i]
+        )
+    for i in range(ge.shape[0]):
+        Review.objects.update_or_create(
+            content=ge.content[i],
+            title=ge.article_title[i],
+            sentiment=ge.sentiment[i],
+            probability=ge.probability[i]
+        )
 
 
 if __name__ == '__main__':
-    list_dirs = os.walk('crawler/html')
+    list_dirs = os.walk('./crawler/html')
     filenames = []
     for root, dirs, files in list_dirs:
         for f in files:
@@ -65,3 +85,5 @@ if __name__ == '__main__':
 
     for filename in filenames:
         create_dept(filename)
+
+    put_review()

@@ -114,6 +114,8 @@ class Review(models.Model):
     sweetness = models.CharField(max_length=2, choices=LOADING_CHOICES, default='0')
     stars = models.CharField(max_length=2, choices=LOADING_CHOICES, default='0')
     content = models.TextField(blank=True)
+    sentiment = models.CharField(max_length=10, default='Neutral')
+    probability = models.CharField(max_length=20, blank=True)
 
 
 class User(models.Model):
