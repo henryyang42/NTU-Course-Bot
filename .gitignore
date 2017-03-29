@@ -9,6 +9,7 @@ request_template
 *.zip
 *.sqlite3-journal
 *.sqlite3
+*.csv
 
 # Django
 migrations
