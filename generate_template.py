@@ -71,8 +71,8 @@ for course in all_course:
     titles.append(course.title)
     instructors.append(course.instructor)
 
-titles = np.unique(titles)
-instructors = np.unique(instructors)
+titles = np.unique([x for x in titles if x and ' ' not in x])
+instructors = np.unique([x for x in instructors if x and ' ' not in x])
 
 print ('%d titles, %d instructors' % (len(titles), len(instructors)))
 
