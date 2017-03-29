@@ -16,7 +16,7 @@ def single_turn(request):
             ans = query_course(goal=d['intent'], **d['slot'])
             print (ans)
         except:
-            ans = Course.objects.filter(title__contains=user_input, semester='105-2')
+            return HttpResponse("Server Error: %s" % user_input)
 
         return HttpResponse(' '.join(ans))
 
