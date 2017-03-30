@@ -1,4 +1,5 @@
-unzip crawler/html.zip -d crawler # 2 years' course
+unzip ./crawler/review.zip -d crawler # ntu-course comment (from ptt)
+unzip ./crawler/html.zip -d crawler # 2 years' course
 pip3 install -r requirements.txt # install required packages
 
 python3 manage.py makemigrations
