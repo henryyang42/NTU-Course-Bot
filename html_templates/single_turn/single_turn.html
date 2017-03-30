@@ -6,8 +6,10 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <style type="text/css">
+
 body {
   margin-top: 2%;
   background: #ebeef0;
@@ -215,7 +217,7 @@ body {
           <div class="panel-footer" style="height:10%;">
             <form class="row">
               <div class="col-xs-9">
-                <input type="text" name="chat" ng-model="chat_input" ng-keyup="chat_input && $event.keyCode == 13 && send(chat_input)" placeholder='Enter something like {"intent": "title", "slot": {"instructor": "陳信希"}}' class="form-control chat-input">
+                <input type="text" name="chat" ng-model="chat_input" ng-keyup="chat_input && $event.keyCode == 13 && send(chat_input)" placeholder='可以輸入 老師 ｜ 課名 ｜ {"intent": "title", "slot": {"instructor": "陳信希"}}' class="form-control chat-input">
               </div>
               <div class="col-xs-3">
                 <button class="btn btn-primary btn-block" ng-click="chat_input && send(chat_input)">Send</button>

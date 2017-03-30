@@ -96,7 +96,7 @@ class Course(models.Model):
         unique_together = ('semester', 'serial_no')
 
     def __str__(self):
-        return '(%s) - %s - %s' % (self.semester, self.serial_no, self.title)
+        return '(%s) - %s - %s by %s' % (self.semester, self.serial_no, self.title, self.instructor)
 
 
 class Review(models.Model):
