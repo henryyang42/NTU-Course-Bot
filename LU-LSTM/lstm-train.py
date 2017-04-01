@@ -46,8 +46,11 @@ args = ap.parse_args()
 # prepare data
 X = [] # list of sequences of indice
 Y = [] # list of sequences of one-hot encoding of label e.g. [0 0 ... 0 1 0 ... 0]
+Y2 = [] # list of intents
 #TODO intent label
 
+intent2idx = {}
+idx2intent = []
 word2idx = {"#": 0, "<UNK>":1}
 idx2word = ["#", "<UNK>"] # "#" for padding
 label2idx = {"#": 0}
@@ -56,11 +59,17 @@ max_seq_len = 0
 pat_split = re.compile(ur"\s+")
 with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
     lines = f_in.readlines()
-    print "# data:", len(lines)/2
-    for i in range(0, len(lines), 2):
+    print "# data:", len(lines)/3
+    for i in range(0, len(lines), 3):
+        # intent
+        intent = lines[i].strip()
+        if intent not in intent2idx:
+            intent2idx[intent] = len(idx2intent)
+            idx2intent.append(intent)
+        Y2.append(intent2idx[intent])
+
         # tokens
-        #print lines[i].strip(), repr(lines[i])
-        tokens = pat_split.split(lines[i].strip())
+        tokens = pat_split.split(lines[i+1].strip())
         #print tokens[0], repr(tokens[0])
         if len(tokens) > max_seq_len:
             max_seq_len = len(tokens)
@@ -73,8 +82,7 @@ with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
         X.append(idx_seq)
 
         # BIO labels 
-        #print lines[i+1]
-        labels = pat_split.split(lines[i+1].strip())
+        labels = pat_split.split(lines[i+2].strip())
         if len(tokens) != len(labels):
             print "!! something wrong !!", len(tokens), len(labels)
         #print tokens
@@ -105,10 +113,14 @@ for i, y in enumerate(Y):
     #print one_hot_seq, one_hot_seq.shape
     Y[i] = np.array(one_hot_seq)
     """
-    Y[i] = np_utils.to_categorical(y)
+    Y[i] = np_utils.to_categorical(y, len(idx2label))
 
 Y = np.array(Y)
 print Y.shape
+
+Y2 = np_utils.to_categorical(Y2)
+
+##### contruct model #####
 
 # [input layer]
 seq_input = Input(shape=(max_seq_len,), dtype='int32')
@@ -136,16 +148,17 @@ x = Activation(args.activation)(x)
 # [output layer for slot]
 x = TimeDistributed(Dense(len(idx2label)))(x)
 #print x.__shape
-slot_output = Activation('softmax')(x)
+slot_output = Activation('softmax', name='slot')(x)
 
 # [output layer for intent]
-"""
-x2 = Dense(args.emb_size)(intent_lstm_out)
-intent_output = Activation('softmax')(x2)
-"""
+x2 = Dense(len(idx2intent))(intent_lstm_out)
+intent_output = Activation('softmax', name='intent')(x2)
+
 
 # connect nodes to the model
-model = Model(input=seq_input, output=slot_output)#TODO add intent output
+model = Model(input=seq_input, output=[slot_output, intent_output])
+
+##### ##### #####
 
 cb = []
 # early-stopping
@@ -158,10 +171,13 @@ saveBestModel = ModelCheckpoint(best_weights_filepath, monitor='val_loss', verbo
 cb.append(saveBestModel)
 
 optm = Adam(lr=args.learning_rate)
-model.compile(loss=args.cost, optimizer=optm)
+
+intent_weight = 0.8
+#TODO configurable loss weight
+model.compile(loss=args.cost, optimizer=optm, loss_weights=[1.0-intent_weight, intent_weight])
 print "== model compilation done =="
 
-model.fit(X, Y, validation_split=0.1, nb_epoch=args.epoch, callbacks=cb)
+model.fit(X, [Y, Y2], validation_split=0.1, nb_epoch=args.epoch, callbacks=cb)
 
 
 model.load_weights(best_weights_filepath)
@@ -170,5 +186,5 @@ model.load_weights(best_weights_filepath)
 model.save(args.out_model)
 
 # dump_vocabulary
-obj = {"word_vocab": word2idx, "intent_vocab": intent2idx, "slot_vocab": label2idx}
-json.dump(obj, args.out_vocab)
+obj = {"word_vocab": idx2word, "intent_vocab": idx2intent, "slot_vocab": idx2label}
+json.dump(obj, open(args.out_vocab, "w"))
