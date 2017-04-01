@@ -217,7 +217,7 @@ body {
           <div class="panel-footer" style="height:10%;">
             <form class="row">
               <div class="col-xs-9">
-                <input type="text" name="chat" ng-model="chat_input" ng-keyup="chat_input && $event.keyCode == 13 && send(chat_input)" placeholder='可以輸入 老師 ｜ 課名 ｜ {"intent": "title", "slot": {"instructor": "陳信希"}}' class="form-control chat-input">
+                <input type="text" name="chat" ng-model="chat_input" ng-keypress="chat_input && $event.keyCode == 13 && send(chat_input)" placeholder="請輸入想詢問的事情" class="form-control chat-input">
               </div>
               <div class="col-xs-3">
                 <button class="btn btn-primary btn-block" ng-click="chat_input && send(chat_input)">Send</button>
