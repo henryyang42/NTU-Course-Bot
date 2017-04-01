@@ -16,6 +16,36 @@ import json
 import re
 from LSTM_util import *
 
+def get_intent_slot(model, tokens, word2idx, idx2label, idx2intent):
+    # prepare sequence input
+    seq_len =  model.input_layers[0].batch_input_shape[1]
+    idx_seq = seq_word2idx(tokens, word2idx)
+    if len(idx_seq) < seq_len:
+        pad_idx_seq = [0]*(seq_len-len(idx_seq)) + idx_seq
+    elif len(idx_seq) > seq_len:
+        pad_idx_seq = idx_seq[-seq_len : ]
+    else:
+        pad_idx_seq = idx_seq 
+    
+    # predict
+    pred_slot, pred_intent = model.predict(np.array([pad_idx_seq]))
+    #print pred_slot
+    #print pred_intent
+
+    # convert result
+    intent_idx = pred_intent[0].argmax()
+    intent = idx2intent[intent_idx]
+
+    slot_idx_seq = pred_slot[0].argmax(axis=-1)
+    #print slot_idx_seq
+    labels = seq_idx2word(slot_idx_seq[-len(tokens) : ], idx2label)
+    for i, l in enumerate(labels):
+        if l == '#':
+            labels[i] = 'O'
+
+    return intent, tokens, labels
+        
+
 #arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("test_file", help="sentences(questions) to label slot and intent")
@@ -26,19 +56,22 @@ args = ap.parse_args()
 # load vocab
 obj = json.load(open(args.vocab, "r"))
 idx2label = obj["slot_vocab"]
-intent2label = obj["intent_vocab"]
+idx2intent = obj["intent_vocab"]
 word2idx = {}
 for i, w in enumerate(obj["word_vocab"]):
     word2idx[w] = i
 
 # load model
 model = load_model(args.model)
-print "== load model done =="
+#print "== load model done =="
 
 # prediction on test data
-with codecs.open(args.test_fild, "r", "utf-8") as f_test:
+with codecs.open(args.test_file, "r", "utf-8") as f_test:
     for line in f_test:
         tokens = line.strip().split(" ")
-        idx_seq = seq_word2idx(tokens, word2idx)
 
-        pred_slot, pred_intent = model.predict([idx_seq])
+        intent, tokens, labels = get_intent_slot(model, tokens, word2idx, idx2label, idx2intent)
+        print intent
+        print " ".join(tokens)
+        print " ".join(labels)
+

@@ -16,3 +16,4 @@ def seq_idx2word(idx_seq, idx2word):
             word_seq.append(idx2word[idx])
         else:
             word_seq.append("<UNK>")
+    return word_seq
