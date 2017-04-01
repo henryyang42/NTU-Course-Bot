@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'single_turn.apps.SingleTurnConfig',
     'crawler.apps.CrawlerConfig',
     'django.contrib.admin',
     'django.contrib.auth',

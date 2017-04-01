@@ -4,17 +4,16 @@ from django.http import HttpResponse
 
 from crawler.models import *
 from .request import *
+
 # Create your views here.
 
 
 def single_turn(request):
     if request.method == 'POST':
         user_input = request.POST['input']
-        print (user_input)
+        understand(user_input)
         try:
-            d = json.loads(user_input)
             ans = query_course(goal=d['intent'], **d['slot'])
-            print (ans)
         except:
             ans = Course.objects.filter(semester='105-2', title__contains=user_input) | Course.objects.filter(semester='105-2', instructor__contains=user_input)
             if ans:

@@ -1,5 +1,6 @@
 from crawler.models import *
 import numpy as np
+from .apps import *
 
 
 def query_course(goal=None, **kwargs):
@@ -20,3 +21,12 @@ def query_course(goal=None, **kwargs):
         eval('ans.append(course.%s)' % goal)
 
     return np.unique(ans)
+
+
+def understand(input):
+    tokens = [tok for tok in jieba.cut(input)]
+    print (tokens)
+    intent, tokens, labels = get_intent_slot(lu_model, tokens, word2idx, idx2label, idx2intent)
+
+    print (tokens, labels, intent)
+
