@@ -15,14 +15,14 @@ from keras.utils import np_utils
 import json
 import re
 from .LSTM_util import *
-
+"""
 # http://stackoverflow.com/questions/40154320/replicating-models-in-keras-and-tensorflow-for-a-multi-threaded-setting
 import tensorflow as tf
 sess = tf.Session()
 
 from keras import backend as K
 K.set_session(sess)
-
+"""
 def get_intent_slot(model, tokens, word2idx, idx2label, idx2intent):
     # prepare sequence input
     seq_len =  model.input_layers[0].batch_input_shape[1]
@@ -35,8 +35,8 @@ def get_intent_slot(model, tokens, word2idx, idx2label, idx2intent):
         pad_idx_seq = idx_seq
 
     # predict
-    with sess.graph.as_default():
-        pred_slot, pred_intent = model.predict(np.array([pad_idx_seq]))
+    #with sess.graph.as_default():
+    pred_slot, pred_intent = model.predict(np.array([pad_idx_seq]))
     #print pred_slot
     #print pred_intent
 
