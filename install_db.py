@@ -76,7 +76,7 @@ def put_review():
 
 
 if __name__ == '__main__':
-    list_dirs = os.walk('./crawler/html')
+    list_dirs = os.walk('crawler/html')
     filenames = []
     for root, dirs, files in list_dirs:
         for f in files:
