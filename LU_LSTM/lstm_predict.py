@@ -23,6 +23,8 @@ sess = tf.Session()
 from keras import backend as K
 K.set_session(sess)
 """
+
+
 def get_intent_slot(model, tokens, word2idx, idx2label, idx2intent):
     # prepare sequence input
     seq_len =  model.input_layers[0].batch_input_shape[1]
