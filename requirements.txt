@@ -4,6 +4,6 @@ numpy
 pandas
 h5py
 keras==1.2.0
-tensorflow==0.12.0
+# tensorflow==0.12.0
 Theano==0.8.2
 jieba
