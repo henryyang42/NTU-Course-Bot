@@ -11,12 +11,12 @@ from .request import *
 def single_turn(request):
     if request.method == 'POST':
         user_input = request.POST['input']
-        d = understand(user_input)
         try:
-            ans = query_course(goal=d['intent'], **d['slot'])
-        except:
-            pass
+            d = understand(user_input)
+            d['resp_list'], d['resp_str'] = query_course(d['intent'], d['slot'])
+        except Exception as e:
+            print(e)
 
-        return HttpResponse("%s<br><br>%s" % (str(ans), str(d)))
+        return HttpResponse("%s<br><br>%s" % (d['resp_str'], str(d)))
 
     return render(request, 'single_turn/single_turn.html', {})
