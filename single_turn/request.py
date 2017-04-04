@@ -1,6 +1,14 @@
 from crawler.models import *
 import numpy as np
 from .apps import *
+from django.db.models import Q
+
+
+def expand_title(title):
+    q = Q()
+    for c in title:
+        q &= Q(title__contains=c)
+    return q
 
 
 def query_course(goal, slot):
@@ -21,11 +29,13 @@ def query_course(goal, slot):
     for k, v in slot.items():
         if k == 'when':
             query_term['schedule_str__contains'] = v[-1]
+        elif k == 'title':
+            pass
         else:
             query_term[k + '__contains'] = v
 
     # Generate corresponding response to each intent.
-    courses = Course.objects.filter(**query_term).filter(semester='105-2')
+    courses = Course.objects.filter(expand_title(slot.get('titie', ''))).filter(**query_term).filter(semester='105-2')
     if courses.count() == 0:
         return [], '並未找到相符的課程。'
 
