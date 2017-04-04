@@ -26,7 +26,7 @@ def query_course(goal, slot):
 
     # Generate corresponding response to each intent.
     courses = Course.objects.filter(**query_term).filter(semester='105-2')
-    if courses.count() == 0:
+    if not query_term or courses.count() == 0:
         return [], '並未找到相符的課程。'
 
     resp_list, resp_str = [], ''
