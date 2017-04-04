@@ -1,5 +1,7 @@
 import json
 import logging
+import traceback
+import sys
 from django.shortcuts import render
 from django.http import HttpResponse
 
@@ -18,8 +20,8 @@ def single_turn(request):
             d['resp_list'], d['resp_str'] = query_course(d['intent'], d['slot'])
             logger.debug('%s -> %s\n%s' % (user_input, d['resp_str'], str(d)))
             return HttpResponse("%s<br><br>%s" % (d['resp_str'], str(d)))
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc(file=sys.stdout)
 
         return HttpResponse("我壞掉惹QQ")
 

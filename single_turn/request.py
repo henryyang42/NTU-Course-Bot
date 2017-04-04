@@ -35,14 +35,15 @@ def query_course(goal, slot):
             query_term[k + '__contains'] = v
 
     # Generate corresponding response to each intent.
-    courses = Course.objects.filter(expand_title(slot.get('titie', ''))).filter(**query_term).filter(semester='105-2')
-    if courses.count() == 0:
+    courses = Course.objects.filter(expand_title(slot.get('title', ''))).filter(**query_term).filter(semester='105-2')
+    print (courses)
+    if not slot or courses.count() == 0:
         return [], '並未找到相符的課程。'
 
     resp_list, resp_str = [], ''
     if goal == 'instructor':
         resp_list = list(np.unique([course.instructor for course in courses]))
-        resp_str = '<b>%s</b>有以下的老師開課：<br>%s' % (slot['title'], '<br>'.join(resp_list))
+        resp_str = '<b>%s</b>有以下的老師開課：<br>%s' % (slot.get('title', courses[0].title), '<br>'.join(resp_list))
     elif goal == 'title':
         resp_list = list(np.unique([course.title for course in courses]))
         resp_str = '<b>%s</b>教授所開的課如下：<br>%s' % (courses[0].instructor, '<br>'.join(resp_list))
