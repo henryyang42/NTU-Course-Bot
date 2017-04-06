@@ -1,6 +1,4 @@
-# NTUCB [Demo site](http://ntu-course-chatbot.ml/)
-
-
+# NTUCB 
 
 ## Website
 http://ntu-course-chatbot.ml/
