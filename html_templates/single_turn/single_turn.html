@@ -1,198 +1,199 @@
 <html>
+
 <head>
   <title>Course Bot</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <style type="text/css">
-
-body {
-  margin-top: 2%;
-  background: #ebeef0;
-  overflow:hidden;
-}
-
-.panel {
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.075);
-  border-radius: 0;
-  border: 0;
-  margin-bottom: 24px;
-}
-
-.panel .panel-heading,
-.panel>:first-child {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-.panel-heading {
-  position: relative;
-  height: 50px;
-  padding: 0;
-  border-bottom: 1px solid #eee;
-}
-
-.panel-title {
-  font-weight: normal;
-  padding: 0 20px 0 20px;
-  font-size: 1.416em;
-  line-height: 50px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.nano {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.nano>.nano-content {
-  position: absolute;
-  overflow: scroll;
-  overflow-x: hidden;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-
-.pad-all {
-  padding: 15px;
-}
-
-.mar-btm {
-  margin-bottom: 15px;
-}
-
-.media-block .media-left {
-  display: block;
-  float: left;
-}
-
-.img-sm {
-  width: 46px;
-  height: 46px;
-}
-
-.media-block .media-body {
-  display: block;
-  overflow: hidden;
-  width: auto;
-}
-
-.pad-hor {
-  padding-left: 15px;
-  padding-right: 15px;
-}
-
-.speech {
-  position: relative;
-  background: #b7dcfe;
-  color: #317787;
-  display: inline-block;
-  border-radius: 0;
-  padding: 12px 20px;
-}
-
-.speech:before {
-  content: "";
-  display: block;
-  position: absolute;
-  width: 0;
-  height: 0;
-  left: 0;
-  top: 0;
-  border-top: 7px solid transparent;
-  border-bottom: 7px solid transparent;
-  border-right: 7px solid #b7dcfe;
-  margin: 15px 0 0 -6px;
-}
-
-.speech-right>.speech:before {
-  left: auto;
-  right: 0;
-  border-top: 7px solid transparent;
-  border-bottom: 7px solid transparent;
-  border-left: 7px solid #ffdc91;
-  border-right: 0;
-  margin: 15px -6px 0 0;
-}
-
-.speech .media-heading {
-  font-size: 1.2em;
-  color: #317787;
-  display: block;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  margin-bottom: 10px;
-  padding-bottom: 5px;
-  font-weight: 300;
-}
-
-.speech-time {
-  margin-top: 20px;
-  margin-bottom: 0;
-  font-size: .8em;
-  font-weight: 300;
-}
-
-.media-block .media-right {
-  float: right;
-}
-
-.speech-right {
-  text-align: right;
-}
-
-.pad-hor {
-  padding-left: 15px;
-  padding-right: 15px;
-}
-
-.speech-right>.speech {
-  background: #ffda87;
-  color: #a07617;
-  text-align: right;
-}
-
-.speech-right>.speech .media-heading {
-  color: #a07617;
-}
-
-.btn-primary,
-.btn-primary:focus,
-.btn-hover-primary:hover,
-.btn-hover-primary:active,
-.btn-hover-primary.active,
-.btn.btn-active-primary:active,
-.btn.btn-active-primary.active,
-.dropdown.open>.btn.btn-active-primary,
-.btn-group.open .dropdown-toggle.btn.btn-active-primary {
-  background-color: #579ddb;
-  border-color: #5fa2dd;
-  color: #fff !important;
-}
-
-.btn {
-  cursor: pointer;
-  /* background-color: transparent; */
-  color: inherit;
-  padding: 6px 12px;
-  border-radius: 0;
-  border: 1px solid 0;
-  font-size: 11px;
-  line-height: 1.42857;
-  vertical-align: middle;
-  -webkit-transition: all .25s;
-  transition: all .25s;
-}
-
+  body {
+    margin-top: 2%;
+    background: #ebeef0;
+    overflow: hidden;
+  }
+  
+  .panel {
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.075);
+    border-radius: 0;
+    border: 0;
+    margin-bottom: 24px;
+  }
+  
+  .panel .panel-heading,
+  .panel>:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  
+  .panel-heading {
+    position: relative;
+    height: 50px;
+    padding: 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .panel-title {
+    font-weight: normal;
+    padding: 0 20px 0 20px;
+    font-size: 1.416em;
+    line-height: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .nano {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .nano>.nano-content {
+    position: absolute;
+    overflow: scroll;
+    overflow-x: hidden;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+  
+  .pad-all {
+    padding: 15px;
+  }
+  
+  .mar-btm {
+    margin-bottom: 15px;
+  }
+  
+  .media-block .media-left {
+    display: block;
+    float: left;
+  }
+  
+  .img-sm {
+    width: 46px;
+    height: 46px;
+  }
+  
+  .media-block .media-body {
+    display: block;
+    overflow: hidden;
+    width: auto;
+  }
+  
+  .pad-hor {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .speech {
+    position: relative;
+    background: #b7dcfe;
+    color: #317787;
+    display: inline-block;
+    border-radius: 0;
+    padding: 12px 20px;
+  }
+  
+  .speech:before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 0;
+    top: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-right: 7px solid #b7dcfe;
+    margin: 15px 0 0 -6px;
+  }
+  
+  .speech-right>.speech:before {
+    left: auto;
+    right: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-left: 7px solid #ffdc91;
+    border-right: 0;
+    margin: 15px -6px 0 0;
+  }
+  
+  .speech .media-heading {
+    font-size: 1.2em;
+    color: #317787;
+    display: block;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    font-weight: 300;
+  }
+  
+  .speech-time {
+    margin-top: 20px;
+    margin-bottom: 0;
+    font-size: .8em;
+    font-weight: 300;
+  }
+  
+  .media-block .media-right {
+    float: right;
+  }
+  
+  .speech-right {
+    text-align: right;
+  }
+  
+  .pad-hor {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .speech-right>.speech {
+    background: #ffda87;
+    color: #a07617;
+    text-align: right;
+  }
+  
+  .speech-right>.speech .media-heading {
+    color: #a07617;
+  }
+  
+  .btn-primary,
+  .btn-primary:focus,
+  .btn-hover-primary:hover,
+  .btn-hover-primary:active,
+  .btn-hover-primary.active,
+  .btn.btn-active-primary:active,
+  .btn.btn-active-primary.active,
+  .dropdown.open>.btn.btn-active-primary,
+  .btn-group.open .dropdown-toggle.btn.btn-active-primary {
+    background-color: #579ddb;
+    border-color: #5fa2dd;
+    color: #fff !important;
+  }
+  
+  .btn {
+    cursor: pointer;
+    /* background-color: transparent; */
+    color: inherit;
+    padding: 6px 12px;
+    border-radius: 0;
+    border: 1px solid 0;
+    font-size: 11px;
+    line-height: 1.42857;
+    vertical-align: middle;
+    -webkit-transition: all .25s;
+    transition: all .25s;
+  }
 </style>
 
 <body>
@@ -217,7 +218,8 @@ body {
           <div class="panel-footer" style="height:10%;">
             <form class="row">
               <div class="col-xs-9">
-                <input type="text" name="chat" ng-model="chat_input" ng-keypress="chat_input && $event.keyCode == 13 && send(chat_input)" placeholder="請輸入想詢問的事情" class="form-control chat-input">
+                <input type="text" name="chat" ng-model="chat_input" ng-keypress="chat_input && $event.keyCode == 13 && send(chat_input)"
+                  placeholder="請輸入想詢問的事情" class="form-control chat-input">
               </div>
               <div class="col-xs-3">
                 <button class="btn btn-primary btn-block" ng-click="chat_input && send(chat_input)">Send</button>
@@ -261,7 +263,7 @@ body {
     </div>
   </li>`;
   // Utils
-  String.prototype.format = function() {
+  String.prototype.format = function () {
     var str = this;
     for (var i = 0; i < arguments.length; i++) {
       var reg = new RegExp("\\{" + i + "\\}", "gm");
@@ -292,8 +294,8 @@ body {
       console.log(input);
       add_message(client_tpl.format(input, now()));
 
-      $.post("/", {input: input, csrfmiddlewaretoken: '{{ csrf_token }}'},
-        function(data){
+      $.post("/", { input: input, csrfmiddlewaretoken: '{{ csrf_token }}' },
+        function (data) {
           add_message(server_tpl.format(data, now()));
         });
 
@@ -301,4 +303,5 @@ body {
   });
 
 </script>
+
 </html>
