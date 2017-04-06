@@ -33,7 +33,7 @@ request_template
 
 ## Current DB schema:
 
-![](db_schema.png)
+![](crawler/db_schema.png)
 
 * **Course** (raw_type: [html-format](crawler/md-based_course-table_example.html))
 
