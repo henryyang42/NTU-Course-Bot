@@ -19,8 +19,9 @@ from LSTM_util import *
 def eval_intent(true_intent_list, pred_intent_list):
     stat = {}
 
-    acc = 0.0
     n_data = len(true_intent_list)
+    ## accuracy ##
+    acc = 0.0
     for i in range(0, n_data):
         if true_intent_list[i] == pred_intent_list[i]:
             acc += 1
@@ -29,6 +30,50 @@ def eval_intent(true_intent_list, pred_intent_list):
 
     return stat
 
+def eval_slot(true_labels_list, pred_labels_list):
+    stat = {}
+
+    n_data = len(true_labels_list)
+    ## precision & recall ##
+    TP = {}
+    FP = {}
+    FN = {}
+    for i in range(0, n_data):
+        true_labels = true_labels_list[i]
+        pred_labels = pred_labels_list[i]
+        seq_len = len(true_labels)
+        for j in range(0, seq_len):
+            #if "B" in true_labels[j] or "I" in true_labels[j]:
+            if "B" in true_labels[j]:
+                slot = true_labels[j][2:]
+                if slot not in TP:
+                    TP[slot] = 0.0
+                    FP[slot] = 0.0
+                    FN[slot] = 0.0
+                if pred_labels[j] == true_labels[j]:
+                    TP[slot] += 1
+                else:
+                    FN[slot] += 1
+            #elif "B" in pred_labels[j] or "I" in pred_labels[j]:
+            elif "B" in pred_labels[j]:
+                slot = true_labels[j][2:]
+                if slot not in TP:
+                    TP[slot] = 0.0
+                    FP[slot] = 0.0
+                    FN[slot] = 0.0
+                FP[slot] += 1
+
+    stat["precision"] = {}
+    stat["recall"] = {}
+    for slot in TP:
+        if TP[slot] + FP[slot] == 0 or TP[slot] + FN[slot] == 0:
+            continue
+        slot_P = TP[slot] / (TP[slot] + FP[slot])
+        slot_R = TP[slot] / (TP[slot] + FN[slot])
+        stat["precision"][slot] = slot_P
+        stat["recall"][slot] = slot_R
+
+    return stat
 
 #arguments
 ap = argparse.ArgumentParser()
@@ -93,7 +138,16 @@ for i in range(0, n_data):
     for j, l in enumerate(pred_labels):
         if l == '#':
             pred_labels[j] = 'O'
+    if len(pred_labels) != len(true_labels_list[i]):
+        print len(pred_labels), len(true_labels_list[i])
     pred_labels_list.append(pred_labels)
+    
 
 intent_stat = eval_intent(true_intent_list, pred_intent_list)
 print ("[intent] Accuracy:", intent_stat["accuracy"])
+
+slot_stat = eval_slot(true_labels_list, pred_labels_list)
+#print (slot_stat)
+for slot in slot_stat["precision"]:
+    print ("[slot - %s] Precision:" % slot, slot_stat["precision"][slot])
+    print ("[slot - %s] Recall:" % slot, slot_stat["recall"][slot])
