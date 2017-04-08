@@ -85,8 +85,8 @@ with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
         labels = pat_split.split(lines[i+2].strip())
         if len(tokens) != len(labels):
             print "!! something wrong !!", len(tokens), len(labels)
-        #print tokens
-        #print labels
+            print " ".join(tokens)
+            print " ".join(labels)
         for l in labels:
             if l not in label2idx:
                 label2idx[l] = len(idx2label)
