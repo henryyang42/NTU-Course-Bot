@@ -56,7 +56,7 @@ def eval_slot(true_labels_list, pred_labels_list):
                     FN[slot] += 1
             #elif "B" in pred_labels[j] or "I" in pred_labels[j]:
             elif "B" in pred_labels[j]:
-                slot = true_labels[j][2:]
+                slot = pred_labels[j][2:]
                 if slot not in TP:
                     TP[slot] = 0.0
                     FP[slot] = 0.0
@@ -100,6 +100,7 @@ with codecs.open(args.test_dataset, "r", "utf-8") as f_test:
     lines = f_test.readlines()
     seq_list = []
     len_list = []
+    tokens_list = []
     true_intent_list = []
     true_labels_list = []
     n_data = len(lines) / 3
@@ -108,6 +109,8 @@ with codecs.open(args.test_dataset, "r", "utf-8") as f_test:
         tokens = lines[i+1].strip().split(" ")
         labels = lines[i+2].strip().split(" ")
         
+        tokens_list.append(tokens)
+
         true_intent_list.append(intent)
         true_labels_list.append(labels)
     
@@ -140,6 +143,9 @@ for i in range(0, n_data):
             pred_labels[j] = 'O'
     if len(pred_labels) != len(true_labels_list[i]):
         print len(pred_labels), len(true_labels_list[i])
+    print " ".join(tokens_list[i])
+    print pred_labels
+    print true_labels_list[i]
     pred_labels_list.append(pred_labels)
     
 
