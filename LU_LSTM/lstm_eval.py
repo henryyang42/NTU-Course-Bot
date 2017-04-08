@@ -138,7 +138,10 @@ for i in range(0, n_data):
     for j, l in enumerate(pred_labels):
         if l == '#':
             pred_labels[j] = 'O'
+    if len(pred_labels) != len(true_labels_list[i]):
+        print len(pred_labels), len(true_labels_list[i])
     pred_labels_list.append(pred_labels)
+    
 
 intent_stat = eval_intent(true_intent_list, pred_intent_list)
 print ("[intent] Accuracy:", intent_stat["accuracy"])
