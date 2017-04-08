@@ -112,24 +112,24 @@ embedding = Embedding(len(idx2word), args.emb_size, input_length=max_seq_len, dr
 
 # [LSTM for slot]
 if args.bi_direct:
-    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, return_sequences=True))(embedding)
+    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, return_sequences=True), name='slot LSTM')(embedding)
 else:
-    slot_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, return_sequences=True)(embedding)
+    slot_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, return_sequences=True, name='slot LSTM')(embedding)
 
 # [LSTM for intent]
-intent_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2)(slot_lstm_out)
+intent_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, name='intent LSTM')(slot_lstm_out)
 
 # [transformation for slot]
-x = TimeDistributed(Dense(args.emb_size))(slot_lstm_out)
+x = TimeDistributed(Dense(args.emb_size), name='slot transformation 1')(slot_lstm_out)
 x = Activation(args.activation)(x)
 #TODO deeper feed-forward layers
 
 # [output layer for slot]
-x = TimeDistributed(Dense(len(idx2label)))(x)
+x = TimeDistributed(Dense(len(idx2label)), name='slot transformation 2')(x)
 slot_output = Activation('softmax', name='slot')(x)
 
 # [output layer for intent]
-x2 = Dense(len(idx2intent))(intent_lstm_out)
+x2 = Dense(len(idx2intent), name='intent transformation')(intent_lstm_out)
 intent_output = Activation('softmax', name='intent')(x2)
 
 
