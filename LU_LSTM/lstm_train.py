@@ -6,9 +6,10 @@ import codecs
 import numpy as np
 from keras.models import Model, Sequential
 from keras.layers import Dense, Activation, Dropout, Embedding, TimeDistributed, LSTM
-from keras.layers.core import Dropout
+from keras.layers.core import Dropout, Flatten, RepeatVector, Permute
 from keras.layers.wrappers import Bidirectional
 from keras.layers import Input, merge
+from keras.layers.pooling import AveragePooling1D
 from keras.optimizers import *
 from keras.preprocessing import sequence
 from keras.utils import np_utils
@@ -31,6 +32,7 @@ ap.add_argument("-lr", "--learning-rate", type=float, default=0.001, help="")
 ap.add_argument("-c", "--cost", type=str, default="categorical_crossentropy", help="loss (cost) function")
 ap.add_argument("-l", "--log", type=str, help="output prediction result for analysis")
 ap.add_argument("-b", "--bi-direct", action="store_true", help="bidirectional LSTM")
+ap.add_argument("-n", "--attention", action="store_true", help="use attention")
 ap.add_argument("-a", "--activation", default="relu", type=str, help="activation function")
 ap.add_argument("-iw", "--intent-weight", type=float, default=0.8, help="weight of the loss for intent")
 args = ap.parse_args()
@@ -117,7 +119,20 @@ else:
     slot_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, return_sequences=True, name='slot LSTM')(embedding)
 
 # [LSTM for intent]
-intent_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, name='intent LSTM')(slot_lstm_out)
+if args.attention:
+    intent_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, name='intent LSTM', return_sequences=True)(slot_lstm_out)
+    attn = TimeDistributed(Dense(1, activation=args.activation))(intent_lstm_out)
+    attn = Flatten()(attn)
+    attn = Activation('softmax')(attn)
+    attn = RepeatVector(args.emb_size)(attn)
+    attn = Permute([2, 1])(attn)
+    
+    intent_lstm_out = merge([intent_lstm_out, attn], mode='mul')
+    intent_lstm_out = AveragePooling1D(pool_length=max_seq_len)(intent_lstm_out)
+    intent_lstm_out = Flatten()(intent_lstm_out)
+
+else:
+    intent_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, name='intent LSTM')(slot_lstm_out)
 
 # [transformation for slot]
 x = TimeDistributed(Dense(args.emb_size), name='slot transformation 1')(slot_lstm_out)
