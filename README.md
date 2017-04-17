@@ -52,6 +52,10 @@ request_template
 
 ## References
 
-- Bordes, Antoine, and Jason Weston. "[Learning end-to-end goal-oriented dialog.](https://arxiv.org/pdf/1605.07683.pdf)" Proceedings of The 5th International Conference on Learning Representations. 2017.
-- Serban, Iulian Vlad, et al. "[Generative Deep Neural Networks for Dialogue: A Short Review.](https://arxiv.org/pdf/1611.06216.pdf)" arXiv preprint arXiv:1611.06216 (2016).
-- Shah, Pararth, Dilek Hakkani-Tür, and Larry Heck. "[Interactive reinforcement learning for task-oriented dialogue management.](https://static.googleusercontent.com/media/research.google.com/zh-TW//pubs/archive/45734.pdf)" NIPS 2016 Deep Learning for Action and Interaction Workshop. 2016.
+- Bordes, Antoine, and Jason Weston. "[Learning end-to-end goal-oriented dialog.](https://arxiv.org/pdf/1605.07683.pdf)" Proceedings of The 5th International Conference on Learning Representations. 2017.  
+(last updated: 2017/4/17)
+
+- Serban, Iulian Vlad, et al. "[Generative Deep Neural Networks for Dialogue: A Short Review.](https://arxiv.org/pdf/1611.06216.pdf)" arXiv preprint arXiv:1611.06216 (2016).  
+(last updated: 2017/4/17)
+- Shah, Pararth, Dilek Hakkani-Tür, and Larry Heck. "[Interactive reinforcement learning for task-oriented dialogue management.](https://static.googleusercontent.com/media/research.google.com/zh-TW//pubs/archive/45734.pdf)" NIPS 2016 Deep Learning for Action and Interaction Workshop. 2016.  
+(last updated: 2017/4/17)
