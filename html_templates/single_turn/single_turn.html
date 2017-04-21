@@ -1,5 +1,4 @@
 <html>
-
 <head>
   <title>Course Bot</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -12,16 +11,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <style type="text/css">
+  .panel-footer {
+    padding: 20px 15px;
+  }
   @media only screen and (max-width: 479px) {
     .mobile {
       padding: 0px;
       margin: 0px;
 	}
     .panel-footer {
-      width: 100%;
-	  position: fixed;
-      padding: 15px 0px;
-	}
+      padding: 13px 0px;
+      position: fixed;
+	  width: 100%;
+    }
   }
   body {
 	background: #ebeef0;
@@ -32,7 +34,6 @@
     border-radius: 0;
     border: 0;
   }
-  
   .panel .panel-heading,
   .panel>:first-child {
     border-top-left-radius: 0;
@@ -204,7 +205,7 @@
 </style>
 
 <body>
-  <div class="">
+  <div class="container mobile">
     <div class="col-md-12 col-lg-12 mobile">
       <div class="panel">
         <!--Heading-->
@@ -213,8 +214,8 @@
         </div>
         <!--Widget body-->
         {% verbatim %}
-        <div id="demo-chat-body" class="collapse in" style="height: 92%;" ng-app="chat" ng-controller="chatController">
-          <div class="nano has-scrollbar" style="height: 90%">
+        <div id="demo-chat-body" class="collapse in" ng-app="chat" ng-controller="chatController">
+          <div class="nano has-scrollbar" style="height: 83%">
             <div id="chat-box" class="nano-content pad-all" tabindex="0">
               <ul class="list-unstyled media-block" id="chat-box1">
 
@@ -223,15 +224,15 @@
           </div>
           <!--Widget footer-->
           <div class="panel-footer" style="height: 10%;">
-            <form>
-              <div class="col-xs-9">
+            
+              <div class="col-xs-9 col-md-9">
                 <input type="text" name="chat" ng-model="chat_input" ng-keypress="chat_input && $event.keyCode == 13 && send(chat_input)"
                   placeholder="請輸入想詢問的事情" class="form-control chat-input">
               </div>
-              <div class="col-xs-3">
+              <div class="col-xs-3 col-md-3">
                 <button class="btn btn-primary btn-block" ng-click="chat_input && send(chat_input)">Send</button>
               </div>
-            </form>
+            
           </div>
         </div>
         {% endverbatim %}
@@ -239,36 +240,11 @@
     </div>
   </div>
 </body>
+
 <script type="text/javascript">
   // Chat templates
-  var client_tpl = `
-  <li class="mar-btm">
-    <div class="media-right">
-      <img src="https://i.imgur.com/1fxNgjD.png" class="img-circle img-sm" alt="Profile Picture">
-    </div>
-    <div class="media-body pad-hor speech-right">
-      <div class="speech">
-        <p>{0}</p>
-        <p class="speech-time">
-          <i class="fa fa-clock-o fa-fw"></i> {1}
-        </p>
-      </div>
-    </div>
-  </li>`;
-  var server_tpl = `
-  <li class="mar-btm">
-    <div class="media-left">
-      <img src="https://i.imgur.com/lITE2bq.png" class="img-circle img-sm" alt="Profile Picture">
-    </div>
-    <div class="media-body pad-hor">
-      <div class="speech">
-        <p>{0}</p>
-        <p class="speech-time">
-          <i class="fa fa-clock-o fa-fw"></i>{1}
-        </p>
-      </div>
-    </div>
-  </li>`;
+  var client_tpl = "\n  <li class=\"mar-btm\">\n    <div class=\"media-right\">\n      <img src=\"https://i.imgur.com/1fxNgjD.png\" class=\"img-circle img-sm\" alt=\"Profile Picture\">\n    </div>\n    <div class=\"media-body pad-hor speech-right\">\n      <div class=\"speech\">\n        <p>{0}</p>\n        <p class=\"speech-time\">\n          <i class=\"fa fa-clock-o fa-fw\"></i> {1}\n        </p>\n      </div>\n    </div>\n  </li>";
+  var server_tpl = "\n  <li class=\"mar-btm\">\n    <div class=\"media-left\">\n      <img src=\"https://i.imgur.com/lITE2bq.png\" class=\"img-circle img-sm\" alt=\"Profile Picture\">\n    </div>\n    <div class=\"media-body pad-hor\">\n      <div class=\"speech\">\n        <p>{0}</p>\n        <p class=\"speech-time\">\n          <i class=\"fa fa-clock-o fa-fw\"></i>{1}\n        </p>\n      </div>\n    </div>\n  </li>";
   // Utils
   String.prototype.format = function () {
     var str = this;
@@ -308,7 +284,6 @@
 
     }
   });
-
 </script>
 
 </html>
