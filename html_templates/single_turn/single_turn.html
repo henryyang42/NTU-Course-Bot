@@ -12,17 +12,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <style type="text/css">
+  #chat-box-outter {
+    height: 81%;
+  }
+  @media only screen and (max-width: 479px) {
+    .mobile {
+      padding: 0px;
+      margin: 0px;
+	}
+    .panel-footer {
+      width: 100%;
+	  position: fixed;
+      padding: 10px 0px;
+	}
+    #chat-box-outter {
+      height: 83%;
+	}
+  }
   body {
-    margin-top: 2%;
-    background: #ebeef0;
+	background: #ebeef0;
     overflow: hidden;
   }
-  
   .panel {
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.075);
     border-radius: 0;
     border: 0;
-    margin-bottom: 24px;
   }
   
   .panel .panel-heading,
@@ -69,7 +83,7 @@
     padding: 15px;
   }
   
-  .mar-btm {
+ .mar-btm {
     margin-bottom: 15px;
   }
   
@@ -187,7 +201,7 @@
     color: inherit;
     padding: 6px 12px;
     border-radius: 0;
-    border: 1px solid 0;
+    /* border: 1px solid 0; *.
     font-size: 11px;
     line-height: 1.42857;
     vertical-align: middle;
@@ -197,8 +211,8 @@
 </style>
 
 <body>
-  <div class="container">
-    <div class="col-md-12 col-lg-12">
+  <div class="container mobile">
+    <div class="col-md-12 col-lg-12 mobile">
       <div class="panel">
         <!--Heading-->
         <div class="panel-heading">
@@ -207,7 +221,7 @@
         <!--Widget body-->
         {% verbatim %}
         <div id="demo-chat-body" class="collapse in" ng-app="chat" ng-controller="chatController">
-          <div class="nano has-scrollbar" style="height:80%;">
+          <div id="chat-box-outter" class="nano has-scrollbar">
             <div id="chat-box" class="nano-content pad-all" tabindex="0">
               <ul class="list-unstyled media-block" id="chat-box1">
 
@@ -216,7 +230,7 @@
           </div>
           <!--Widget footer-->
           <div class="panel-footer" style="height:10%;">
-            <form class="row">
+            <form>
               <div class="col-xs-9">
                 <input type="text" name="chat" ng-model="chat_input" ng-keypress="chat_input && $event.keyCode == 13 && send(chat_input)"
                   placeholder="請輸入想詢問的事情" class="form-control chat-input">
@@ -237,7 +251,7 @@
   var client_tpl = `
   <li class="mar-btm">
     <div class="media-right">
-      <img src="http://bootdey.com/img/Content/avatar/avatar2.png" class="img-circle img-sm" alt="Profile Picture">
+      <img src="https://i.imgur.com/1fxNgjD.png" class="img-circle img-sm" alt="Profile Picture">
     </div>
     <div class="media-body pad-hor speech-right">
       <div class="speech">
@@ -251,7 +265,7 @@
   var server_tpl = `
   <li class="mar-btm">
     <div class="media-left">
-      <img src="http://bootdey.com/img/Content/avatar/avatar1.png" class="img-circle img-sm" alt="Profile Picture">
+      <img src="https://i.imgur.com/lITE2bq.png" class="img-circle img-sm" alt="Profile Picture">
     </div>
     <div class="media-body pad-hor">
       <div class="speech">
