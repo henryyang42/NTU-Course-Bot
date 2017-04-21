@@ -12,9 +12,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <style type="text/css">
-  #chat-box-outter {
-    height: 81%;
-  }
   @media only screen and (max-width: 479px) {
     .mobile {
       padding: 0px;
@@ -23,10 +20,7 @@
     .panel-footer {
       width: 100%;
 	  position: fixed;
-      padding: 10px 0px;
-	}
-    #chat-box-outter {
-      height: 83%;
+      padding: 15px 0px;
 	}
   }
   body {
@@ -47,7 +41,6 @@
   
   .panel-heading {
     position: relative;
-    height: 50px;
     padding: 0;
     border-bottom: 1px solid #eee;
   }
@@ -211,17 +204,17 @@
 </style>
 
 <body>
-  <div class="container mobile">
+  <div class="">
     <div class="col-md-12 col-lg-12 mobile">
       <div class="panel">
         <!--Heading-->
-        <div class="panel-heading">
+        <div class="panel-heading" style="height: 7%;">
           <h3 class="panel-title">Course Chatbot</h3>
         </div>
         <!--Widget body-->
         {% verbatim %}
-        <div id="demo-chat-body" class="collapse in" ng-app="chat" ng-controller="chatController">
-          <div id="chat-box-outter" class="nano has-scrollbar">
+        <div id="demo-chat-body" class="collapse in" style="height: 92%;" ng-app="chat" ng-controller="chatController">
+          <div class="nano has-scrollbar" style="height: 90%">
             <div id="chat-box" class="nano-content pad-all" tabindex="0">
               <ul class="list-unstyled media-block" id="chat-box1">
 
@@ -229,7 +222,7 @@
             </div>
           </div>
           <!--Widget footer-->
-          <div class="panel-footer" style="height:10%;">
+          <div class="panel-footer" style="height: 10%;">
             <form>
               <div class="col-xs-9">
                 <input type="text" name="chat" ng-model="chat_input" ng-keypress="chat_input && $event.keyCode == 13 && send(chat_input)"
