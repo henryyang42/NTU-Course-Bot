@@ -143,10 +143,14 @@ for i in range(0, n_data):
             pred_labels[j] = 'O'
     if len(pred_labels) != len(true_labels_list[i]):
         print len(pred_labels), len(true_labels_list[i])
-    print " ".join(tokens_list[i])
-    print pred_labels
-    print true_labels_list[i]
+
     pred_labels_list.append(pred_labels)
+
+    # show error
+    if pred_intent != true_intent_list[i]:
+        print " ".join(tokens_list[i])
+        print "Pred:", pred_intent, pred_labels
+        print "True:", true_intent_list[i], true_labels_list[i]
     
 
 intent_stat = eval_intent(true_intent_list, pred_intent_list)

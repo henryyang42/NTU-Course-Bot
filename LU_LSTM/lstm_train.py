@@ -10,6 +10,7 @@ from keras.layers.core import Dropout, Flatten, RepeatVector, Permute
 from keras.layers.wrappers import Bidirectional
 from keras.layers import Input, merge
 from keras.layers.pooling import AveragePooling1D
+from keras.layers.normalization import BatchNormalization
 from keras.optimizers import *
 from keras.preprocessing import sequence
 from keras.utils import np_utils
@@ -35,6 +36,7 @@ ap.add_argument("-b", "--bi-direct", action="store_true", help="bidirectional LS
 ap.add_argument("-n", "--attention", action="store_true", help="use attention")
 ap.add_argument("-a", "--activation", default="relu", type=str, help="activation function")
 ap.add_argument("-iw", "--intent-weight", type=float, default=0.8, help="weight of the loss for intent")
+ap.add_argument("-bn", "--batch-norm", action="store_true", help="use BatchNormalization layer between LSTM")
 args = ap.parse_args()
 
 # prepare data
@@ -117,6 +119,9 @@ if args.bi_direct:
     slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, return_sequences=True), name='slot LSTM')(embedding)
 else:
     slot_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, return_sequences=True, name='slot LSTM')(embedding)
+
+if args.batch_norm:
+    slot_lstm_out = BatchNormalization(slot_lstm_out)
 
 # [LSTM for intent]
 if args.attention:
