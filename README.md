@@ -61,8 +61,10 @@ request_template
 - Shah, Pararth, Dilek Hakkani-Tür, and Larry Heck. "[Interactive reinforcement learning for task-oriented dialogue management.](https://static.googleusercontent.com/media/research.google.com/zh-TW//pubs/archive/45734.pdf)" NIPS 2016 Deep Learning for Action and Interaction Workshop. 2016.
 (last updated: 2017/4/17)
 
-- Li, Xiujun, et al. "[A User Simulator for Task-Completion Dialogues.](https://arxiv.org/abs/1612.05688)" arXiv preprint arXiv:1612.05688 (2016).
+- Li, Xiujun, et al. "[A User Simulator for Task-Completion Dialogues.](https://arxiv.org/abs/1612.05688)" arXiv preprint arXiv:1612.05688 (2016).  
+(github-repo [here](https://github.com/MiuLab/TC-Bot))
 (last updated: 2017/4/23)
 
-- Li, Xuijun, et al. "[End-to-end task-completion neural dialogue systems.](https://arxiv.org/abs/1703.01008)" arXiv preprint arXiv:1703.01008 (2017).
+- Li, Xuijun, et al. "[End-to-end task-completion neural dialogue systems.](https://arxiv.org/abs/1703.01008)" arXiv preprint arXiv:1703.01008 (2017).  
+(github-repo [here](https://github.com/MiuLab/KB-InfoBot))
 (last updated: 2017/4/23)
