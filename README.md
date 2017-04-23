@@ -1,4 +1,4 @@
-# NTUCB 
+# NTUCB
 
 ## Website
 http://ntu-course-chatbot.ml/
@@ -9,11 +9,11 @@ Create a Python3 ``virtualenv`` and run ``sh install.sh``.
 
 ## Functionalities
 
-After install, you may access 
+After install, you may access
 
 - ``python3 manage.py runserver``
-    - Interactive demo site [http://localhost:8000](http://localhost:8000) 
-	-  Django admin [http://localhost:8000/admin](http://localhost:8000/admin) 
+    - Interactive demo site [http://localhost:8000](http://localhost:8000)
+	-  Django admin [http://localhost:8000/admin](http://localhost:8000/admin)
 - ``python3 manage.py shell``
 	-  Making queries in Django interactive shell
 
@@ -52,10 +52,17 @@ request_template
 
 ## References
 
-- Bordes, Antoine, and Jason Weston. "[Learning end-to-end goal-oriented dialog.](https://arxiv.org/pdf/1605.07683.pdf)" Proceedings of The 5th International Conference on Learning Representations. 2017.  
+- Bordes, Antoine, and Jason Weston. "[Learning end-to-end goal-oriented dialog.](https://arxiv.org/pdf/1605.07683.pdf)" Proceedings of The 5th International Conference on Learning Representations. 2017.
 (last updated: 2017/4/17)
 
-- Serban, Iulian Vlad, et al. "[Generative Deep Neural Networks for Dialogue: A Short Review.](https://arxiv.org/pdf/1611.06216.pdf)" arXiv preprint arXiv:1611.06216 (2016).  
+- Serban, Iulian Vlad, et al. "[Generative Deep Neural Networks for Dialogue: A Short Review.](https://arxiv.org/pdf/1611.06216.pdf)" arXiv preprint arXiv:1611.06216 (2016).
 (last updated: 2017/4/17)
-- Shah, Pararth, Dilek Hakkani-Tür, and Larry Heck. "[Interactive reinforcement learning for task-oriented dialogue management.](https://static.googleusercontent.com/media/research.google.com/zh-TW//pubs/archive/45734.pdf)" NIPS 2016 Deep Learning for Action and Interaction Workshop. 2016.  
+
+- Shah, Pararth, Dilek Hakkani-Tür, and Larry Heck. "[Interactive reinforcement learning for task-oriented dialogue management.](https://static.googleusercontent.com/media/research.google.com/zh-TW//pubs/archive/45734.pdf)" NIPS 2016 Deep Learning for Action and Interaction Workshop. 2016.
 (last updated: 2017/4/17)
+
+- Li, Xiujun, et al. "[A User Simulator for Task-Completion Dialogues.](https://arxiv.org/abs/1612.05688)" arXiv preprint arXiv:1612.05688 (2016).
+(last updated: 2017/4/23)
+
+- Li, Xuijun, et al. "[End-to-end task-completion neural dialogue systems.](https://arxiv.org/abs/1703.01008)" arXiv preprint arXiv:1703.01008 (2017).
+(last updated: 2017/4/23)
