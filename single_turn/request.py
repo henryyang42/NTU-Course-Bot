@@ -65,6 +65,7 @@ def query_course(goal, slot):
 
 
 def understand(input):
+    return {'tokens': [], 'labels': [], 'intent': [], 'slot': {}}
     tokens = [tok for tok in jieba.cut(input)]
     intent, tokens, labels = get_intent_slot(lu_model, tokens, word2idx, idx2label, idx2intent)
 
