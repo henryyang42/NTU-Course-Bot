@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 
 
 class Schedule(models.Model):
@@ -116,6 +117,25 @@ class Review(models.Model):
     content = models.TextField(blank=True)
     sentiment = models.CharField(max_length=10, default='Neutral')
     probability = models.CharField(max_length=20, blank=True)
+
+
+class DialogueLog(models.Model):
+    utterance = models.CharField(max_length=100, blank=True)
+    reply = models.CharField(max_length=100, blank=True)
+    time = models.DateTimeField(default=datetime.now, blank=True)
+    debug = models.TextField(blank=True)
+    rating = models.IntegerField(default=0)
+
+    def toggle_rating(self):
+        if self.rating == 0:
+            self.rating = -1
+        else:
+            self.rating = 0
+
+        self.save()
+
+    def __str__(self):
+        return '%s -> %s' % (self.utterance, self.reply)
 
 
 class User(models.Model):
