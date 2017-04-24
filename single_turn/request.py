@@ -39,18 +39,25 @@ def query_course(goal, slot):
     print (courses)
     if not slot or courses.count() == 0:
         return [], '並未找到相符的課程。'
+    if len(courses) > 20:
+        courses = courses[:20]
 
     resp_list, resp_str = [], ''
     if goal == 'instructor':
+        courses = [c for c in courses if c.instructor != '']
         resp_list = list(np.unique([course.instructor for course in courses]))
-        resp_str = '<b>%s</b>有以下的老師開課：<br>%s' % (slot.get('title', courses[0].title), '<br>'.join(resp_list))
+        #resp_str = '<b>%s</b>有以下的老師開課：<br>%s' % (slot.get('title', courses[0].title), '<br>'.join(resp_list))
+        resp_str = '<b>%s</b>有以下的老師開課：<br>%s' % (courses[0].title, '<br>'.join(resp_list))
     elif goal == 'title':
+        courses = [c for c in courses if c.title != '']
         resp_list = list(np.unique([course.title for course in courses]))
         resp_str = '<b>%s</b>教授所開的課如下：<br>%s' % (courses[0].instructor, '<br>'.join(resp_list))
     elif goal == 'classroom':
+        courses = [c for c in courses if c.classroom != '']
         resp_list = [course.classroom for course in courses]
         resp_str = '<b>%s</b>在<b>%s</b>上課。' % (courses[0].title, courses[0].classroom)
     elif goal == 'schedule':
+        courses = [c for c in courses if c.schedule_str != '']
         resp_list = [course.schedule_str for course in courses]
         resp_str = '<b>%s</b>的上課時段在<b>星期%s節</b>。' % (courses[0].title, courses[0].schedule_str)
 

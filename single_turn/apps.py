@@ -13,7 +13,8 @@ class SingleTurnConfig(AppConfig):
         global lu_model, idx2label, idx2intent, word2idx
 
         # load vocab
-        obj = json.load(open('%s/LU_LSTM/merged_data_re_seg.1M.vocab.json' % settings.BASE_DIR, "r"))
+        #obj = json.load(open('%s/LU_LSTM/merged_data_re_seg.1M.vocab.json' % settings.BASE_DIR, "r"))
+        obj = json.load(open('%s/LU_LSTM/re_seg.1K+log_extend_1000.vocab.json' % settings.BASE_DIR, "r"))
         idx2label = obj["slot_vocab"]
         idx2intent = obj["intent_vocab"]
         word2idx = {}
@@ -21,4 +22,5 @@ class SingleTurnConfig(AppConfig):
             word2idx[w] = i
 
         # load model
-        lu_model = load_model('%s/LU_LSTM/merged_data_re_seg.1M--LSTM.model' % settings.BASE_DIR)
+        #lu_model = load_model('%s/LU_LSTM/merged_data_re_seg.1M--LSTM.model' % settings.BASE_DIR)
+        lu_model = load_model('%s/LU_LSTM/re_seg.1K+log_extend_1000--LSTM.model' % settings.BASE_DIR)
