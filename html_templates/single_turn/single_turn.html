@@ -274,6 +274,23 @@
       }
     });
   }
+  function speak(utterance) {
+    utterance = utterance.replace(/(<([^>]+)>)/ig, '');
+    const synthesis = window.speechSynthesis;
+    const utter = new SpeechSynthesisUtterance(utterance);
+    // the list of all available voices
+    const voices = synthesis.getVoices();
+  
+    for(i = 0; i < voices.length; ++i) {
+      if(voices[i].name === "Google 國語（臺灣）") {
+        utter.voice = voices[i];
+      }
+    }
+  
+    utter.rate = 1;
+    utter.pitch = 1;
+    synthesis.speak(utter);
+  }
   // initial
   add_message(server_tpl.format('歡迎來到NTUCB！我能幫您做什麼？', now()));
 
@@ -291,8 +308,8 @@
           console.log(data)
           add_message(server_tpl.format(
             '{0}<br><br>{1}<br><i id="sucks{2}" onClick="sucks({2})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, JSON.stringify(data), data.id), now()));
+          speak(data.resp_str);
         });
-
     }
   });
 </script>
