@@ -14,7 +14,8 @@ from keras.preprocessing import sequence
 from keras.utils import np_utils
 import json
 import re
-from .LSTM_util import *
+#from .LSTM_util import *
+from LSTM_util import *
 """
 # http://stackoverflow.com/questions/40154320/replicating-models-in-keras-and-tensorflow-for-a-multi-threaded-setting
 import tensorflow as tf
@@ -55,6 +56,41 @@ def get_intent_slot(model, tokens, word2idx, idx2label, idx2intent):
 
     return intent, tokens, labels
 
+def get_intent_slot_prob(model, tokens, word2idx, idx2label, idx2intent):
+    # prepare sequence input
+    seq_len =  model.input_layers[0].batch_input_shape[1]
+    idx_seq = seq_word2idx(tokens, word2idx)
+    if len(idx_seq) < seq_len:
+        pad_idx_seq = [0]*(seq_len-len(idx_seq)) + idx_seq
+    elif len(idx_seq) > seq_len:
+        pad_idx_seq = idx_seq[-seq_len : ]
+    else:
+        pad_idx_seq = idx_seq
+
+    # predict
+    #with sess.graph.as_default():
+    pred_slot, pred_intent = model.predict(np.array([pad_idx_seq]))
+    #print pred_slot
+    #print pred_intent
+
+    # convert result
+    intent_prob = {}
+    for idx, p in enumerate(pred_intent[0]):
+        intent = idx2intent[idx]
+        intent_prob[intent] = p
+
+    label_prob_list = []
+    for slot_vec in pred_slot[0][-len(tokens) : ]:
+        label_prob = {}
+        for idx, p in enumerate(slot_vec):
+            label = idx2label[idx]
+            label_prob[label] = p
+        label_prob['O'] += label_prob['#']
+        del label_prob['#']
+        label_prob_list.append(label_prob)
+
+    return intent_prob, tokens, label_prob_list
+
 
 #arguments
 ap = argparse.ArgumentParser()
@@ -83,7 +119,14 @@ if __name__ == '__main__':
         for line in f_test:
             tokens = line.strip().split(" ")
 
+            print ("== Single-turn ==")
             intent, tokens, labels = get_intent_slot(model, tokens, word2idx, idx2label, idx2intent)
             print (intent)
             print (" ".join(tokens))
             print (" ".join(labels))
+            
+            print ("== Output prob. for DST ==")
+            intent_prob, tokens, label_prob_list = get_intent_slot_prob(model, tokens, word2idx, idx2label, idx2intent)
+            print (intent_prob)
+            print (" ".join(tokens))
+            print (label_prob_list)
