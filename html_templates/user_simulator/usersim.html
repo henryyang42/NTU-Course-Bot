@@ -1,0 +1,64 @@
+{% extends "user_simulator/base.html" %}
+
+{% block content %}
+  {% load staticfiles %}
+  <h1>User simulator</h1>
+  <form action="" method="post">
+    {% csrf_token %}
+    {% for field in diaactform %}
+    <tr>
+    <th> {{ field }} </th>
+    {% endfor %}
+    <th> <input type="submit" value="Submit"/> </th>
+    </tr>
+  </form>
+  <h5><b>User goal : </b></h5>
+  <b>Inform: </b>
+  {% for key, value in user_goal.inform_slots.items %}
+    ({{key}} {{value}})
+  {% endfor %}
+  <br>
+  <b>Request: </b>
+  {% for key, value in user_goal.request_slots.items %}
+    ({{key}}:{{value}})
+  {% endfor %}
+  <table id="chat">
+    <tbody>
+      <tr>
+	<td><b>Turn</b></td>
+	<td><b>Action</b></td>
+	<td><b>Inform</b></td>
+        <td><b>Request</b></td>
+      </tr>
+      <tr>
+	<td> USR Turn 0 </td>
+	<td> Request </td>
+        <td> {{ user_action.inform_slots }} </td>
+        <td> {{ user_action.request_slots }} </td>
+      </tr>
+      <tr>
+	<td></td>
+	<td><b> Possible values: <b></td>
+	<td><b>{{num}}</b></td>
+	<td>
+		{% if num > 5 %}
+		  {% for item in suggest %}
+		    {{ item }},
+		  {% endfor %}
+		  ......
+		{% else %}
+		  {% for item in suggest %}
+		    {{ item }},
+		  {% endfor %}
+		{% endif %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock content %}
+
+
+{% block afterbody %}
+  <script type="text/javascript" src='{% static "user_simulator/jquery-1.12.1.min.js" %}'></script>
+  <script type="text/javascript" src='{% static "user_simulator/chat.js" %}'></script>
+{% endblock afterbody %}
