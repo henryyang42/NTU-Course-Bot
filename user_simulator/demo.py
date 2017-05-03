@@ -23,7 +23,7 @@ from django.template import Context, Template
 from crawler.models import *
 
 
-""" 
+"""
 Launch a dialog simulation per the command line arguments
 This function instantiates a user_simulator, an agent, and a dialog system.
 Next, it triggers the simulator to run for the specified number of episodes.
@@ -42,9 +42,9 @@ def suggest(ans_dict):
 
 def usim_initial():
 
-    all_course = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2').all()
+    all_course = Course.objects.filter(~Q(classroom=''), ~Q(instructor=''), semester='105-2').all()
     count = all_course.count()
-    course = all_course[random.randint(0,count-1)]
+    course = all_course[random.randint(0, count-1)]
 
     act_set = text_to_dict('deep_dialog/data/dia_acts.txt')
     slot_set = text_to_dict('deep_dialog/data/slot_set.txt')
