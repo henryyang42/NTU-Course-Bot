@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 
-SECURE_SSL_REDIRECT = True
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,12 +27,16 @@ SECRET_KEY = '3f&!+sfhtsx^cfixwc7z$5lglj0n*@p=$5_s1ucu@1m0^2c1)b'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# SSL when in production
+SECURE_SSL_REDIRECT = not DEBUG
+
 ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'multi_turn.apps.MultiTurnConfig',
     'single_turn.apps.SingleTurnConfig',
     'crawler.apps.CrawlerConfig',
     'django.contrib.admin',
@@ -42,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #'django_extensions',
+    # 'django_extensions',
 ]
 
 MIDDLEWARE = [

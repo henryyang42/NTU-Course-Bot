@@ -12,15 +12,15 @@ class SingleTurnConfig(AppConfig):
         jieba.load_userdict('%s/crawler/entity_dictionary.txt' % settings.BASE_DIR)
         global lu_model, idx2label, idx2intent, word2idx
 
-        # load vocab
-        #obj = json.load(open('%s/LU_LSTM/merged_data_re_seg.1M.vocab.json' % settings.BASE_DIR, "r"))
-        obj = json.load(open('%s/LU_LSTM/re_seg.1K+log_extend_1000.vocab.json' % settings.BASE_DIR, "r"))
-        idx2label = obj["slot_vocab"]
-        idx2intent = obj["intent_vocab"]
-        word2idx = {}
-        for i, w in enumerate(obj["word_vocab"]):
-            word2idx[w] = i
+        if not settings.DEBUG:  # Only load model in production to speed up debugging.
+            # load vocab
+            obj = json.load(open('%s/LU_LSTM/re_seg.1K+log_extend_1000.vocab.json' % settings.BASE_DIR, "r"))
+            idx2label = obj["slot_vocab"]
+            idx2intent = obj["intent_vocab"]
+            word2idx = {}
+            for i, w in enumerate(obj["word_vocab"]):
+                word2idx[w] = i
 
-        # load model
-        #lu_model = load_model('%s/LU_LSTM/merged_data_re_seg.1M--LSTM.model' % settings.BASE_DIR)
-        lu_model = load_model('%s/LU_LSTM/re_seg.1K+log_extend_1000--LSTM.model' % settings.BASE_DIR)
+            # load model
+            lu_model = load_model('%s/LU_LSTM/re_seg.1K+log_extend_1000--LSTM.model' % settings.BASE_DIR)
+            print('LU model loaded.')
