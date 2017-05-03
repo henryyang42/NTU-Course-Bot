@@ -14,8 +14,10 @@ from keras.preprocessing import sequence
 from keras.utils import np_utils
 import json
 import re
-#from .LSTM_util import *
-from LSTM_util import *
+try:
+    from .LSTM_util import *
+except:
+    from LSTM_util import *
 """
 # http://stackoverflow.com/questions/40154320/replicating-models-in-keras-and-tensorflow-for-a-multi-threaded-setting
 import tensorflow as tf
@@ -124,7 +126,7 @@ if __name__ == '__main__':
             print (intent)
             print (" ".join(tokens))
             print (" ".join(labels))
-            
+
             print ("== Output prob. for DST ==")
             intent_prob, tokens, label_prob_list = get_intent_slot_prob(model, tokens, word2idx, idx2label, idx2intent)
             print (intent_prob)
