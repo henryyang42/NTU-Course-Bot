@@ -2,7 +2,13 @@
 #from django.db.models import Q
 
 # some fake courses
-all_courses = [{"serial_no":"0001", "title":"機器學習技法", "instructor":"林軒田", "classroom":"資102", "schedule_str":"二5,6"}, {"serial_no":"0002", "title":"機器學習技法", "instructor":"張軒田", "classroom":"資102", "schedule_str":"二5,6"}, {"serial_no":"0003", "title":"機器學習技法", "instructor":"林軒田", "classroom":"資103", "schedule_str":"二5,6"}, {"serial_no":"0004", "title":"機器學習技法", "instructor":"林軒田", "classroom":"資102", "schedule_str":"二7,8"}]
+all_courses = [
+        {"serial_no":"0001", "title":"機器學習技法", "instructor":"林軒田", "classroom":"資102", "schedule_str":"二5,6"}, 
+        {"serial_no":"0002", "title":"機器學習技法", "instructor":"張軒田", "classroom":"資102", "schedule_str":"二5,6"}, 
+        {"serial_no":"0003", "title":"機器學習技法", "instructor":"林軒田", "classroom":"資103", "schedule_str":"二5,6"}, 
+        {"serial_no":"0004", "title":"機器學習技法", "instructor":"林軒田", "classroom":"資102", "schedule_str":"二7,8"},
+        {"serial_no":"0005", "title":"機器學習技法", "instructor":"林軒田", "classroom":"資204", "schedule_str":"二5,6"}
+    ]
 #all_courses = Course.objects.filter(semester='105-2')
 
 def get_action_from_frame(dia_state):
@@ -58,7 +64,7 @@ def get_action_from_frame(dia_state):
 
 
 def get_NL_from_action(sys_act):
-    if sys_act["diaact"] == "closing":
+    if sys_act["diaact"] == "closing" and len(sys_act["inform_slots"]) == 0:
         return "不好意思，沒有找到符合條件的課程。"
 
     res_list = []
