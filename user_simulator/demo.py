@@ -49,13 +49,13 @@ def usim_initial():
     act_set = text_to_dict('deep_dialog/data/dia_acts.txt')
     slot_set = text_to_dict('deep_dialog/data/slot_set.txt')
 
-    goal = {'diaact':'request','inform_slots':{}, 'request_slots':{}}
-    goal['inform_slots'] = {'title':course.title, 'instructor':course.instructor,'classroom':course.classroom,'schedule_str':course.schedule_str}
-    goal['request_slots'] = {'serial_no':'UNK'}
-    goal_set = {'all':[goal]}
+    goal = {'diaact': 'request','inform_slots': {}, 'request_slots': {}}
+    goal['inform_slots'] = {'title': course.title, 'instructor': course.instructor,'classroom': course.classroom,'schedule_str': course.schedule_str}
+    goal['request_slots'] = {'serial_no': 'UNK'}
+    goal_set = {'all': [goal]}
 
-    agent_params = {'max_turn':40, 'epsilon':0, 'agent_run_mode':3, 'agent_act_level':0, 'cmd_input_mode':0}
-    usersim_params = {'max_turn':40, 'slot_err_probability':0, 'slot_err_mode':0, 'intent_err_probability':0, 'simulator_run_mode':0, 'simulator_act_level':0, 'learning_phase':'all'}
+    agent_params = {'max_turn': 40, 'epsilon': 0, 'agent_run_mode': 3, 'agent_act_level': 0, 'cmd_input_mode': 0}
+    usersim_params = {'max_turn': 40, 'slot_err_probability': 0, 'slot_err_mode': 0, 'intent_err_probability': 0, 'simulator_run_mode': 0, 'simulator_act_level': 0, 'learning_phase': 'all'}
 
 
     agent = AgentDemo(act_set, slot_set, agent_params)
@@ -83,7 +83,7 @@ def usim_request(request):
 
     possible_answer, possible_num = suggest(dialog_manager.possible_answer)
 
-    response = {'agent':agent_action, 'user':user_action, 'num':possible_num, 'suggest':possible_answer}
+    response = {'agent': agent_action, 'user': user_action, 'num': possible_num, 'suggest': possible_answer}
 
     return response
 

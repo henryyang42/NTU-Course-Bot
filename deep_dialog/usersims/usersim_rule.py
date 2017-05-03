@@ -16,7 +16,6 @@ import argparse, json, random, copy
 from deep_dialog import dialog_config
 
 
-
 class RuleSimulator(UserSimulator):
     """ A rule-based user simulator for testing dialog policy """
 
@@ -53,7 +52,7 @@ class RuleSimulator(UserSimulator):
         self.episode_over = False
         self.dialog_status = dialog_config.NO_OUTCOME_YET
 
-        #self.goal =  random.choice(self.start_set)
+        # self.goal =  random.choice(self.start_set)
         self.goal = self._sample_goal(self.start_set)
         self.ans = copy.deepcopy(self.goal)
         # Our Task
@@ -85,7 +84,7 @@ class RuleSimulator(UserSimulator):
         self.constraint_check = dialog_config.CONSTRAINT_CHECK_FAILURE
 
         """ Debug: build a fake goal mannually """
-        #self.debug_falk_goal()
+        # self.debug_falk_goal()
 
         # sample first action
         user_action = self._sample_action()
@@ -161,7 +160,7 @@ class RuleSimulator(UserSimulator):
                         user_action[random_slot] = random.choice(self.course_dict[random_slot])
                     else:
                         del user_action['inform_slots'][slot]
-                elif self.slot_err_mode == 2: #replace slot and its values
+                elif self.slot_err_mode == 2: # replace slot and its values
                     del user_action['inform_slots'][slot]
                     random_slot = random.choice(self.course_dict.keys())
                     user_action[random_slot] = random.choice(self.course_dict[random_slot])
@@ -285,9 +284,11 @@ class RuleSimulator(UserSimulator):
                     self.state['diaact'] = "inform"
                     self.state['inform_slots'][slot] = self.goal['inform_slots'][slot]
                     # request slot in rest_slots
-                    if slot in self.state['rest_slots']: self.state['rest_slots'].remove(slot)
+                    if slot in self.state['rest_slots']:
+                        self.state['rest_slots'].remove(slot)
                     # request slot in inform_slots and also in request_slots ?
-                    if slot in self.state['request_slots'].keys(): del self.state['request_slots'][slot]
+                    if slot in self.state['request_slots'].keys():
+                        del self.state['request_slots'][slot]
                     #self.state['request_slots'].clear()
 
                 # request slot in user's goal's request slots has been answered
@@ -352,8 +353,10 @@ class RuleSimulator(UserSimulator):
 
             if system_action['inform_slots']['taskcomplete'] == dialog_config.NO_VALUE_MATCH:
                 self.state['history_slots']['serial_no'] = dialog_config.NO_VALUE_MATCH
-                if 'serial_no' in self.state['rest_slots']: self.state['rest_slots'].remove('serial_no')
-                if 'serial_no' in self.state['request_slots'].keys(): del self.state['request_slots']['serial_no']
+                if 'serial_no' in self.state['rest_slots']:
+                    self.state['rest_slots'].remove('serial_no')
+                if 'serial_no' in self.state['request_slots'].keys():
+                    del self.state['request_slots']['serial_no']
 
             for slot in self.goal['inform_slots'].keys():
                 #  Deny, if the answers from agent can not meet the constraints of user
@@ -398,7 +401,8 @@ class RuleSimulator(UserSimulator):
                         ########################################################################
                         self.state['diaact'] = "inform"
                         self.state['inform_slots'][slot] = self.goal['inform_slots'][slot]
-                        if slot in self.state['rest_slots']: self.state['rest_slots'].remove(slot)
+                        if slot in self.state['rest_slots']:
+                            self.state['rest_slots'].remove(slot)
                 else:
                     if slot in self.state['rest_slots']:
                         self.state['rest_slots'].remove(slot)
