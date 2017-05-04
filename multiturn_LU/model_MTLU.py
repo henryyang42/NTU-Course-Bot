@@ -27,7 +27,7 @@ np.random.seed(123)  # for reproducibility
 ########################################################
 def sentence_to_vec(sentence, model_w2v, dim_w2v=100, len_sentence=10) :
     s_vec = np.zeros((len_sentence,dim_w2v))
-    if sentence == '' :
+    if sentence == '':
         return s_vec
     sentence = sentence.split(' ')
     i3 = 0
@@ -36,8 +36,10 @@ def sentence_to_vec(sentence, model_w2v, dim_w2v=100, len_sentence=10) :
     for i,word in enumerate(sentence) :
         if word == '' or word not in model_w2v.vocab : #or word == '' or word == '' or word == '' or word == '海口' or word == '群眾' or word == '中歸' or word == '這也能' or word == '經不住' or word == '' or word == '海天' or  word == '388' or word == '海興' or word == '彭年' or word == '場在' or word == '給凍醒' or word == '借殼'or word == '1702'or word == '1710'  or word == '剛為' or word == '568' or word == '我主':
             s_vec[i3+i] = [0.0] * dim_w2v
-            #print(word)
+            print(word)
         else :
+            print(word, model_w2v[word][:4])
+            # input()
             s_vec[i3+i] = model_w2v[word]
     return s_vec
 
@@ -101,7 +103,7 @@ def model_MTLU(X_train_history=None, X_train_current=None, len_history=4, len_se
     d = 0.5 # dropout
     input_h = Input(shape=(len_history,len_sentence,dim_w2v)) # shape = (?,8,30,100)
     input_c = Input(shape=(1,len_sentence,dim_w2v)) # shape = (?,1,30,100)
-    rnn_s2v = GRU(dim_after_rnn)
+    rnn_s2v = LSTM(dim_after_rnn)
     m = TimeDistributed(rnn_s2v)(input_h) # shape = (?,8,100)
     u = TimeDistributed(rnn_s2v)(input_c) # shape = (?,1,100)
     p_temp = keras.layers.dot([m,u],axes=-1, normalize=False) # shape = (?,8,1)
@@ -118,26 +120,28 @@ def model_MTLU(X_train_history=None, X_train_current=None, len_history=4, len_se
     h = keras.layers.pooling.AveragePooling1D(pool_size=len_history, strides=None, padding='valid')(h_temp)
     h_r = Reshape((1,dim_after_rnn),input_shape=(dim_after_rnn,))(h)
     s = keras.layers.add([h_r,u]) # shape = (?,1,100)
-    D1 = Dense(256, activation='elu')(s)
+    D1 = Dense(256, activation='relu')(s)
     d1 = Dropout(d)(D1)
-    D2 = Dense(128, activation='elu')(d1)
+    D2 = Dense(128, activation='relu')(d1)
     d2 = Dropout(d)(D2)
-    O = Dense(64, activation='elu')(d2) # shape = (?,1,64)
+    O = Dense(64, activation='relu')(d2) # shape = (?,1,64)
     #d3 = Dropout(d)(O)
     c_r = Reshape((len_sentence,dim_w2v),input_shape=(1,len_sentence,dim_w2v))(input_c) # shape = (?,30,100)
     O_r = Reshape((64,),input_shape=(1,64))(O) #shape = (?,64)
     O_rp = RepeatVector(len_sentence)(O_r) # shape = (?,30,64)
     final = keras.layers.concatenate([O_rp,c_r]) # shape = (?,30,164)
-    Y1 = GRU(num_tag, return_sequences=True, activation='softmax')(final) # shape = (?,?,6)
+    Y1 = LSTM(num_tag, return_sequences=True, activation='softmax')(final) # shape = (?,?,6)
     final_flat = Flatten()(final)
     Y2 = Dense(dim_status, activation='softmax')(final_flat) # shape = (?,8)
 
-    model = Model(inputs=[input_h, input_c], outputs=[Y1,Y2])
+
+
+    model = Model(inputs=[input_h,input_c], outputs=[Y1,Y2])
     model.compile(#loss='mean_squared_error',
-                  loss=['categorical_crossentropy','categorical_crossentropy'],
-                  #optimizer='rmsprop',
+                  loss='categorical_crossentropy',
+                  #optimizer=keras.optimizers.RMSprop(lr=0.005, rho=0.9, epsilon=1e-08, decay=0.0),
                   optimizer='adam',
-                  loss_weights=[0.1, 1.],
+                  #loss_weights=[0.1, 1.],
                   metrics=['acc']) #'mae'
 
 
@@ -196,19 +200,19 @@ def prediction_to_dia_state(prediction) :
 def train_MTLU() :
     len_history = 4
     len_sentence = 10
-    dim_w2v = 100
+    dim_w2v = 300
     dim_after_rnn = 100
     num_tag = 5 # Nan, O , B_title, B_instructor, B_when
     dim_status = 2*4+1 # request*4 and constraint*4
 
-    epochs = 20
+    epochs = 30
 
 
     s_log = pd.read_csv('./MTLU_template/simmulator_log.csv').fillna('')
     #all_sentence_temp = s_log['sentence']
 
     #training w2v
-    w2v(dim_w2v=100, data_training=s_log['sentence'])
+    w2v(dim_w2v=dim_w2v, data_training=s_log['sentence'])
     model_w2v = word2vec.load('word2vec_corpus.bin')
 
     #len_group = len(s_log)/len_history
@@ -221,29 +225,42 @@ def train_MTLU() :
             BIO_group[t1][t2][0] = 1
     n = 0
     sub_turn = 0
-    for b in range(len(s_log)) :
-        history = np.zeros((len_history,len_sentence,dim_w2v))
-        current = np.zeros((len_sentence,dim_w2v))
-        bio_num = np.zeros((len_sentence,num_tag))
-        for t1 in range(len_sentence) :
-            bio_num[t1][0] = 1
-        n += 1
-        # 還需要改，若再多template的情況下 ^^done^^
-        if b%len_history == 0 :
-            n = 1
-            for s in s_log['sentence'][b:b+4] :
-                if s == '' :
-                    n += 1
-        #print(n)
-        for i,s in enumerate(s_log['sentence']) :
-            if i < len_history - n :
-                history[i+n] = sentence_to_vec(s, model_w2v, dim_w2v=100, len_sentence=10)
-            elif i == len_history - n :
-                current = sentence_to_vec(s, model_w2v, dim_w2v=100, len_sentence=10)
-                bio_num = BIO2num(s_log['BIO'][i])
-        history_group[b] = history
-        current_group[b] = current.reshape((1,len_sentence,dim_w2v))
-        BIO_group[b] = bio_num
+    for b in range(0,len(s_log), 4) :
+        for gg in range(4):
+            history = np.zeros((len_history,len_sentence,dim_w2v))
+            current = np.zeros((len_sentence,dim_w2v))
+            bio_num = np.zeros((len_sentence,num_tag))
+            ind = b+ gg
+            s = s_log['sentence'][ind]
+            if s:
+                bio_num = BIO2num(s_log['BIO'][ind])
+                current = sentence_to_vec(s, model_w2v, dim_w2v=dim_w2v, len_sentence=len_sentence)
+                for ggg in range(gg):
+                    gggs = s_log['sentence'][ind+ggg]
+                    print(gggs)
+                    history[4-gg+ggg] = sentence_to_vec(gggs, model_w2v, dim_w2v=dim_w2v, len_sentence=len_sentence)
+
+            # for t1 in range(len_sentence) :
+            #     bio_num[t1][0] = 1
+            # n += 1
+            # # 還需要改，若再多template的情況下 ^^done^^
+            # if b%len_history == 0 :
+            #     n = 1
+            #     for s in s_log['sentence'][b:b+4] :
+            #         if s == '' :
+            #             n += 1
+            # #print(n)
+            # for i, s in enumerate(s_log['sentence'][b:b+4]):
+            #     #s = s_log['sentence'][i+b]
+            #     print(s, i)
+            #     if i < len_history - n :
+            #         history[i+n] = sentence_to_vec(s, model_w2v, dim_w2v=dim_w2v, len_sentence=len_sentence)
+            #     elif i == len_history - n :
+            #         current = sentence_to_vec(s, model_w2v, dim_w2v=dim_w2v, len_sentence=len_sentence)
+            #         bio_num = BIO2num(s_log['BIO'][i+b])
+            history_group[ind] = history
+            current_group[ind] = current.reshape((1,len_sentence,dim_w2v))
+            BIO_group[ind] = bio_num
 
 
 
@@ -286,17 +303,22 @@ def train_MTLU() :
                             len_history=len_history, len_sentence=len_sentence,
                             dim_w2v=dim_w2v, dim_after_rnn=dim_after_rnn,
                             num_tag=num_tag, dim_status=dim_status)
-
+    #print(history_group)
+    #print(current_group)
+    global input_history, input_current
+    input_history = history_group
+    input_current = current_group
     model_mtlu.fit([history_group,current_group],[BIO_group,status_for_MTLU],
-                    batch_size=32, epochs=epochs, verbose=1, validation_split=0.5)
+                    batch_size=32, epochs=epochs, verbose=1, validation_split=0.1)
+    global prediction
     prediction = model_mtlu.predict([history_group,current_group])
-
-    model_mtlu.save('./model_MTLU.h5')
+    return model_mtlu
+    #model_mtlu.save('./model_MTLU.h5')
 
     # for some fault of compatible
-    f = h5py.File('model_MTLU.h5', 'r+')
-    del f['optimizer_weights']
-    f.close()
+    #f = h5py.File('model_MTLU.h5', 'r+')
+    #del f['optimizer_weights']
+    #f.close()
 
 def run_MTLU(history=None, sentence=None, model_w2v=None, len_history=4, len_sentence=10,
                dim_w2v=100, dim_after_rnn=100, num_tag=5, dim_status=9) :
@@ -308,7 +330,7 @@ def run_MTLU(history=None, sentence=None, model_w2v=None, len_history=4, len_sen
     if model_w2v == None :
         print('please load model_w2v')
         return None,None
-    model = load_model('./model_MTLU.h5')
+    #model = load_model('./model_MTLU.h5')
     model_w2v = word2vec.load('word2vec_corpus.bin')
     if history == None :
         history = np.zeros((1,len_history,len_sentence,dim_w2v))
@@ -316,30 +338,33 @@ def run_MTLU(history=None, sentence=None, model_w2v=None, len_history=4, len_sen
     #sentence_vec = NLP_to_vec(sentence)
     #sentence = list(jieba.cut(sentence))
     sentence = ' '.join(sentence)
-    sentence_vec = sentence_to_vec(sentence, model_w2v)
+    sentence_vec = sentence_to_vec(sentence, model_w2v, dim_w2v=dim_w2v,)
     sentence_vec = sentence_vec.reshape((1,1,len_sentence,dim_w2v))
     prediction = model.predict([history,sentence_vec])
     sentence_vec = sentence_vec.reshape((1,len_sentence,dim_w2v))
     history_new = history_add(history,sentence_vec,len_history)
+
+    print(prediction)
+    print(sentence)
 
     return prediction , history_new
 
 if __name__ == '__main__' :
     len_history = 4
     len_sentence = 10
-    dim_w2v = 100
+    dim_w2v = 300
     dim_after_rnn = 100
     num_tag = 5 # Nan, O , B_title, B_instructor, B_when
     dim_status = 2*4+1 # request*4 and constraint*4
 
-    model_w2v = word2vec.load('word2vec_corpus.bin')
+    model = train_MTLU()
 
-    train_MTLU()
+    model_w2v = word2vec.load('word2vec_corpus.bin')
 
     # for test
     lst_s = np.empty([2,], dtype=object)
-    lst_s[0] = '我想選星期四的課'
-    lst_s[1] = '老師是陳信希'
+    lst_s[0] = '我想上星期四的課'
+    lst_s[1] = '教學老師是陳信希'
 
     dia_state = {}
     h = np.zeros((1,len_history,len_sentence,dim_w2v))
@@ -347,15 +372,16 @@ if __name__ == '__main__' :
     history = []
     for i,v in enumerate(lst_s) :
         s = list(jieba.cut(v))
-        p, h = run_MTLU(history=h, sentence=s, model_w2v=model_w2v)
+        p, h = run_MTLU(history=h, sentence=s, model_w2v=model_w2v, dim_w2v=dim_w2v)
         prediction.append(p)
         history.append(h)
         ary_1 = np.argmax(p[1], axis=1)
         status = ary_1[0] # 0~8
-        ary_2 = np.argmax(p[0], axis=1)
+        ary_2 = np.argmax(p[0], axis=2) # 0~
         for i2,v2 in enumerate(ary_2[0]) :
             if v2 == 2 or v2 == 3 or v2 == 4:
                 key_word = s[i2]
+
 
         '''
         if status == 0 :
