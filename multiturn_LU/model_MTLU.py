@@ -37,7 +37,7 @@ def sentence_to_vec(sentence, model_w2v, dim_w2v=100, len_sentence=10) :
         if word == '' or word not in model_w2v.vocab : #or word == '' or word == '' or word == '' or word == '海口' or word == '群眾' or word == '中歸' or word == '這也能' or word == '經不住' or word == '' or word == '海天' or  word == '388' or word == '海興' or word == '彭年' or word == '場在' or word == '給凍醒' or word == '借殼'or word == '1702'or word == '1710'  or word == '剛為' or word == '568' or word == '我主':
             s_vec[i3+i] = [0.0] * dim_w2v
             print(word)
-        else :
+        else:
             print(word, model_w2v[word][:4])
             # input()
             s_vec[i3+i] = model_w2v[word]

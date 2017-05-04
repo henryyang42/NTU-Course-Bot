@@ -18,8 +18,12 @@ from django.template import Context, Template
 from crawler.models import *
 
 import jieba
+if not os.path.exists('dict.big.txt'):
+    os.system("wget %s -O %s" % (
+        'https://raw.githubusercontent.com/fxsjy/jieba/master/extra_dict/dict.txt.big',
+        'dict.big.txt'))
+jieba.set_dictionary('dict.big.txt')
 jieba.load_userdict('./entity_dictionary_2_replace.txt')
-
 random.seed(123)
 
 
@@ -86,7 +90,7 @@ def generate_sentence_auto_mode(status, course):
     status_for_MTLU = np.zeros((4, 2), dtype=int)
     for i, st in enumerate(status):
         if st[4] and not st[2]:
-            print('constraint_or_not', request[i])
+            # print('constraint_or_not', request[i])
             st[2] = 1
             status[i] = st
             status_for_MTLU[i][1] = 1
@@ -96,18 +100,18 @@ def generate_sentence_auto_mode(status, course):
 
             context = {request[i]: course[request[i]], 'where': random.choice(where), 'time_query': random.choice(
                 time_query), 'course_query': random.choice(course_query), 'instructor_query': random.choice(instructor_query)}
-            print (context)
+            # print (context)
             tpl = random.choice(constraint_tpl[i])
             sentence = tpl.render(Context(context))
             #sentence = sentence_replace(sentence)
-            print (sentence)
+            # print (sentence)
             bio = ' '.join(BIO(sentence, context))
-            print (bio)
+            # print (bio)
             sentence_seg = ' '.join(jieba.cut(sentence))
             return sentence_seg, bio, status, status_for_MTLU
     for i, st in enumerate(status):
         if st[3] and not st[2]:
-            print('request_or_not', request[i])
+            # print('request_or_not', request[i])
             st[2] = 1
             status[i] = st
             status_for_MTLU[i][0] = 1
@@ -119,7 +123,7 @@ def generate_sentence_auto_mode(status, course):
             bio = ' '.join(BIO(sentence, {}))
             sentence_seg = ' '.join(jieba.cut(sentence))
             return sentence_seg, bio, status, status_for_MTLU
-    print('done')
+    # print('done')
     status_for_MTLU = ' '.join([str(x) for x in status_for_MTLU.flatten()])
     return sentence_seg, bio, status, status_for_MTLU
 
@@ -153,7 +157,7 @@ def generate_sentence_auto_mode(status, course):
 def status_maker():
     status = np.zeros((4, 5), dtype=int)
     if user_mode == 0:
-        print('auto_mode')
+        # print('auto_mode')
         flag1 = 1
         while flag1:
             for i, st in enumerate(status):
@@ -163,7 +167,7 @@ def status_maker():
                     if st[4]:
                         flag1 = 0
                 status[i] = st
-    print(status)
+    # print(status)
     return status
 
 
@@ -207,6 +211,9 @@ for course in all_course:
     course.title = course.title.replace('》', '')
     course.title = course.title.replace('《', '')
     course.title = course.title.replace(' ', '')
+    course.title = course.title.replace('、', '')
+    course.title = course.title.replace('/', '')
+    course.title = course.title.replace('+', '')
 
     titles.append(course.title)
     instructors.append(course.instructor)
@@ -277,12 +284,13 @@ request = ['title', 'instructor', 'when', 'classroom']
 
 
 len_history = 4
-num_sample = 250000
+num_sample = 200
 # shape = (?*4, 6)
 # ['index_sample', 'index_turn', 'sentence', 'BIO', 'status', 'status_for_MTLU']
 df_log = pd.DataFrame([], columns=['index_sample', 'index_turn',
                                    'sentence', 'BIO', 'status', 'status_for_MTLU'])
 for j in range(num_sample):
+    print(j)
     status = status_maker()
     course = random.choice(courses)
     for i in range(len_history):
