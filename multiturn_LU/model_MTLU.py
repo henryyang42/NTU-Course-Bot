@@ -25,7 +25,7 @@ np.random.seed(123)  # for reproducibility
 ########################################################
 # turn NLP input into vector
 ########################################################
-def sentence_to_vec(sentence, model_w2v, dim_w2v=100, len_sentence=10) :
+def sentence_to_vec(sentence, model_w2v, dim_w2v=300, len_sentence=20) :
     s_vec = np.zeros((len_sentence,dim_w2v))
     if sentence == '':
         return s_vec
@@ -96,10 +96,10 @@ def history_add(history, sentence_vec, len_history) :
 
 ########################################################
 # X_train contains history and current sentence
-# Y_train is BIO of current sentence
+# Y_train contains BIO of current sentence and intent of current sentence
 ########################################################
-def model_MTLU(X_train_history=None, X_train_current=None, len_history=4, len_sentence=10,
-               dim_w2v=100, dim_after_rnn=100, num_tag=5, dim_status=9) :
+def model_MTLU(X_train_history=None, X_train_current=None, len_history=20, len_sentence=20,
+               dim_w2v=300, dim_after_rnn=100, num_tag=5, dim_status=9) :
     d = 0.5 # dropout
     input_h = Input(shape=(len_history, len_sentence, dim_w2v)) # shape = (?, 8, 30 ,100)
     input_c = Input(shape=(1, len_sentence, dim_w2v)) # shape = (?, 1, 30, 100)
@@ -161,7 +161,7 @@ def model_MTLU(X_train_history=None, X_train_current=None, len_history=4, len_se
 # len_sentence * num_tag
 # i.e. 10 * 5
 # 10000:NaN 01000:O 00100:B_title 00010:B_instructor 00001:B_when
-def BIO2num(BIO=None, len_sentence=10, num_tag=5):
+def BIO2num(BIO=None, len_sentence=20, num_tag=5):
     lst = BIO.split(' ')
     #print(lst)
 
@@ -196,9 +196,9 @@ def prediction_to_dia_state(prediction) :
     #for i,v in enumerate(BIO) :
     #    if
 
-def train_MTLU() :
-    len_history = 4
-    len_sentence = 10
+def train_MTLU(need_train_w2v=False) :
+    len_history = 20
+    len_sentence = 20
     dim_w2v = 300
     dim_after_rnn = 100
     num_tag = 5 # Nan, O , B_title, B_instructor, B_when
@@ -211,7 +211,8 @@ def train_MTLU() :
     #all_sentence_temp = s_log['sentence']
 
     #training w2v
-    w2v(dim_w2v=dim_w2v, data_training=s_log['sentence'])
+    if need_train_w2v :
+        w2v(dim_w2v=dim_w2v, data_training=s_log['sentence'])
     model_w2v = word2vec.load('word2vec_corpus.bin')
 
     #len_group = len(s_log)/len_history
@@ -309,48 +310,92 @@ def train_MTLU() :
     input_current = current_group
     model_mtlu.fit([history_group,current_group],[BIO_group,status_for_MTLU],
                     batch_size=32, epochs=epochs, verbose=1, validation_split=0.1)
-    global prediction
-    prediction = model_mtlu.predict([history_group,current_group])
-    return model_mtlu
-    #model_mtlu.save('./model_MTLU.h5')
+    #global prediction
+    #prediction = model_mtlu.predict([history_group,current_group])
+    #return model_mtlu
+    model_mtlu.save('./model_MTLU.h5')
 
     # for some fault of compatible
-    #f = h5py.File('model_MTLU.h5', 'r+')
-    #del f['optimizer_weights']
-    #f.close()
-
-def run_MTLU(history=None, sentence=None, model_w2v=None, len_history=4, len_sentence=10,
-               dim_w2v=100, dim_after_rnn=100, num_tag=5, dim_status=9) :
-    '''
     f = h5py.File('model_MTLU.h5', 'r+')
     del f['optimizer_weights']
     f.close()
-    '''
+
+
+########################################################
+# input : history and current sentence
+# output : new state which is like dia_state["inform_slots"] = {"title": key_word }
+########################################################
+def run_MTLU(history=None, sentence=None, old_state=None,
+             model_w2v=None, len_history=20, len_sentence=20,
+             dim_w2v=300, dim_after_rnn=100, num_tag=5, dim_status=9) :
+
+    model = keras.models.load_model('./model_MTLU.h5')
+
     if model_w2v == None :
         print('please load model_w2v')
         return None,None
-    #model = load_model('./model_MTLU.h5')
+    if old_state == None:
+        old_state = {}
+        old_state["request_slots"] = {}
+        old_state["inform_slots"] = {}
     model_w2v = word2vec.load('word2vec_corpus.bin')
     if history == None :
         history = np.zeros((1,len_history,len_sentence,dim_w2v))
 
     #sentence_vec = NLP_to_vec(sentence)
-    #sentence = list(jieba.cut(sentence))
-    sentence = ' '.join(sentence)
-    sentence_vec = sentence_to_vec(sentence, model_w2v, dim_w2v=dim_w2v,)
+    sentence = list(jieba.cut(sentence))
+    sentence_str = ' '.join(sentence)
+    sentence_vec = sentence_to_vec(sentence_str, model_w2v, dim_w2v=dim_w2v)
     sentence_vec = sentence_vec.reshape((1,1,len_sentence,dim_w2v))
     prediction = model.predict([history,sentence_vec])
-    sentence_vec = sentence_vec.reshape((1,len_sentence,dim_w2v))
-    history_new = history_add(history,sentence_vec,len_history)
+    #sentence_vec = sentence_vec.reshape((1,len_sentence,dim_w2v))
+    #history_new = history_add(history,sentence_vec,len_history)
 
-    print(prediction)
-    print(sentence)
 
-    return prediction , history_new
+    dia_state = old_state
+    dia_state["request_slots"] = {}
+    lst_constraint = ['title', 'instructor', 'schedule_str', 'classroom']
+    #for item in lst_constraint :
+    #    dia_state[]
+    temp = np.argmax(prediction[1], axis=1)
+    status = temp[0] # 0~8
+    temp = np.argmax(prediction[0], axis=2)
+    bio = temp[0] # 0~4
+    #key_word = []
+    key_word = ''
+    for i2,v2 in enumerate(bio) :
+        if v2 == 2 or v2 == 3 or v2 == 4:
+            key_word = sentence[i2]
+
+
+
+    if status == 0 :
+        dia_state["request_slots"] = {"title": "?"}
+    if status == 1 :
+        dia_state["inform_slots"]['title'] = key_word
+    if status == 2 :
+        dia_state["request_slots"] = {"instructor": "?"}
+    if status == 3 :
+        dia_state["inform_slots"]['instructor'] = key_word
+    if status == 4 :
+        dia_state["request_slots"] = {"schedule_str": "?"}
+    if status == 5 :
+        dia_state["inform_slots"]["schedule_str"] = key_word
+    if status == 6 :
+        dia_state["request_slots"] = {"classroom": "?"}
+    if status == 7 :
+        dia_state["inform_slots"]["classroom"] = key_word
+    else :
+        print('no need action')
+
+    #print(prediction)
+    #print(sentence)
+
+    return dia_state
 
 if __name__ == '__main__' :
-    len_history = 4
-    len_sentence = 10
+    len_history = 20
+    len_sentence = 20
     dim_w2v = 300
     dim_after_rnn = 100
     num_tag = 5 # Nan, O , B_title, B_instructor, B_when
@@ -360,48 +405,58 @@ if __name__ == '__main__' :
 
     model_w2v = word2vec.load('word2vec_corpus.bin')
 
-    # for test
     lst_s = np.empty([2,], dtype=object)
     lst_s[0] = '我想上星期四的課'
     lst_s[1] = '教學老師是陳信希'
 
-    dia_state = {}
-    h = np.zeros((1,len_history,len_sentence,dim_w2v))
-    prediction = []
-    history = []
-    for i,v in enumerate(lst_s) :
-        s = list(jieba.cut(v))
-        p, h = run_MTLU(history=h, sentence=s, model_w2v=model_w2v, dim_w2v=dim_w2v)
-        prediction.append(p)
-        history.append(h)
-        ary_1 = np.argmax(p[1], axis=1)
-        status = ary_1[0] # 0~8
-        ary_2 = np.argmax(p[0], axis=2) # 0~
-        for i2,v2 in enumerate(ary_2[0]) :
-            if v2 == 2 or v2 == 3 or v2 == 4:
-                key_word = s[i2]
+    s = run_MTLU(history=None, sentence=lst_s[0], old_state=None,
+                 model_w2v=model_w2v, len_history=20, len_sentence=20,
+                 dim_w2v=300, dim_after_rnn=100, num_tag=5, dim_status=9)
 
 
-        '''
-        if status == 0 :
-            dia_state["request_slots"] = {"title": "?"}
-        if status == 1 :
-            dia_state["inform_slots"] = {"title": key_word }
-        if status == 2 :
-            dia_state["request_slots"] = {"instructor": "?"}
-        if status == 3 :
-            dia_state["inform_slots"] = {"instructor": key_word }
-        if status == 4 :
-            dia_state["request_slots"] = {"schedule_str": "?"}
-        if status == 5 :
-            dia_state["inform_slots"] = {"schedule_str": key_word }
-        if status == 6 :
-            dia_state["request_slots"] = {"classroom": "?"}
-        if status == 7 :
-            dia_state["inform_slots"] = {"classroom": key_word }
-        else :
-            print('no need action')
-        '''
+    #
+    # # for test
+    # lst_s = np.empty([2,], dtype=object)
+    # lst_s[0] = '我想上星期四的課'
+    # lst_s[1] = '教學老師是陳信希'
+    #
+    # dia_state = {}
+    # h = np.zeros((1,len_history,len_sentence,dim_w2v))
+    # prediction = []
+    # history = []
+    # for i,v in enumerate(lst_s) :
+    #     s = list(jieba.cut(v))
+    #     p, h = run_MTLU(history=h, sentence=s, model_w2v=model_w2v, dim_w2v=dim_w2v)
+    #     prediction.append(p)
+    #     history.append(h)
+    #     ary_1 = np.argmax(p[1], axis=1)
+    #     status = ary_1[0] # 0~8
+    #     ary_2 = np.argmax(p[0], axis=2) # 0~
+    #     for i2,v2 in enumerate(ary_2[0]) :
+    #         if v2 == 2 or v2 == 3 or v2 == 4:
+    #             key_word = s[i2]
+
+
+        #
+        # if status == 0 :
+        #     dia_state["request_slots"] = {"title": "?"}
+        # if status == 1 :
+        #     dia_state["inform_slots"] = {"title": key_word }
+        # if status == 2 :
+        #     dia_state["request_slots"] = {"instructor": "?"}
+        # if status == 3 :
+        #     dia_state["inform_slots"] = {"instructor": key_word }
+        # if status == 4 :
+        #     dia_state["request_slots"] = {"schedule_str": "?"}
+        # if status == 5 :
+        #     dia_state["inform_slots"] = {"schedule_str": key_word }
+        # if status == 6 :
+        #     dia_state["request_slots"] = {"classroom": "?"}
+        # if status == 7 :
+        #     dia_state["inform_slots"] = {"classroom": key_word }
+        # else :
+        #     print('no need action')
+        # '''
 
 
 
