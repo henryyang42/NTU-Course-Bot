@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}User simulator{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600,200' rel='stylesheet' type='text/css'>
+  {% load staticfiles %}
+  <link rel="stylesheet" href="{% static 'user_simulator/normalize.css' %}">
+  <link rel="stylesheet" href="{% static 'user_simulator/skeleton.css' %}">
+  <link rel="stylesheet" href="{% static 'user_simulator/chat.css' %}">
+</head>
+<body>
+  <div class="section">
+    <div class="container">
+      {% block content %}{% endblock content %}
+    </div>
+  </div>  
+  {% block afterbody %}{% endblock afterbody %}
+</body>
+</html>
