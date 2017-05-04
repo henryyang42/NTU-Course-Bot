@@ -124,7 +124,7 @@ def model_MTLU(X_train_history=None, X_train_current=None, len_history=20, len_s
     s = keras.layers.add([h_r,u]) # shape = (?, 1, 100)
     D1 = Dense(256, activation='elu')(s)
     d1 = Dropout(d)(D1)
-    D2 = Dense(128, activation='relu')(d1)
+    D2 = Dense(128, activation='elu')(d1)
     d2 = Dropout(d)(D2)
     O = Dense(64, activation='elu')(d2) # shape = (?, 1, 64)
     #d3 = Dropout(d)(O)
@@ -205,7 +205,7 @@ def train_MTLU(need_train_w2v=False) :
     num_tag = 5 # Nan, O , B_title, B_instructor, B_when
     dim_status = 2*4+1 # request*4 and constraint*4
 
-    epochs = 1
+    epochs = 5
 
 
     s_log = pd.read_csv('./MTLU_template/simmulator_log.csv').fillna('')
@@ -312,7 +312,7 @@ def train_MTLU(need_train_w2v=False) :
     input_history = history_group
     input_current = current_group
     model_mtlu.fit([history_group,current_group],[BIO_group,status_for_MTLU],
-                    batch_size=32, epochs=epochs, verbose=1, validation_split=0.1)
+                    batch_size=32, epochs=epochs, verbose=1, validation_split=0.1, shuffle=True)
     #global prediction
     #prediction = model_mtlu.predict([history_group,current_group])
     #return model_mtlu
