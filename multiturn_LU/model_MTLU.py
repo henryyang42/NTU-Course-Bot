@@ -25,7 +25,7 @@ np.random.seed(123)  # for reproducibility
 ########################################################
 # turn NLP input into vector
 ########################################################
-def sentence_to_vec(sentence, model_w2v, dim_w2v=300, len_sentence=20) :
+def sentence_to_vec(sentence, model_w2v, dim_w2v=100, len_sentence=10) :
     s_vec = np.zeros((len_sentence,dim_w2v))
     if sentence == '':
         return s_vec
@@ -36,11 +36,12 @@ def sentence_to_vec(sentence, model_w2v, dim_w2v=300, len_sentence=20) :
     for i,word in enumerate(sentence) :
         if word == '' or word not in model_w2v.vocab : #or word == '' or word == '' or word == '' or word == '海口' or word == '群眾' or word == '中歸' or word == '這也能' or word == '經不住' or word == '' or word == '海天' or  word == '388' or word == '海興' or word == '彭年' or word == '場在' or word == '給凍醒' or word == '借殼'or word == '1702'or word == '1710'  or word == '剛為' or word == '568' or word == '我主':
             s_vec[i3+i] = [0.0] * dim_w2v
-            print(word)
+            #print(word)
         else:
-            print(word, model_w2v[word][:4])
+            #print(word, model_w2v[word][:4])
             # input()
-            s_vec[i3+i] = model_w2v[word]
+            if i3+i < len_sentence:
+                s_vec[i3+i] = model_w2v[word]
     return s_vec
 
 ########################################################
@@ -161,7 +162,7 @@ def model_MTLU(X_train_history=None, X_train_current=None, len_history=20, len_s
 # len_sentence * num_tag
 # i.e. 10 * 5
 # 10000:NaN 01000:O 00100:B_title 00010:B_instructor 00001:B_when
-def BIO2num(BIO=None, len_sentence=20, num_tag=5):
+def BIO2num(BIO=None, len_sentence=10, num_tag=5):
     lst = BIO.split(' ')
     #print(lst)
 
@@ -188,7 +189,7 @@ def BIO2num(BIO=None, len_sentence=20, num_tag=5):
             bio_num[n+i] = [0, 0, 0, 0, 1]
             #print(w)
         #print(bio_num)
-    return bio_num # shape = (20,5)
+    return bio_num
 
 def prediction_to_dia_state(prediction) :
     BIO = prediction[0]
@@ -197,17 +198,19 @@ def prediction_to_dia_state(prediction) :
     #    if
 
 def train_MTLU(need_train_w2v=False) :
-    len_history = 20
-    len_sentence = 20
-    dim_w2v = 300
+    len_history = 10
+    len_sentence = 10
+    dim_w2v = 100
     dim_after_rnn = 100
     num_tag = 5 # Nan, O , B_title, B_instructor, B_when
     dim_status = 2*4+1 # request*4 and constraint*4
 
-    epochs = 50
+    epochs = 1
 
 
     s_log = pd.read_csv('./MTLU_template/simmulator_log.csv').fillna('')
+    print(len(s_log))
+    input()
     #all_sentence_temp = s_log['sentence']
 
     #training w2v
@@ -236,7 +239,7 @@ def train_MTLU(need_train_w2v=False) :
                 bio_num = BIO2num(s_log['BIO'][ind])
                 current = sentence_to_vec(s, model_w2v, dim_w2v=dim_w2v, len_sentence=len_sentence)
                 for ggg in range(gg):
-                    gggs = s_log['sentence'][ind+ggg]
+                    gggs = s_log['sentence'][b+ggg]
                     print(gggs)
                     history[4-gg+ggg] = sentence_to_vec(gggs, model_w2v, dim_w2v=dim_w2v, len_sentence=len_sentence)
 
@@ -309,34 +312,36 @@ def train_MTLU(need_train_w2v=False) :
     input_history = history_group
     input_current = current_group
     model_mtlu.fit([history_group,current_group],[BIO_group,status_for_MTLU],
-                    batch_size=8, epochs=epochs, verbose=1, validation_split=0.)
+                    batch_size=32, epochs=epochs, verbose=1, validation_split=0.1)
     #global prediction
     #prediction = model_mtlu.predict([history_group,current_group])
     #return model_mtlu
-    model_mtlu.save('./model_MTLU_theano.h5')
+    model_mtlu.save('./model_MTLU.h5')
 
     # for some fault of compatible
-    #f = h5py.File('model_MTLU.h5', 'r+')
-    #del f['optimizer_weights']
-    #f.close()
+    f = h5py.File('model_MTLU.h5', 'r+')
+    del f['optimizer_weights']
+    f.close()
 
 
 ########################################################
 # input : history and current sentence
 # output : new state which is like dia_state["inform_slots"] = {"title": key_word }
 ########################################################
-def run_MTLU(history=None, sentence=None, old_state=None, model=None,
+def run_MTLU(history=None, sentence=None, old_state=None,
              model_w2v=None, len_history=20, len_sentence=20,
              dim_w2v=300, dim_after_rnn=100, num_tag=5, dim_status=9) :
 
-    if model == None :
-        model = keras.models.load_model('./model_MTLU.h5')
+    model = keras.models.load_model('./model_MTLU.h5')
+
     if model_w2v == None :
-        model_w2v = word2vec.load('word2vec_corpus.bin')
+        print('please load model_w2v')
+        return None,None
     if old_state == None:
         old_state = {}
         old_state["request_slots"] = {}
         old_state["inform_slots"] = {}
+    model_w2v = word2vec.load('word2vec_corpus.bin')
     if history == None :
         history = np.zeros((1,len_history,len_sentence,dim_w2v))
 
@@ -352,7 +357,7 @@ def run_MTLU(history=None, sentence=None, old_state=None, model=None,
 
     dia_state = old_state
     dia_state["request_slots"] = {}
-    #lst_constraint = ['title', 'instructor', 'schedule_str', 'classroom']
+    lst_constraint = ['title', 'instructor', 'schedule_str', 'classroom']
     #for item in lst_constraint :
     #    dia_state[]
     temp = np.argmax(prediction[1], axis=1)
@@ -392,24 +397,24 @@ def run_MTLU(history=None, sentence=None, old_state=None, model=None,
     return dia_state
 
 if __name__ == '__main__' :
-    len_history = 20
-    len_sentence = 20
-    dim_w2v = 300
-    dim_after_rnn = 100
-    num_tag = 5 # Nan, O , B_title, B_instructor, B_when
-    dim_status = 2*4+1 # request*4 and constraint*4
+    #len_history = 20
+    #len_sentence = 20
+    #dim_w2v = 100
+    #dim_after_rnn = 100
+    #num_tag = 5 # Nan, O , B_title, B_instructor, B_when
+    #dim_status = 2*4+1 # request*4 and constraint*4
 
-    model = train_MTLU()
+    model = train_MTLU(True)
 
-    model_w2v = word2vec.load('word2vec_corpus.bin')
+    #model_w2v = word2vec.load('word2vec_corpus.bin')
 
     lst_s = np.empty([2,], dtype=object)
     lst_s[0] = '我想上星期四的課'
     lst_s[1] = '教學老師是陳信希'
 
-    s = run_MTLU(history=None, sentence=lst_s[0], old_state=None,
-                 model_w2v=model_w2v, len_history=20, len_sentence=20,
-                 dim_w2v=300, dim_after_rnn=100, num_tag=5, dim_status=9)
+    #s = run_MTLU(history=None, sentence=lst_s[0], old_state=None,
+    #             model_w2v=model_w2v, len_history=20, len_sentence=20,
+    #             dim_w2v=dim_w2v, dim_after_rnn=100, num_tag=5, dim_status=9)
 
 
     #

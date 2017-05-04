@@ -284,7 +284,7 @@ request = ['title', 'instructor', 'when', 'classroom']
 
 
 len_history = 4
-num_sample = 200
+num_sample = 250
 # shape = (?*4, 6)
 # ['index_sample', 'index_turn', 'sentence', 'BIO', 'status', 'status_for_MTLU']
 df_log = pd.DataFrame([], columns=['index_sample', 'index_turn',
