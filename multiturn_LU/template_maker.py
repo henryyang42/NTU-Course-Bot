@@ -4,7 +4,7 @@ import os
 import random
 import numpy as np
 import pandas as pd
-
+import re
 
 import sys
 #sys.path.append("/Users/xogo/Desktop/NTU/2017_spring/ICB/")
@@ -18,7 +18,9 @@ from django.template import Context, Template
 from crawler.models import *
 
 import jieba
-jieba.load_userdict('./entity_dictionary_2.txt')
+jieba.load_userdict('./entity_dictionary_2_replace.txt')
+
+random.seed(123)
 
 def formulate(**kwargs):
     kwlist = list(kwargs.items())
@@ -52,6 +54,7 @@ def BIO(sentence, context):
     inv_context = {v: k for k, v in context.items()}
     #toks = sentence.split()
     toks = sentence.replace(' ','')
+    #toks = sentence_replace(toks)
     toks = list(jieba.cut(toks))
     tags = ['O'] * len(toks)
     for i, tok in enumerate(toks):
@@ -62,6 +65,12 @@ def BIO(sentence, context):
     #return ' '.join(tags) + '\n'
     return tags
 
+def sentence_replace(sentence):
+    sentence = sentence.replace('(','')
+    sentence = sentence.replace(')','')
+    sentence = sentence.replace('（','')
+    sentence = sentence.replace('）','')
+    return sentence
 #def status_for_MTLU() :
 
 # status = [[ confirm_or_not, misunderstood_or_not, inform_or_not, request_or_not, constraint_or_not] * 4 ]
@@ -77,9 +86,15 @@ def generate_sentence_auto_mode(status):
             status_for_MTLU[i][1] = 1
             status_for_MTLU = ' '.join([str(x) for x in status_for_MTLU.flatten()])
             #status_for_MTLU = ' '.join(status_for_MTLU.flatten().tolist())
-            context = {request[i]: content[i][0]}
+            if i == 2 :
+                r1 = random.randrange(10)
+            else :
+                r1 = random.randrange(100)
+            context = {request[i]: content[i][r1]}
             print (context)
-            sentence = constraint_tpl[i].render(Context(context))
+            r2 = random.randrange(2)
+            sentence = constraint_tpl[i][r2].render(Context(context))
+            #sentence = sentence_replace(sentence)
             print (sentence)
             bio = ' '.join(BIO(sentence, context))
             print (bio)
@@ -92,7 +107,9 @@ def generate_sentence_auto_mode(status):
             status[i] = st
             status_for_MTLU[i][0] = 1
             status_for_MTLU = ' '.join([str(x) for x in status_for_MTLU.flatten()])
-            sentence = request_tpl[i].render(Context({}))
+            r2 = random.randrange(2)
+            sentence = request_tpl[i][r2].render(Context({}))
+            #sentence = sentence_replace(sentence)
             bio = ' '.join(BIO(sentence, {}))
             sentence_seg = ' '.join(jieba.cut(sentence))
             return sentence_seg, bio, status, status_for_MTLU
@@ -124,7 +141,21 @@ def generate_sentence_user_mode(status):
     print('done')
     return sentence, bio, status
 
-
+def status_maker() :
+    status = np.zeros((4,5),dtype=int)
+    print(status)
+    if user_mode == 0 :
+        print('auto_mode')
+        flag1 = 1
+        while flag1 :
+            for i, st in enumerate(status) :
+                st[3] = random.randint(0,1)
+                if i != 3 and not st[3]:
+                    st[4] = random.randint(0,1)
+                    if st[4] :
+                        flag1 = 0
+                status[i] = st
+    return status
 
 
 
@@ -143,11 +174,45 @@ instructors = []
 all_course = list(Course.objects.filter(semester='105-2'))
 
 for course in all_course:
+    '''
+
+    '''
+    course.title = re.sub(r'\（[^)]*\）', '', course.title)
+    course.title = re.sub(r'\([^)]*\)', '', course.title)
+    course.title = re.sub(r'\-[^)]*', '', course.title)
+    if course.title[-1] == '一' or course.title[-1] == '二' or course.title[-1] == '三' or course.title[-1] == '四' or course.title[-1] == '五' or course.title[-1] == '六' or course.title[-1] == '上' or course.title[-1] == '下':
+        course.title = course.title[:-1]
+    if course.title[-1] == '一' or course.title[-1] == '二' or course.title[-1] == '三' or course.title[-1] == '四' or course.title[-1] == '五' or course.title[-1] == '六' or course.title[-1] == '上' or course.title[-1] == '下':
+        course.title = course.title[:-1]
+    course.title = course.title.replace('(','')
+    course.title = course.title.replace(')','')
+    course.title = course.title.replace('（','')
+    course.title = course.title.replace('）','')
+    course.title = course.title.replace('：','')
+    course.title = course.title.replace(':','')
+    course.title = course.title.replace('-','')
+    course.title = course.title.replace('「','')
+    course.title = course.title.replace('」','')
+    course.title = course.title.replace('》','')
+    course.title = course.title.replace('《','')
+    course.title = course.title.replace(' ','')
+
     titles.append(course.title)
     instructors.append(course.instructor)
 
 titles = np.unique([x for x in titles if x and ' ' not in x])
 instructors = np.unique([x for x in instructors if x and ' ' not in x])
+
+lst_dict = []
+
+for t in titles :
+    lst_dict.append(t)
+for i in instructors :
+    lst_dict.append(i)
+
+with open('entity_dictionary_2_replace.txt', 'w') as f:
+    f.write('\n'.join(lst_dict))
+f.close()
 
 print ('%d titles, %d instructors' % (len(titles), len(instructors)))
 
@@ -162,24 +227,17 @@ user_mode = 0
 
 # what who when where
 # title instructor when classroom
-constraint_tpl = [Template('課名是{{title}}'), Template('教學老師是{{instructor}}'), Template('上課時間是{{when}}'), Template('上課教室是{{classroom}}')]
-request_tpl = [Template('請列出課程名稱'), Template('老師的名字'), Template('這堂課在星期幾上課?'), Template('在哪裡上課') ]
+constraint_tpl = [ [Template('課名是{{title}}'), Template('課程名稱為{{title}}')],
+                   [Template('教學老師是{{instructor}}'), Template('{{instructor}}上的課')],
+                   [Template('上課時間是{{when}}'), Template('我想上{{when}}的課')],
+                   [Template('上課教室是{{classroom}}'), Template('在{{classroom}}上課')] ]
+request_tpl = [ [Template('請列出課程名稱'), Template('什麼課')],
+                [Template('老師的名字'), Template('老師是誰')],
+                [Template('這堂課在星期幾上課?'), Template('上課時間在什麼時候')],
+                [Template('在哪裡上課'), Template('教室在哪')] ]
 # status what who when where
 # status = [ confirm_or_not, misunderstood_or_not, inform_or_not, request_or_not, constraint_or_not]
-status = np.zeros((4,5),dtype=int)
-print(status)
-if user_mode == 0 :
-    print('auto_mode')
-    flag1 = 1
-    while flag1 :
-        for i, st in enumerate(status) :
-            st[3] = random.randint(0,1)
-            if i != 3 and not st[3]:
-                st[4] = random.randint(0,1)
-                if st[4] :
-                    flag1 = 0
-            status[i] = st
-print(status)
+
 '''
 if user_mode == 0 :
     print('auto_mode')
@@ -208,11 +266,12 @@ content = [ titles, instructors, when, []]
 
 
 len_history = 4
-num_sample = 1
+num_sample = 100
 # shape = (?*4, 6)
 # ['index_sample', 'index_turn', 'sentence', 'BIO', 'status', 'status_for_MTLU']
 df_log = pd.DataFrame([], columns=['index_sample', 'index_turn', 'sentence', 'BIO', 'status', 'status_for_MTLU'])
 for j in range(num_sample) :
+    status = status_maker()
     for i in range(len_history) :
         s, bio, status, status_for_MTLU = generate_sentence_auto_mode(status)
         str_status = ' '.join([str(x) for x in status.flatten()])
