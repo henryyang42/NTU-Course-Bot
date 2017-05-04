@@ -19,7 +19,6 @@ from crawler.models import *
 
 
 
-
 def usim_initial():
 
     all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2').all().values()[:100]
@@ -52,9 +51,7 @@ def usim_request(request):
     possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
     possible_num = dialog_manager.possible_answer['count']
 
-    response = {'agent':agent_action, 'user':user_action, 'num':possible_num, 'suggest':possible_answer}
-    
-    print(reward)
+    response = {'agent': agent_action, 'user': user_action, 'num': possible_num, 'suggest': possible_answer}
 
     return response
 
