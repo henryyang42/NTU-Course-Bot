@@ -451,12 +451,9 @@ class RuleSimulator(UserSimulator):
                         self.state['diaact'] = "thanks" # or replies "confirm_answer"
 
 
-
-
 def main(params):
     user_sim = RuleSimulator()
     user_sim.initialize_episode()
-
 
 
 if __name__ == "__main__":
