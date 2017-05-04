@@ -101,42 +101,41 @@ def history_add(history, sentence_vec, len_history) :
 def model_MTLU(X_train_history=None, X_train_current=None, len_history=4, len_sentence=10,
                dim_w2v=100, dim_after_rnn=100, num_tag=5, dim_status=9) :
     d = 0.5 # dropout
-    input_h = Input(shape=(len_history,len_sentence,dim_w2v)) # shape = (?,8,30,100)
-    input_c = Input(shape=(1,len_sentence,dim_w2v)) # shape = (?,1,30,100)
-    rnn_s2v = LSTM(dim_after_rnn)
-    m = TimeDistributed(rnn_s2v)(input_h) # shape = (?,8,100)
-    u = TimeDistributed(rnn_s2v)(input_c) # shape = (?,1,100)
-    p_temp = keras.layers.dot([m,u],axes=-1, normalize=False) # shape = (?,8,1)
-    p_r = Reshape((len_history,),input_shape=(len_history,1))(p_temp) # shape = (?,8)
+    input_h = Input(shape=(len_history, len_sentence, dim_w2v)) # shape = (?, 8, 30 ,100)
+    input_c = Input(shape=(1, len_sentence, dim_w2v)) # shape = (?, 1, 30, 100)
+    rnn_s2v = GRU(dim_after_rnn)
+    m = TimeDistributed(rnn_s2v)(input_h) # shape = (?, 8, 100)
+    u = TimeDistributed(rnn_s2v)(input_c) # shape = (?, 1, 100)
+    p_temp = keras.layers.dot([m, u], axes=-1, normalize=False) # shape = (?, 8, 1)
+    p_r = Reshape((len_history, ), input_shape=(len_history, 1))(p_temp) # shape = (?, 8)
+
     #p_final = K.softmax(p_r) # shape = (?,8)
     p_final = Activation(K.softmax)(p_r)
-    p_final_r = Reshape((len_history,1),input_shape=(len_history,))(p_final) # shape = (?,8,1)
+    p_final_r = Reshape((len_history, 1),input_shape=(len_history, ))(p_final) # shape = (?,8,1)
 
     # notice not sure
-    h_temp = keras.layers.multiply([p_final_r,m]) # shape = (?,8,100)
-    #h = K.sum(h_temp, axis=1) # shape = (?,100)
-    #h = A(K.sum(h_temp, axis=1)) # shape = (?,100)
-    #h = keras.layers.add(h_temp, axis=1) # shape = (?,100)
+    h_temp = keras.layers.multiply([p_final_r, m]) # shape = (?, 8, 100)
+    #h = K.sum(h_temp, axis=1) # shape = (?, 100)
+    #h = A(K.sum(h_temp, axis=1)) # shape = (?, 100)
+    #h = keras.layers.add(h_temp, axis=1) # shape = (?, 100)
     h = keras.layers.pooling.AveragePooling1D(pool_size=len_history, strides=None, padding='valid')(h_temp)
-    h_r = Reshape((1,dim_after_rnn),input_shape=(dim_after_rnn,))(h)
-    s = keras.layers.add([h_r,u]) # shape = (?,1,100)
-    D1 = Dense(256, activation='relu')(s)
+    h_r = Reshape((1,dim_after_rnn), input_shape=(dim_after_rnn,))(h)
+    s = keras.layers.add([h_r,u]) # shape = (?, 1, 100)
+    D1 = Dense(256, activation='elu')(s)
     d1 = Dropout(d)(D1)
     D2 = Dense(128, activation='relu')(d1)
     d2 = Dropout(d)(D2)
-    O = Dense(64, activation='relu')(d2) # shape = (?,1,64)
+    O = Dense(64, activation='elu')(d2) # shape = (?, 1, 64)
     #d3 = Dropout(d)(O)
-    c_r = Reshape((len_sentence,dim_w2v),input_shape=(1,len_sentence,dim_w2v))(input_c) # shape = (?,30,100)
-    O_r = Reshape((64,),input_shape=(1,64))(O) #shape = (?,64)
-    O_rp = RepeatVector(len_sentence)(O_r) # shape = (?,30,64)
-    final = keras.layers.concatenate([O_rp,c_r]) # shape = (?,30,164)
-    Y1 = LSTM(num_tag, return_sequences=True, activation='softmax')(final) # shape = (?,?,6)
+    c_r = Reshape((len_sentence, dim_w2v), input_shape=(1, len_sentence,dim_w2v))(input_c) # shape = (?, 30, 100)
+    O_r = Reshape((64, ),input_shape=(1, 64))(O) # shape = (?, 64)
+    O_rp = RepeatVector(len_sentence)(O_r) # shape = (?, 30, 64)
+    final = keras.layers.concatenate([O_rp, c_r]) # shape = (?, 30, 164)
+    Y1 = GRU(num_tag, return_sequences=True, activation='softmax')(final) # shape = (?, ?, 6)
     final_flat = Flatten()(final)
-    Y2 = Dense(dim_status, activation='softmax')(final_flat) # shape = (?,8)
+    Y2 = Dense(dim_status, activation='softmax')(final_flat) # shape = (?, 8)
 
-
-
-    model = Model(inputs=[input_h,input_c], outputs=[Y1,Y2])
+    model = Model(inputs=[input_h, input_c], outputs=[Y1, Y2])
     model.compile(#loss='mean_squared_error',
                   loss='categorical_crossentropy',
                   #optimizer=keras.optimizers.RMSprop(lr=0.005, rho=0.9, epsilon=1e-08, decay=0.0),
@@ -162,13 +161,13 @@ def model_MTLU(X_train_history=None, X_train_current=None, len_history=4, len_se
 # len_sentence * num_tag
 # i.e. 10 * 5
 # 10000:NaN 01000:O 00100:B_title 00010:B_instructor 00001:B_when
-def BIO2num(BIO=None,len_sentence=10, num_tag=5) :
+def BIO2num(BIO=None, len_sentence=10, num_tag=5):
     lst = BIO.split(' ')
     #print(lst)
 
     # initialization
     ##########################################
-    bio_num = np.zeros((len_sentence,num_tag))
+    bio_num = np.zeros((len_sentence, num_tag))
     for t in range(len(bio_num)) :
         bio_num[t][0] = 1
 
@@ -178,15 +177,15 @@ def BIO2num(BIO=None,len_sentence=10, num_tag=5) :
         #print(i)
         #print(w)
         if w == '' :
-            bio_num[n+i] = [1,0,0,0,0]
+            bio_num[n+i] = [1, 0, 0, 0, 0]
         elif w == 'O' :
-            bio_num[n+i] = [0,1,0,0,0]
+            bio_num[n+i] = [0, 1, 0, 0, 0]
         elif w == 'B_title' :
-            bio_num[n+i] = [0,0,1,0,0]
+            bio_num[n+i] = [0 ,0, 1, 0, 0]
         elif w == 'B_instructor' :
-            bio_num[n+i] = [0,0,0,1,0]
+            bio_num[n+i] = [0, 0, 0, 1, 0]
         elif w == 'B_when' :
-            bio_num[n+i] = [0,0,0,0,1]
+            bio_num[n+i] = [0, 0, 0, 0, 1]
             #print(w)
         #print(bio_num)
     return bio_num
