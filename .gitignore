@@ -1,6 +1,6 @@
 # Corpus
 dict.big.txt
-
+*.pickle
 # Static files
 static
 html

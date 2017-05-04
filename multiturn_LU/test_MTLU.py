@@ -35,11 +35,23 @@ def understand(user_id, sentence):
 if __name__ == '__main__':
     uid1 = 123
     s1 = '課名是自然語言處理'
-    s2 = '這堂課在哪裡上課?'
+    s2 = '教室在哪'
     s_list1 = [s1, s2]
 
     for s in s_list1:
         status = understand(uid1, s)
         action = get_action_from_frame(status)
-        print(status, action)
+        print('Status:', status)
+        print('Action:', action)
+    
+    print ('=====================')
+    uid1 = 456
+    s1 = '課程名稱是道教文化專題研究'
+    s2 = '老師是誰?'
+    s_list1 = [s1, s2]
 
+    for s in s_list1:
+        status = understand(uid1, s)
+        action = get_action_from_frame(status)
+        print('Status:', status)
+        print('Action:', action)
