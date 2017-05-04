@@ -7,6 +7,7 @@ sys.path.append("../")
 from DiaPol_rule.dia_pol import *
 from user_simulator.usersim.usersim_rule import *
 from django.db.models import Q
+from django.template import Context, Template
 
 
 request_tpl = {
@@ -66,7 +67,7 @@ def understand(user_id, sentence):
 
 if __name__ == '__main__':
     all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2').all().values()
-    uid1 = 123
+    '''uid1 = 123
     s1 = '課名是自然語言處理'
     s2 = '教室在哪'
     s_list1 = [s1, s2]
@@ -93,35 +94,44 @@ if __name__ == '__main__':
         print('Status:', status)
         print('Action:', action)
         print('sem_fram:', sem_frame, over)
-
+'''
+    uid1 = 123
     user_sim = RuleSimulator(all_courses)
-    action = user_sim.initialize_episode()
-    print('User_action:', action)
-    # turn 1
-    sentence = sem2nl(action)
-    status = understand(uid1, sentence)
-    action = get_action_from_frame(status)
+    user_action = user_sim.initialize_episode()
+    print('-----# Turn 1-----')
+    print('User_action:', user_action)
+    
+    user_sentence = sem2nl(user_action)
+    status = understand(uid1, user_sentence)
+    system_action = get_action_from_frame(status)
+    print('-----# Turn 2-----')
     print('Status:', status)
-    print('Action:', action)
-    print('sem_fram:', sem_frame, over)
-    # turn 2
-    sentence = sem2nl(user_sim.next(action)[0])
-    status = understand(uid1, sentence)
-    action = get_action_from_frame(status)
+    print('System Action:', system_action)
+    
+    user_action = user_sim.next(system_action)[0]
+    user_sentence = sem2nl(user_action)
+    status = understand(uid1, user_sentence)
+    system_action = get_action_from_frame(status)
+    print('-----# Turn 3-----')
     print('Status:', status)
-    print('Action:', action)
-    print('sem_fram:', sem_frame, over)
-    # turn 3
-    sentence = sem2nl(user_sim.next(action)[0])
-    status = understand(uid1, sentence)
-    action = get_action_from_frame(status)
+    print('User Action:', user_action)
+    print('System Action:', system_action)
+   
+    user_action = user_sim.next(system_action)[0]
+    user_sentence = sem2nl(user_action)
+    status = understand(uid1, user_sentence)
+    system_action = get_action_from_frame(status)
+    print('-----# Turn 4-----')
     print('Status:', status)
-    print('Action:', action)
-    print('sem_fram:', sem_frame, over)
-    # turn 4
-    sentence = sem2nl(user_sim.next(action)[0])
-    status = understand(uid1, sentence)
-    action = get_action_from_frame(status)
+    print('User Action:', user_action)
+    print('System Action:', system_action)
+
+    user_action = user_sim.next(system_action)[0]
+    user_sentence = sem2nl(user_action)
+    status = understand(uid1, user_sentence)
+    system_action = get_action_from_frame(status)
+    print('-----# Turn 5-----')
     print('Status:', status)
-    print('Action:', action)
-    print('sem_fram:', sem_frame, over)
+    print('User Action:', user_action)
+    print('System Action:', system_action)
+

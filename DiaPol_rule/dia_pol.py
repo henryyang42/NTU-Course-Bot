@@ -39,7 +39,7 @@ def get_action_from_frame(dia_state):
             courses.append(c)
     #############################################
     print ("[INFO] current set of courses")
-    print (courses)
+    print (len(courses))
 
     sys_act = {}
     if len(courses) == 1:  # find the unique course
