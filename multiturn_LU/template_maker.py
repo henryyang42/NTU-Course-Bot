@@ -23,7 +23,6 @@ if not os.path.exists('dict.big.txt'):
         'https://raw.githubusercontent.com/fxsjy/jieba/master/extra_dict/dict.txt.big',
         'dict.big.txt'))
 jieba.set_dictionary('dict.big.txt')
-jieba.load_userdict('./entity_dictionary_2_replace.txt')
 random.seed(123)
 
 
@@ -225,15 +224,14 @@ instructors = np.unique([x for x in instructors if x and ' ' not in x])
 
 lst_dict = []
 
-for t in titles:
-    lst_dict.append(t)
-for i in instructors:
-    lst_dict.append(i)
-
+lst_dict.extend(titles)
+lst_dict.extend(instructors)
+lst_dict.extend(when)
+lst_dict.extend(['星期幾', '禮拜幾'])
 with open('entity_dictionary_2_replace.txt', 'w') as f:
-    f.write('\n'.join(lst_dict))
+    f.write('\n'.join(['%s 99999' % s for s in lst_dict]))
 f.close()
-
+jieba.load_userdict('./entity_dictionary_2_replace.txt')
 print ('%d titles, %d instructors' % (len(titles), len(instructors)))
 
 template_folder = 'MTLU_template'
@@ -284,7 +282,7 @@ request = ['title', 'instructor', 'when', 'classroom']
 
 
 len_history = 4
-num_sample = 250
+num_sample = 25000
 # shape = (?*4, 6)
 # ['index_sample', 'index_turn', 'sentence', 'BIO', 'status', 'status_for_MTLU']
 df_log = pd.DataFrame([], columns=['index_sample', 'index_turn',

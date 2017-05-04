@@ -32,12 +32,12 @@ def understand(user_id, sentence):
 
 if __name__ == '__main__':
     uid = 123
-    s1 = '課名 是 MATLAB及其應用'
-    s2 = '這堂 課 在 星期 幾上 課 ?'
-    s3 = '我 想 上 禮拜 三 的 課'
-    s4 = '丁亮 上 的 課'
-    s5 = '上課 時間 是 星期五'
-    s6 = '什麼 課'
+    s1 = '課名是MATLAB及其應用'
+    s2 = '這堂課在星期幾上課 ?'
+    s3 = '我想上星期三的課'
+    s4 = '丁亮上的課'
+    s5 = '上課時間是星期五'
+    s6 = '什麼課'
 
     # status1 = run_MTLU(history=None, sentence=s1, old_state=None,
     #              model_w2v=None, len_history=len_history, len_sentence=len_sentence,
