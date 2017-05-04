@@ -188,7 +188,7 @@ def BIO2num(BIO=None, len_sentence=20, num_tag=5):
             bio_num[n+i] = [0, 0, 0, 0, 1]
             #print(w)
         #print(bio_num)
-    return bio_num
+    return bio_num # shape = (20,5)
 
 def prediction_to_dia_state(prediction) :
     BIO = prediction[0]
@@ -204,7 +204,7 @@ def train_MTLU(need_train_w2v=False) :
     num_tag = 5 # Nan, O , B_title, B_instructor, B_when
     dim_status = 2*4+1 # request*4 and constraint*4
 
-    epochs = 30
+    epochs = 50
 
 
     s_log = pd.read_csv('./MTLU_template/simmulator_log.csv').fillna('')
@@ -309,36 +309,34 @@ def train_MTLU(need_train_w2v=False) :
     input_history = history_group
     input_current = current_group
     model_mtlu.fit([history_group,current_group],[BIO_group,status_for_MTLU],
-                    batch_size=32, epochs=epochs, verbose=1, validation_split=0.1)
+                    batch_size=8, epochs=epochs, verbose=1, validation_split=0.)
     #global prediction
     #prediction = model_mtlu.predict([history_group,current_group])
     #return model_mtlu
-    model_mtlu.save('./model_MTLU.h5')
+    model_mtlu.save('./model_MTLU_theano.h5')
 
     # for some fault of compatible
-    f = h5py.File('model_MTLU.h5', 'r+')
-    del f['optimizer_weights']
-    f.close()
+    #f = h5py.File('model_MTLU.h5', 'r+')
+    #del f['optimizer_weights']
+    #f.close()
 
 
 ########################################################
 # input : history and current sentence
 # output : new state which is like dia_state["inform_slots"] = {"title": key_word }
 ########################################################
-def run_MTLU(history=None, sentence=None, old_state=None,
+def run_MTLU(history=None, sentence=None, old_state=None, model=None,
              model_w2v=None, len_history=20, len_sentence=20,
              dim_w2v=300, dim_after_rnn=100, num_tag=5, dim_status=9) :
 
-    model = keras.models.load_model('./model_MTLU.h5')
-
+    if model == None :
+        model = keras.models.load_model('./model_MTLU.h5')
     if model_w2v == None :
-        print('please load model_w2v')
-        return None,None
+        model_w2v = word2vec.load('word2vec_corpus.bin')
     if old_state == None:
         old_state = {}
         old_state["request_slots"] = {}
         old_state["inform_slots"] = {}
-    model_w2v = word2vec.load('word2vec_corpus.bin')
     if history == None :
         history = np.zeros((1,len_history,len_sentence,dim_w2v))
 
@@ -354,7 +352,7 @@ def run_MTLU(history=None, sentence=None, old_state=None,
 
     dia_state = old_state
     dia_state["request_slots"] = {}
-    lst_constraint = ['title', 'instructor', 'schedule_str', 'classroom']
+    #lst_constraint = ['title', 'instructor', 'schedule_str', 'classroom']
     #for item in lst_constraint :
     #    dia_state[]
     temp = np.argmax(prediction[1], axis=1)
