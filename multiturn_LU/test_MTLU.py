@@ -2,7 +2,9 @@
 import model_MTLU
 from model_MTLU import *
 import pickle
-
+import sys
+sys.path.append("../")
+from DiaPol_rule.dia_pol import *
 with open('user_log.pickle', 'wb') as handle:
     pickle.dump({}, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -31,30 +33,13 @@ def understand(user_id, sentence):
     return user['state']
 
 if __name__ == '__main__':
-    uid = 123
-    s1 = '課名是MATLAB及其應用'
-    s2 = '這堂課在星期幾上課 ?'
-    s3 = '我想上星期三的課'
-    s4 = '丁亮上的課'
-    s5 = '上課時間是星期五'
-    s6 = '什麼課'
+    uid1 = 123
+    s1 = '課名是自然語言處理'
+    s2 = '這堂課在哪裡上課?'
+    s_list1 = [s1, s2]
 
-    # status1 = run_MTLU(history=None, sentence=s1, old_state=None,
-    #              model_w2v=None, len_history=len_history, len_sentence=len_sentence,
-    #              dim_w2v=dim_w2v, dim_after_rnn=dim_after_rnn, num_tag=num_tag, dim_status=dim_status)
-    status1 = understand(uid, s1)
-    print(status1)
+    for s in s_list1:
+        status = understand(uid1, s)
+        action = get_action_from_frame(status)
+        print(status, action)
 
-    # status2 = run_MTLU(history=None, sentence=s2, old_state=status1,
-    #              model_w2v=None, len_history=len_history, len_sentence=len_sentence,
-    #              dim_w2v=dim_w2v, dim_after_rnn=dim_after_rnn, num_tag=num_tag, dim_status=dim_status)
-    status2 = understand(uid, s2)
-    print(status2)
-    status3 = understand(uid, s3)
-    print(status3)
-    status4 = understand(uid, s4)
-    print(status4)
-    status5 = understand(uid, s5)
-    print(status5)
-    status6 = understand(uid, s6)
-    print(status6)
