@@ -8,11 +8,13 @@ from .demo import usim_initial, usim_request
 
 class DialogAct(forms.Form):
     action = forms.ChoiceField(choices=(('request', 'request'), ('inform', 'inform'), 
-                                        ('thanks', 'thanks'), ('taskcomplete','taskcomplete')))
+                                        ('thanks', 'thanks')))
+    """
     serial = forms.CharField( 
         max_length=20, 
         widget=forms.TextInput(attrs={'placeholder': '流水號'}),
         required=False)
+    """
     title = forms.CharField(
         max_length=20, 
         widget=forms.TextInput(attrs={'placeholder': '課程名稱'}),
@@ -38,7 +40,7 @@ def user_simulator(request):
         if DiaactForm.is_valid():
 
             slots = {
-                'serial_no':DiaactForm.cleaned_data['serial'],
+                #'serial_no':DiaactForm.cleaned_data['serial'],
                 'title':DiaactForm.cleaned_data['title'],
                 'instructor':DiaactForm.cleaned_data['instructor'],
                 'classroom':DiaactForm.cleaned_data['classroom'],
@@ -56,12 +58,6 @@ def user_simulator(request):
                     'diaact':DiaactForm.cleaned_data['action'],
                     'request_slots': {},
                     'inform_slots': slots,
-                }
-            elif DiaactForm.cleaned_data['action'] == 'taskcomplete':
-                dialogue = {
-                    'diaact': 'inform',
-                    'request_slots': {},
-                    'inform_slots': {'taskcomplete':'YA'},
                 }
             elif DiaactForm.cleaned_data['action'] == 'thanks':
                 dialogue = {
