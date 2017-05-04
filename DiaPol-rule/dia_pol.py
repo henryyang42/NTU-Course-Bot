@@ -1,6 +1,7 @@
 import django
 import sys
 import os
+import word2vec
 try:
     sys.path.append('../')
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "NTUCB.settings")
@@ -152,3 +153,33 @@ if __name__ == '__main__':
         print (NL)
 
         print ("----------\n")
+
+    ########################
+    ### interactive demo ###
+    ########################
+
+    print ("\n***** [ interactive demo ] *****")
+    import imp
+    os.chdir('../multiturn_LU')
+    modl = imp.load_source('MTLU', 'model_MTLU.py')
+    model_w2v = word2vec.load('word2vec_corpus.bin')
+    hist = []#FIXME
+    while True:
+        sent = input("user>")
+        dia_state = modl.run_MTLU(hist, sent, model_w2v = model_w2v)
+        hist.append(sent) 
+        
+        print ("\n== Dialogue State ==")
+        print (dia_state)
+
+        sys_act = get_action_from_frame(dia_state)
+
+        print ("\n== System Action ==")
+        print (sys_act)
+        NL = get_NL_from_action(sys_act)
+
+        print ("\n== Template-based NLG ==")
+        print (NL)
+
+        print ("----------\n")
+

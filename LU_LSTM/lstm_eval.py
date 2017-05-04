@@ -103,7 +103,7 @@ with codecs.open(args.test_dataset, "r", "utf-8") as f_test:
     tokens_list = []
     true_intent_list = []
     true_labels_list = []
-    n_data = len(lines) / 3
+    n_data = int(len(lines) / 3)
     for i in range(0, len(lines), 3):
         intent = lines[i].strip()
         tokens = lines[i+1].strip().split(" ")
@@ -142,15 +142,15 @@ for i in range(0, n_data):
         if l == '#':
             pred_labels[j] = 'O'
     if len(pred_labels) != len(true_labels_list[i]):
-        print len(pred_labels), len(true_labels_list[i])
+        print (len(pred_labels), len(true_labels_list[i]))
 
     pred_labels_list.append(pred_labels)
 
     # show error
     if pred_intent != true_intent_list[i]:
-        print " ".join(tokens_list[i])
-        print "Pred:", pred_intent, pred_labels
-        print "True:", true_intent_list[i], true_labels_list[i]
+        print (" ".join(tokens_list[i]))
+        print ("Pred:", pred_intent, pred_labels)
+        print ("True:", true_intent_list[i], true_labels_list[i])
     
 
 intent_stat = eval_intent(true_intent_list, pred_intent_list)
