@@ -5,6 +5,9 @@ import pickle
 import sys
 sys.path.append("../")
 from DiaPol_rule.dia_pol import *
+from user_simulator.usersim.usersim_rule import *
+from django.db.models import Q
+
 with open('user_log.pickle', 'wb') as handle:
     pickle.dump({}, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -33,25 +36,36 @@ def understand(user_id, sentence):
     return user['state']
 
 if __name__ == '__main__':
+    all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2').all().values()
     uid1 = 123
     s1 = '課名是自然語言處理'
     s2 = '教室在哪'
     s_list1 = [s1, s2]
-
+    user_sim = RuleSimulator(all_courses)
+    user_sim.initialize_episode()
     for s in s_list1:
         status = understand(uid1, s)
         action = get_action_from_frame(status)
+        sem_frame, over = user_sim.next(action)
         print('Status:', status)
         print('Action:', action)
-    
+        print('sem_fram:', sem_frame, over)
     print ('=====================')
     uid1 = 456
     s1 = '課程名稱是道教文化專題研究'
     s2 = '老師是誰?'
     s_list1 = [s1, s2]
-
+    user_sim = RuleSimulator(all_courses)
+    user_sim.initialize_episode()
     for s in s_list1:
         status = understand(uid1, s)
         action = get_action_from_frame(status)
+        sem_frame, over = user_sim.next(action)
         print('Status:', status)
         print('Action:', action)
+        print('sem_fram:', sem_frame, over)
+
+    user_sim = RuleSimulator(all_courses)
+    user_action = user_sim.initialize_episode()
+    print('User_action:', user_action)
+

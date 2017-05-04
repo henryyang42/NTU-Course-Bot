@@ -9,7 +9,7 @@ class RuleSimulator():
     def __init__(self, start_set=None):
         """ Constructor shared by all user simulators """
         self.act_set = ['inform', 'request', 'thanks']
-        self.slot_set = ['title', 'instructor', 'classroom', 'schedule_str']
+        self.slot_set = ['serial_no','title', 'instructor', 'classroom', 'schedule_str']
         self.max_turn = 50
         self.start_set = start_set
     
