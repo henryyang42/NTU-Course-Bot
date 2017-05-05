@@ -1,5 +1,0 @@
-title
-instructor
-classroom
-schedule_str
-serial_no
