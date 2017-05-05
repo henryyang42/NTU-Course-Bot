@@ -112,8 +112,11 @@ class RuleSimulator():
     def response_thanks(self, system_action):
         """ Response for Thanks (System Action) """
 
-        self.state['inform_slots'].clear()
-        self.state['request_slots'].clear()
+        
+        if self.state['inform_slots'] or self.state['request_slots']:
+            self.state['diaact'] = 'deny'
+        else:
+            self.state['diaact'] = 'thanks'
 
         self.episode_over = True
 
@@ -141,12 +144,27 @@ class RuleSimulator():
         """ Response for Inform (System Action) """
 
         self.state['diaact'] = 'thanks'
-        self.state['inform_slots'].clear()
-        self.state['request_slots'].clear()
         self.episode_over = True
 
+        # System inform slots must match all slots
         for key in system_action['inform_slots'].keys():
             if self.ans['inform_slots'][key] != system_action['inform_slots'][key]:
                 self.state['diaact'] = 'deny'
+        # System must inform request slot
+        for key in self.goal['request_slots'].keys():
+            if key in system_action['inform_slots'].keys():
+                pass
+            else:
+                self.state['diaact'] = 'deny'
+
+        # System give serial no. 
+        if 'serial_no' in system_action['inform_slots'].keys():
+            if self.ans['inform_slots']['serial_no'] == system_action['inform_slots']['serial_no']:
+                self.state['diaact'] = 'thanks'
+            else:
+                self.state['diaact'] = 'deny'
+
+        self.state['inform_slots'].clear()
+        self.state['request_slots'].clear()
                 
 

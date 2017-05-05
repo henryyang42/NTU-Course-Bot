@@ -10,8 +10,9 @@ class DialogManager:
         self.kbhelper = KBHelper()
         self.user_action = None
         self.reward = 0
+        self.episode_times = 0
+        self.episode_correct = 0
         self.episode_over = False
-        self.history_slots = {}
         self.query_slot = 'title'
 
         # possible answer set
@@ -19,9 +20,9 @@ class DialogManager:
 
     def initialize_episode(self):
         """ Refresh state for new dialog """
-        
-        self.reward = 0
+        self.history_slots = {}
         self.episode_over = False
+        self.episode_times = self.episode_times + 1
         self.user_action = self.user.initialize_episode()
 
         for key in self.user_action['inform_slots'].keys():
@@ -36,20 +37,15 @@ class DialogManager:
         """ This function initiates each subsequent exchange between agent and user (agent first) """
 
         self.user_action, self.episode_over  = self.user.next(self.sys_action)
+        if self.episode_over and self.user_action['diaact']=='thanks':
+            self.episode_correct = self.episode_correct +1
         
         for key in self.user_action['inform_slots'].keys():
             self.history_slots[key] = self.user_action['inform_slots'][key]
 
         self.possible_answer = self.kbhelper.query(self.history_slots, self.query_slot)
-        self.reward = self.reward_function()
 
-        return (self.episode_over, self.reward)
-    
-
-    def reward_function(self):
-        """ Reward Function 1: a reward function based on the dialog_status """
-        reward = 1
-        return reward
+        return self.episode_over
     
     
     def print_function(self, agent_action=None, user_action=None):

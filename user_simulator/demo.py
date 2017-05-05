@@ -30,7 +30,7 @@ def usim_initial():
     user_action = dialog_manager.initialize_episode()
 
     # Dump system status
-    pickle.dump(dialog_manager, open('user_simulator/log/dm.p', 'wb'))
+    pickle.dump(dialog_manager, open('user_simulator/dm.p', 'wb'))
 
     # Suggest Possible Answers
     possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
@@ -44,19 +44,22 @@ def usim_initial():
 def usim_request(request):
 
     # Load system status
-    dialog_manager = pickle.load(open('user_simulator/log/dm.p', 'rb'))
+    dialog_manager = pickle.load(open('user_simulator/dm.p', 'rb'))
 
     # Remove blank slots
     request['request_slots'] = {k:v for k, v in request['request_slots'].items() if v}
 
-    #
-    dialog_manager.sys_action = request
-    episode_over, reward = dialog_manager.next_turn()
-    agent_action = dialog_manager.sys_action
-    user_action = dialog_manager.user_action
+    if request['diaact'] == 'closing':
+        agent_action = request
+        user_action = dialog_manager.initialize_episode()
+        episode_over = True
 
-    # Dump system status
-    pickle.dump(dialog_manager, open('user_simulator/log/dm.p', 'wb'))
+    else:
+        #
+        dialog_manager.sys_action = request
+        episode_over = dialog_manager.next_turn()
+        agent_action = dialog_manager.sys_action
+        user_action = dialog_manager.user_action
 
     # Suggest Possible Answers
     possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
@@ -70,12 +73,29 @@ def usim_request(request):
         [ "USR Turn "+str(turn), user_action['diaact'], sem2nl(user_action)],
     ]
 
-    if user_action['diaact'] == 'deny':
-        response.append(["Reward:", -100-turn])
-    elif user_action['diaact'] == 'thanks':
-        response.append(["Reward:", 100-turn])
-    else:
-        pass
+    if episode_over :
+        if user_action['diaact'] == 'deny':
+            response.append(["Reward:", -100-turn])
+            dialog_manager.reward = dialog_manager.reward - 100 - turn
+        elif user_action['diaact'] == 'thanks':
+            response.append(["Reward:", 100-turn])
+            dialog_manager.reward = dialog_manager.reward + 100 - turn
+        else:
+            pass
+
+        response.append(
+            ["Total episodes: " + str(dialog_manager.episode_times-1), 
+             "Correct times: "+str(dialog_manager.episode_correct),
+             "Accumulate reward: " + str(dialog_manager.reward),
+            ]
+        )
+        user_action = dialog_manager.initialize_episode()
+        response.append([ "New Turn!"])
+        response.append([ "USR Turn "+str(user_action['turn']), user_action['diaact'], sem2nl(user_action)])
+
+    # Dump system status
+    pickle.dump(dialog_manager, open('user_simulator/dm.p', 'wb'))
+
     return json.dumps(response)
 
 

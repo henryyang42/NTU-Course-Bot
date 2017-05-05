@@ -13,7 +13,7 @@ class DialogAct(forms.Form):
             ('request', 'request'),
             ('inform', 'inform'),
             ('thanks', 'thanks'),
-            ('reset', 'reset')
+            ('closing', 'closing')
         )
     )
     """
@@ -71,8 +71,12 @@ def user_simulator(request):
                     'request_slots': {},
                     'inform_slots': {},
                 }
-            elif DiaactForm.cleaned_data['action'] == 'reset':
-                pass
+            elif DiaactForm.cleaned_data['action'] == 'closing':
+                dialogue = {
+                    'diaact': 'closing',
+                    'request_slots': {},
+                    'inform_slots': {},
+                }
             else:
                 pass
 
@@ -80,6 +84,7 @@ def user_simulator(request):
                 k: v for k, v in dialogue['request_slots'].items() if v}
             dialogue['inform_slots'] = {
                 k: v for k, v in dialogue['inform_slots'].items() if v}
+
 
             response = JsonResponse(usim_request(dialogue), safe=False)
 
