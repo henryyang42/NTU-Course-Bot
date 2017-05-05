@@ -280,13 +280,13 @@
     const utter = new SpeechSynthesisUtterance(utterance);
     // the list of all available voices
     const voices = synthesis.getVoices();
-  
+
     for(i = 0; i < voices.length; ++i) {
       if(voices[i].name === "Google 國語（臺灣）") {
         utter.voice = voices[i];
       }
     }
-  
+
     utter.rate = 1;
     utter.pitch = 1;
     synthesis.speak(utter);
@@ -303,7 +303,7 @@
       console.log(input);
       add_message(client_tpl.format(input, now()));
 
-      $.post("/", { input: input, csrfmiddlewaretoken: '{{ csrf_token }}' },
+      $.post("", { input: input, csrfmiddlewaretoken: '{{ csrf_token }}' },
         function (data) {
           console.log(data)
           add_message(server_tpl.format(
