@@ -2,7 +2,7 @@
 
 {% block content %}
   <h1>User simulator</h1>
-  <form action="" method="post">
+  <form id="myForm" action="" method="post">
     {% csrf_token %}
     <tr>
     {% for field in diaactform %}

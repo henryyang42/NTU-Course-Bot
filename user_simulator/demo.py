@@ -51,8 +51,12 @@ def usim_request(request):
 
     if request['diaact'] == 'closing':
         agent_action = request
-        user_action = dialog_manager.initialize_episode()
+        user_action = {'diaact':'closing'}
         episode_over = True
+
+        response = [
+            [ "SYS Turn "+ str(dialog_manager.user.state['turn']+1), agent_action['diaact'], agent2nl(agent_action)],
+        ]
 
     else:
         #
@@ -61,17 +65,17 @@ def usim_request(request):
         agent_action = dialog_manager.sys_action
         user_action = dialog_manager.user_action
 
-    # Suggest Possible Answers
-    possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
-    possible_num = dialog_manager.possible_answer['count']
+        # Suggest Possible Answers
+        possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
+        possible_num = dialog_manager.possible_answer['count']
 
-    turn = user_action['turn']
+        turn = user_action['turn']
 
-    response = [
-        [ "SYS Turn "+ str(turn-1), agent_action['diaact'], agent2nl(agent_action)],
-        [ "Possible values:", possible_num, possible_answer],
-        [ "USR Turn "+str(turn), user_action['diaact'], sem2nl(user_action)],
-    ]
+        response = [
+            [ "SYS Turn "+ str(turn-1), agent_action['diaact'], agent2nl(agent_action)],
+            [ "Possible values:", possible_num, possible_answer],
+            [ "USR Turn "+str(turn), user_action['diaact'], sem2nl(user_action)],
+        ]
 
     if episode_over :
         if user_action['diaact'] == 'deny':
@@ -84,7 +88,7 @@ def usim_request(request):
             pass
 
         response.append(
-            ["Total episodes: " + str(dialog_manager.episode_times-1), 
+            ["Total episodes: " + str(dialog_manager.episode_times), 
              "Correct times: "+str(dialog_manager.episode_correct),
              "Accumulate reward: " + str(dialog_manager.reward),
             ]
