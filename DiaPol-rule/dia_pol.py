@@ -166,7 +166,8 @@ if __name__ == '__main__':
     hist = []#FIXME
     while True:
         sent = input("user>")
-        dia_state = modl.run_MTLU(hist, sent, model_w2v = model_w2v)
+        #dia_state = modl.run_MTLU(hist, sent, model_w2v=model_w2v, dim_w2v=modl.dim_w2v)
+        dia_state = modl.run_MTLU(hist, sent, model_w2v=model_w2v, dim_w2v=100)
         hist.append(sent) 
         
         print ("\n== Dialogue State ==")
