@@ -1,7 +1,6 @@
 from .kb_helper import KBHelper
 
 
-
 class DialogManager:
     """ A dialog manager to mediate the interaction between an agent and a customer """
     
@@ -28,6 +27,7 @@ class DialogManager:
         for key in self.user_action['inform_slots'].keys():
             self.history_slots[key] = self.user_action['inform_slots'][key]
 
+        self.query_slot = list(self.user.goal['request_slots'].keys())[0]
         self.possible_answer = self.kbhelper.query(self.history_slots, self.query_slot)
 
         return self.user_action
@@ -36,9 +36,6 @@ class DialogManager:
         """ This function initiates each subsequent exchange between agent and user (agent first) """
 
         self.user_action, self.episode_over  = self.user.next(self.sys_action)
-
-        for key in self.user_action['request_slots'].keys():
-            self.query_slot = key
         
         for key in self.user_action['inform_slots'].keys():
             self.history_slots[key] = self.user_action['inform_slots'][key]
@@ -47,10 +44,8 @@ class DialogManager:
         self.reward = self.reward_function()
 
         return (self.episode_over, self.reward)
-
-
-
     
+
     def reward_function(self):
         """ Reward Function 1: a reward function based on the dialog_status """
         reward = 1

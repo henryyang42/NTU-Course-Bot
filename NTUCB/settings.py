@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'user_simulator.apps.UserSimulatorConfig',
     'multi_turn.apps.MultiTurnConfig',
     'single_turn.apps.SingleTurnConfig',
     'crawler.apps.CrawlerConfig',

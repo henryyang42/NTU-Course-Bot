@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <head>
   <meta charset="utf-8">
   <title>{% block title %}User simulator{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600,200' rel='stylesheet' type='text/css'>
   {% load staticfiles %}
-  <link rel="stylesheet" href="{% static 'user_simulator/normalize.css' %}">
-  <link rel="stylesheet" href="{% static 'user_simulator/skeleton.css' %}">
-  <link rel="stylesheet" href="{% static 'user_simulator/chat.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
+<style>
+body {
+  padding-top: 4em;
+}
+p.deck {
+  font-size: 2.5rem;
+  font-weight: 200;
+}
+p.deck a {
+  text-decoration: none;
+}
+.quiet {
+  font-size: 90%;
+  color: #999;
+}
+	
+</style>
 <body>
   <div class="section">
     <div class="container">
@@ -19,4 +35,25 @@
   </div>  
   {% block afterbody %}{% endblock afterbody %}
 </body>
+<script type="text/javascript">
+  $(function() {
+    $("form").on("submit", function(event) {
+      var chat = $("#chat");
+      var ele;
+
+      event.preventDefault();
+      $.post("", $(this).serialize(), function (data) {
+	var obj = JSON.parse(data);
+
+	for (var i=0; i<obj.length; i++){
+          ele = $('<tr></tr>');
+	  for (var j=0; j<obj[i].length; j++){
+            ele.append($("<td></td>").text(obj[i][j]));
+	  }
+	  chat.prepend(ele);
+	}
+      });
+    });
+  });
+</script>
 </html>

@@ -38,7 +38,6 @@ def user_simulator(request):
     if request.method == 'POST':
         DiaactForm = DialogAct(request.POST)
         if DiaactForm.is_valid():
-
             slots = {
                 #'serial_no':DiaactForm.cleaned_data['serial'],
                 'title':DiaactForm.cleaned_data['title'],
@@ -65,12 +64,14 @@ def user_simulator(request):
                     'request_slots': {},
                     'inform_slots': {},
                 }
+            else:
+                pass
 
 
             dialogue['request_slots'] = {k:v for k, v in dialogue['request_slots'].items() if v}
             dialogue['inform_slots'] = {k:v for k, v in dialogue['inform_slots'].items() if v}
             
-            response = JsonResponse(usim_request(dialogue))
+            response = JsonResponse(usim_request(dialogue), safe=False)
 
             return response
 

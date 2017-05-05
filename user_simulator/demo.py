@@ -17,42 +17,65 @@ from django.db.models import Q
 from django.template import Context, Template
 from crawler.models import *
 
-
+from .nlg import sem2nl, agent2nl
 
 def usim_initial():
 
+    # Initialize Course set
     all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2').all().values()[:100]
 
+    # Initialize simulator
     user_sim = RuleSimulator(all_courses)
     dialog_manager = DialogManager(None, user_sim)
     user_action = dialog_manager.initialize_episode()
 
+    # Dump system status
     pickle.dump(dialog_manager, open('user_simulator/log/dm.p', 'wb'))
 
+    # Suggest Possible Answers
     possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
     possible_num = dialog_manager.possible_answer['count']
+
+    # Add Natural language
+    user_action['nl'] = sem2nl(user_action)
 
     return user_sim.goal, user_action, possible_num, possible_answer
 
 def usim_request(request):
 
-    # Log  QQ
+    # Load system status
     dialog_manager = pickle.load(open('user_simulator/log/dm.p', 'rb'))
 
+    # Remove blank slots
     request['request_slots'] = {k:v for k, v in request['request_slots'].items() if v}
 
+    #  
     dialog_manager.sys_action = request
     episode_over, reward = dialog_manager.next_turn()
     agent_action = dialog_manager.sys_action
     user_action = dialog_manager.user_action
 
+    # Dump system status
     pickle.dump(dialog_manager, open('user_simulator/log/dm.p', 'wb'))
 
+    # Suggest Possible Answers
     possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
     possible_num = dialog_manager.possible_answer['count']
 
-    response = {'agent': agent_action, 'user': user_action, 'num': possible_num, 'suggest': possible_answer}
+    turn = user_action['turn']
 
-    return response
+    response = [ 
+        [ "SYS Turn "+ str(turn-1), agent_action['diaact'], agent2nl(agent_action)],
+        [ "Possible values:", possible_num, possible_answer],
+        [ "USR Turn "+str(turn), user_action['diaact'], sem2nl(user_action)],
+    ]
+
+    if user_action['diaact'] == 'deny':
+        response.append(["Reward:", -100-turn])
+    elif user_action['diaact'] == 'thanks':
+        response.append(["Reward:", 100-turn])
+    else:
+        pass
+    return json.dumps(response)
 
 

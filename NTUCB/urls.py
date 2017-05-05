@@ -19,4 +19,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'', include('single_turn.urls')),
+    url(r'user_simulator/', include('user_simulator.urls')),
 ]

@@ -1,15 +1,14 @@
 {% extends "user_simulator/base.html" %}
 
 {% block content %}
-  {% load staticfiles %}
   <h1>User simulator</h1>
   <form action="" method="post">
     {% csrf_token %}
-    {% for field in diaactform %}
     <tr>
-    <th> {{ field }} </th>
+    {% for field in diaactform %}
+      <th> {{ field }} </th>
     {% endfor %}
-    <th> <input type="submit" value="Submit"/> </th>
+      <th> <input type="submit" name="Submit" value="Submit" /> </th>
     </tr>
   </form>
   <h5><b>User goal : </b></h5>
@@ -22,33 +21,27 @@
   {% for key, value in user_goal.request_slots.items %}
     ({{key}}:{{value}})
   {% endfor %}
+  <HR size="1">
+  <h5><b>Dialogue </b></h5>
   <table id="chat">
     <tbody>
       <tr>
-	<td><b>Turn</b></td>
-	<td><b>Action</b></td>
-	<td><b>Inform</b></td>
-        <td><b>Request</b></td>
-      </tr>
-      <tr>
 	<td> USR Turn 0 </td>
-	<td> Request </td>
-        <td> {{ user_action.inform_slots }} </td>
-        <td> {{ user_action.request_slots }} </td>
+	<td> {{ user_action.diaact}} </td>
+        <td> {{ user_action.nl }} </td>
       </tr>
       <tr>
-	<td></td>
 	<td><b> Possible values: <b></td>
 	<td><b>{{num}}</b></td>
 	<td>
 		{% if num > 5 %}
-		  {% for item in suggest %}
-		    {{ item }},
+		  {% for item in suggest|slice:":10" %}
+		    {{ item }}
 		  {% endfor %}
-		  ......
+		  ............
 		{% else %}
 		  {% for item in suggest %}
-		    {{ item }},
+		    {{ item }}
 		  {% endfor %}
 		{% endif %}
         </td>
@@ -57,8 +50,5 @@
   </table>
 {% endblock content %}
 
-
 {% block afterbody %}
-  <script type="text/javascript" src='{% static "user_simulator/jquery-1.12.1.min.js" %}'></script>
-  <script type="text/javascript" src='{% static "user_simulator/chat.js" %}'></script>
 {% endblock afterbody %}
