@@ -1,8 +1,6 @@
 from crawler.models import *
 import numpy as np
-from .apps import *
 from django.db.models import Q
-
 
 def expand_title(title):
     q = Q()
