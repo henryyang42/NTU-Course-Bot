@@ -1,6 +1,5 @@
 # Corpus
 dict.big.txt
-*.pickle
 word2vec_corpus.tmp
 word2vec_corpus
 word2vec_corpus_phrases
@@ -12,8 +11,8 @@ html
 __MACOSX
 request_template
 *.swp
-
-# Static
+*.p
+*.pickle
 .DS_Store
 *.zip
 *.sqlite3-journal

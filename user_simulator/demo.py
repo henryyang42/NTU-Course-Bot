@@ -17,7 +17,7 @@ from django.db.models import Q
 from django.template import Context, Template
 from crawler.models import *
 
-from .nlg import sem2nl, agent2nl
+from utils.nlg import sem2nl, agent2nl
 
 def usim_initial():
 
@@ -49,7 +49,7 @@ def usim_request(request):
     # Remove blank slots
     request['request_slots'] = {k:v for k, v in request['request_slots'].items() if v}
 
-    #  
+    #
     dialog_manager.sys_action = request
     episode_over, reward = dialog_manager.next_turn()
     agent_action = dialog_manager.sys_action
@@ -64,7 +64,7 @@ def usim_request(request):
 
     turn = user_action['turn']
 
-    response = [ 
+    response = [
         [ "SYS Turn "+ str(turn-1), agent_action['diaact'], agent2nl(agent_action)],
         [ "Possible values:", possible_num, possible_answer],
         [ "USR Turn "+str(turn), user_action['diaact'], sem2nl(user_action)],
