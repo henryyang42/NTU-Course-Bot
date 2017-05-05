@@ -1,12 +1,17 @@
 # Corpus
 dict.big.txt
 *.pickle
+word2vec_corpus.tmp
+word2vec_corpus
+word2vec_corpus_phrases
+
 # Static files
 static
 html
 *.png
 __MACOSX
 request_template
+*.swp
 
 # Static
 .DS_Store

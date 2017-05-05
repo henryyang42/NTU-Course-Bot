@@ -25,12 +25,9 @@ jieba.set_dictionary('dict.big.txt')
 random.seed(123)
 
 
-
 def BIO(sentence, context):
     inv_context = {v: k for k, v in context.items()}
-    #toks = sentence.split()
     toks = sentence.replace(' ', '')
-    #toks = sentence_replace(toks)
     toks = list(jieba.cut(toks))
     tags = ['O'] * len(toks)
     for i, tok in enumerate(toks):
@@ -38,7 +35,6 @@ def BIO(sentence, context):
         if tag in ['title', 'when', 'instructor', 'classroom']:
             tags[i] = 'B_%s' % tag
 
-    # return ' '.join(tags) + '\n'
     return tags
 
 
@@ -88,32 +84,6 @@ def generate_sentence_auto_mode(status, course):
     # print('done')
     status_for_MTLU = ' '.join([str(x) for x in status_for_MTLU.flatten()])
     return sentence_seg, bio, status, status_for_MTLU
-
-
-'''def generate_sentence_user_mode(status):
-    print('not finished')
-    sentence, bio = '', ''
-    for i, st in enumerate(status):
-        if st[4] and not st[2]:
-            print('constraint_or_not', request[i])
-            st[2] = 1
-            context = {request[i]: content[i][0]}
-            print (context)
-            sentence = constraint_tpl[i].render(Context(context))
-            print (sentence)
-            bio = BIO(sentence, context)
-            print (bio)
-            return sentence, bio, status
-    for i, st in enumerate(status):
-        if st[3] and not st[2]:
-            print('request_or_not', request[i])
-            st[2] = 1
-            sentence = request_tpl[i].render(Context({}))
-            bio = BIO(sentence, {})
-            return sentence, bio, status
-    print('done')
-    return sentence, bio, status
-'''
 
 
 def status_maker():
@@ -167,7 +137,7 @@ def trim_attr(s):
 for course in all_course:
     titles.append(trim_attr(course.title))
     classrooms.append(trim_attr(course.classroom))
-    instructors.append(trim_attr(course.instructor))
+    instructors.append(course.instructor)
     if course.instructor and course.schedule_str:
         courses.append({'title': course.title, 'instructor': course.instructor, 'when': '星期' + course.schedule_str[:1], 'classroom': course.classroom})
 
