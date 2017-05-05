@@ -29,4 +29,4 @@ class SingleTurnConfig(AppConfig):
             print('LU model loaded.')
 
         else:
-            print('[Info] Under DEBUG mode, LU is not loaded.')
+            print('[Info] Under DEBUG mode, single-turn LU is not loaded.')
