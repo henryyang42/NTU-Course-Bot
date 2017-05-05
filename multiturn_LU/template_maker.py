@@ -7,7 +7,6 @@ import pandas as pd
 import re
 
 import sys
-# sys.path.append("/Users/xogo/Desktop/NTU/2017_spring/ICB/")
 sys.path.append("../")
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "NTUCB.settings")
@@ -26,34 +25,6 @@ jieba.set_dictionary('dict.big.txt')
 random.seed(123)
 
 
-def formulate(**kwargs):
-    kwlist = list(kwargs.items())
-    len_kw = len(kwlist)
-    state = [0] * (len_kw + 1)
-
-    total = 1
-    for _, l in kwlist:
-        total *= len(l)
-
-    print ('Formulating %d sentences...' % total)
-
-    while True:
-        d = {}
-        for i, v in enumerate(state[:-1]):
-            d[kwlist[i][0]] = kwlist[i][1][v]
-        yield d
-
-        state[0] += 1
-        ind = 0
-
-        while ind < len_kw and state[ind] == len(kwlist[ind][1]):
-            state[ind] = 0
-            state[ind + 1] += 1
-            ind += 1
-
-        if len_kw == ind:
-            break
-
 
 def BIO(sentence, context):
     inv_context = {v: k for k, v in context.items()}
@@ -64,20 +35,12 @@ def BIO(sentence, context):
     tags = ['O'] * len(toks)
     for i, tok in enumerate(toks):
         tag = inv_context.get(tok, '')
-        if tag in ['title', 'when', 'instructor']:
+        if tag in ['title', 'when', 'instructor', 'classroom']:
             tags[i] = 'B_%s' % tag
 
     # return ' '.join(tags) + '\n'
     return tags
 
-
-def sentence_replace(sentence):
-    sentence = sentence.replace('(', '')
-    sentence = sentence.replace(')', '')
-    sentence = sentence.replace('（', '')
-    sentence = sentence.replace('）', '')
-    return sentence
-# def status_for_MTLU() :
 
 # status = [[ confirm_or_not, misunderstood_or_not, inform_or_not, request_or_not, constraint_or_not] * 4 ]
 # 4 for what who when where
@@ -185,48 +148,39 @@ time_query = ['什麼時候', '在幾點', '在星期幾', '在禮拜幾', '幾�
 titles = []
 instructors = []
 courses = []
+classrooms = []
 all_course = list(Course.objects.filter(semester='105-2'))
 
+
+def trim_attr(s):
+    s = re.sub(r'\（[^)]*\）', '', s)
+    s = re.sub(r'\([^)]*\)', '', s)
+    s = re.sub(r'\-[^)]*', '', s)
+    for _ in range(3):
+        if s and s[-1] in '一二三四五六上下':
+            s = s[:-1]
+    for rep in ' ()（）：:-「」《》、/+':
+        s = s.replace(rep, '')
+
+    return s
+
 for course in all_course:
-    '''
-
-    '''
-    course.title = re.sub(r'\（[^)]*\）', '', course.title)
-    course.title = re.sub(r'\([^)]*\)', '', course.title)
-    course.title = re.sub(r'\-[^)]*', '', course.title)
-    if course.title[-1] == '一' or course.title[-1] == '二' or course.title[-1] == '三' or course.title[-1] == '四' or course.title[-1] == '五' or course.title[-1] == '六' or course.title[-1] == '上' or course.title[-1] == '下':
-        course.title = course.title[:-1]
-    if course.title[-1] == '一' or course.title[-1] == '二' or course.title[-1] == '三' or course.title[-1] == '四' or course.title[-1] == '五' or course.title[-1] == '六' or course.title[-1] == '上' or course.title[-1] == '下':
-        course.title = course.title[:-1]
-    course.title = course.title.replace('(', '')
-    course.title = course.title.replace(')', '')
-    course.title = course.title.replace('（', '')
-    course.title = course.title.replace('）', '')
-    course.title = course.title.replace('：', '')
-    course.title = course.title.replace(':', '')
-    course.title = course.title.replace('-', '')
-    course.title = course.title.replace('「', '')
-    course.title = course.title.replace('」', '')
-    course.title = course.title.replace('》', '')
-    course.title = course.title.replace('《', '')
-    course.title = course.title.replace(' ', '')
-    course.title = course.title.replace('、', '')
-    course.title = course.title.replace('/', '')
-    course.title = course.title.replace('+', '')
-
-    titles.append(course.title)
-    instructors.append(course.instructor)
+    titles.append(trim_attr(course.title))
+    classrooms.append(trim_attr(course.classroom))
+    instructors.append(trim_attr(course.instructor))
     if course.instructor and course.schedule_str:
         courses.append({'title': course.title, 'instructor': course.instructor, 'when': '星期' + course.schedule_str[:1], 'classroom': course.classroom})
-# print(courses)
+
+
 titles = np.unique([x for x in titles if x and ' ' not in x])
 instructors = np.unique([x for x in instructors if x and ' ' not in x])
-
+classrooms = np.unique([x for x in classrooms if x and ' ' not in x])
 lst_dict = []
 
 lst_dict.extend(titles)
 lst_dict.extend(instructors)
 lst_dict.extend(when)
+lst_dict.extend(classrooms)
 lst_dict.extend(['星期幾', '禮拜幾'])
 with open('entity_dictionary_2_replace.txt', 'w') as f:
     f.write('\n'.join(['%s 99999' % s for s in lst_dict]))
@@ -252,28 +206,10 @@ request_tpl = [
     [Template('老師的名字'), Template('老師是誰')],
     [Template('這堂課在星期幾上課?'), Template('上課時間在什麼時候')],
     [Template('在哪裡上課'), Template('教室在哪')]]
+
 # status what who when where
 # status = [ confirm_or_not, misunderstood_or_not, inform_or_not, request_or_not, constraint_or_not]
 
-'''
-if user_mode == 0 :
-    print('auto_mode')
-    flag1 = 1
-    flag2 = 1
-    while flag1 and flag2 :
-        for i, st in enumerate(status) :
-            st[3] = random.randint(0,1)
-            if i != 0 and not st[3]:
-                st[4] = random.randint(0,1)
-                if st[4] :
-                    flag1 = 0
-            if st[3] or st[4] :
-                st[2] = random.randint(0,1)
-            status[i] = st
-        for i, st in enumerate(status) :
-            if not st[2] and (st[3] or st[4]) :
-                flag2 = 0
-'''
 
 
 #status = [[0,0,0,0,0],[0,0,0,0,1],[0,0,0,0,1],[0,0,0,1,0]]
@@ -282,7 +218,7 @@ request = ['title', 'instructor', 'when', 'classroom']
 
 
 len_history = 4
-num_sample = 25000
+num_sample = 250
 # shape = (?*4, 6)
 # ['index_sample', 'index_turn', 'sentence', 'BIO', 'status', 'status_for_MTLU']
 df_log = pd.DataFrame([], columns=['index_sample', 'index_turn',
@@ -303,15 +239,3 @@ for j in range(num_sample):
         df_log = df_log.append(df_temp, ignore_index=True)
 
 df_log.to_csv('./MTLU_template/simmulator_log.csv')
-'''
-print (df_log)
-print(status)
-s, bio, status, status_for_MTLU = generate_sentence_auto_mode(status)
-print(s, status, bio, status_for_MTLU)
-s, bio, status, status_for_MTLU = generate_sentence_auto_mode(status)
-print(s, status, bio, status_for_MTLU)
-s, bio, status, status_for_MTLU = generate_sentence_auto_mode(status)
-print(s, status, bio, status_for_MTLU)
-s, bio, status, status_for_MTLU = generate_sentence_auto_mode(status)
-print(s, status, bio, status_for_MTLU)
-'''
