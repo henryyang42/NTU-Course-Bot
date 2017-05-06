@@ -48,7 +48,7 @@ def multi_turn_lu2(user_id, sentence, reset=False):
         user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
     with open('user_log.p', 'wb') as handle:
         pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    return status, action, get_NL_from_action(action)
+    return d, status, action, get_NL_from_action(action)
 
 
 @run_once
