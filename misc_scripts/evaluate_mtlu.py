@@ -1,6 +1,6 @@
 # coding: utf-8
 import numpy as np
-from misc_scripts import access_django
+from access_django import *
 from utils.lu import multi_turn_lu2
 from utils.nlg import *
 from user_simulator.usersim.usersim_rule import *
@@ -14,6 +14,7 @@ np.random.shuffle(all_courses)
 f = open('mtlu_eval.log', 'w')
 tot_reward = 0
 correct = 0
+tot_turn = 0
 N = 100
 user_sim = RuleSimulator(all_courses)
 for i in range(N):
@@ -21,6 +22,7 @@ for i in range(N):
     user_action = user_sim.initialize_episode()
 
     for j in range(4):
+        tot_turn += 2
         user_sentence = sem2nl(user_action)
         resp = {}
         resp['sementic'], resp['status'], resp['action'], resp['resp_str'] = multi_turn_lu2(uid, user_sentence)
@@ -38,4 +40,5 @@ for i in range(N):
 
 print('Average reward: %f' % (tot_reward / N), file=f)
 print('Accuracy: %f (%d/%d)' % (correct / N, correct, N), file=f)
+print('Average Turn: %f' % (tot_turn / N))
 f.close()
