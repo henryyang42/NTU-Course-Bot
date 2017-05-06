@@ -35,6 +35,7 @@ for i in range(N):
             print('Reward: %d\n==============' % reward, file=f)
             break
 
+
 print('Average reward: %f' % (tot_reward / N), file=f)
 print('Accuracy: %f (%d/%d)' % (correct / N, correct, N), file=f)
 f.close()
