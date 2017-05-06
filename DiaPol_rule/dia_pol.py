@@ -51,7 +51,7 @@ def get_action_from_frame(dia_state):
         sys_act["diaact"] = "inform"
         inform_slots = {}
         for slot in dia_state["request_slots"]:
-            inform_slots[slot] = course[slot]
+            inform_slots[slot] = course.__dict__[slot]
         # must provide serial_no to complete the task
         inform_slots["serial_no"] = course["serial_no"]
         sys_act["inform_slots"] = inform_slots
@@ -74,7 +74,7 @@ def get_action_from_frame(dia_state):
             if slot in dia_state["inform_slots"]:
                 continue
             # max # different values --> largest diversity
-            n_values = len(set([c[slot] for c in courses]))
+            n_values = len(set([c.__dict__[slot] for c in courses]))
             print ("[INFO] slot %s, # values = %d" % (slot, n_values))
             if n_values > max_n:
                 max_n = n_values
