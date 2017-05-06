@@ -1,21 +1,23 @@
 # coding: utf-8
+import numpy as np
 from misc_scripts import access_django
 from utils.lu import multi_turn_lu2
 from utils.nlg import *
 from user_simulator.usersim.usersim_rule import *
 from django.db.models import Q
 from crawler.models import *
-import time
+
 
 all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2')[:2].all().values()
+np.random.shuffle(all_courses)
 
 f = open('mtlu_eval.log', 'w')
 tot_reward = 0
 correct = 0
 N = 100
+user_sim = RuleSimulator(all_courses)
 for i in range(N):
     uid = i
-    user_sim = RuleSimulator(all_courses)
     user_action = user_sim.initialize_episode()
 
     for j in range(4):

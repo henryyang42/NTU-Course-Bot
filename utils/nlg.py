@@ -61,6 +61,8 @@ def sem2nl(sem_in):
     """
     if sem_in['diaact'] == 'request':
         attr = next(iter(sem_in['request_slots']))
+        while attr in sem_in['inform_slots']:
+            attr = next(iter(sem_in['request_slots']))
         tpl = random.choice(request_tpl[attr])
         return tpl.render(Context(sem_in['request_slots']))
     elif sem_in['diaact'] == 'inform':
@@ -69,6 +71,7 @@ def sem2nl(sem_in):
         return tpl.render(Context(sem_in['inform_slots']))
     else:
         return '謝謝！'
+
 
 def agent2nl(sys_act):
     if sys_act["diaact"] == "closing" and len(sys_act["inform_slots"]) == 0:
