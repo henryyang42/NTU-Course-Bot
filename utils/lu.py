@@ -16,5 +16,6 @@ def multi_turn_lu(user_id, sentence):
     multi_turn_lu_setup()
     status = understand(user_id, sentence)
     action = get_action_from_frame(status)
-    return status, action, agent2nl(action)
+    #return status, action, agent2nl(action)
+    return status, action, get_NL_from_action(action)
 

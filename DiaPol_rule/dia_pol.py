@@ -9,6 +9,7 @@ try:
     from crawler.models import *
     all_courses = [{k: v for k, v in course.__dict__.items()}
                    for course in Course.objects.filter(semester='105-2')]
+    from utils.query import query_course
 except:
     # some fake courses
     all_courses = [
@@ -29,6 +30,7 @@ except:
 
 def get_action_from_frame(dia_state):
     # filter courses according to dia_state
+    '''
     courses = []
     for c in all_courses:
         exclude = False
@@ -37,6 +39,8 @@ def get_action_from_frame(dia_state):
                 exclude = True
         if not exclude:
             courses.append(c)
+    '''
+    courses = query_course(dia_state["inform_slots"])
     #############################################
     print ("[INFO] current set of courses")
     print (len(courses))
