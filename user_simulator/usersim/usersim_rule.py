@@ -144,11 +144,18 @@ class RuleSimulator():
         self.state['request_slots'].clear()
 
         for key in system_action['request_slots'].keys():
+            # System request slot is user constraints
             if key in self.goal['inform_slots'].keys():
                 self.state['inform_slots'][key] = self.goal['inform_slots'][key]
+
+            # System request slot is user want
             elif key in self.goal['request_slots'].keys():
                 self.state['diaact'] = "request"
                 self.state["request_slots"][key] = "UNK"
+
+            # Penalty.  system request the slot had been informed before.
+            if key in self.state['history_slots'].keys():
+                self.reward = self.reward - 20
 
         self.state['history_slots'].update(self.state['inform_slots'])
 

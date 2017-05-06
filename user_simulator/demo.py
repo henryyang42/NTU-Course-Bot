@@ -19,6 +19,7 @@ from crawler.models import *
 
 from utils.nlg import sem2nl, agent2nl
 
+
 def usim_initial():
 
     # Initialize Course set
@@ -33,7 +34,6 @@ def usim_initial():
 
     # Suggest Possible Answers
     request_slot = user.request_slot
-    print(request_slot)
     answer_set = query_course(user.state['history_slots']).values_list(request_slot, flat=True)
     possible_answer = {request_slot:answer_set,'count':len(answer_set)}
 
@@ -50,31 +50,20 @@ def usim_request(request):
     # Remove blank slots
     request['request_slots'] = {k:v for k, v in request['request_slots'].items() if v}
 
-    if request['diaact'] == 'closing':
-        agent_action = request
-        user_action, episode_over = user.next(request)
+    #
+    user_action, episode_over = user.next(request)
+    agent_action = request
 
-        response = [
-            [ "SYS Turn "+ str(user.state['turn']-1), agent_action['diaact'], agent2nl(agent_action)],
-        ]
+    # Suggest Possible Answers
+    request_slot = user.request_slot
+    answer_set = query_course(user.state['history_slots']).values_list(request_slot, flat=True)
+    possible_answer = {request_slot:answer_set,'count':len(answer_set)}
 
-    else:
-        #
-        user_action, episode_over = user.next(request)
-        agent_action = request
-
-        # Suggest Possible Answers
-        request_slot = user.request_slot
-        answer_set = query_course(user.state['history_slots']).values_list(request_slot, flat=True)
-        possible_answer = {request_slot:answer_set,'count':len(answer_set)}
-
-        turn = user_action['turn']
-
-        response = [
-            [ "SYS Turn "+ str(turn-1), agent_action['diaact'], agent2nl(agent_action)],
-            [ "Possible values:", possible_answer['count'], possible_answer[request_slot][0:10]],
-            [ "USR Turn "+str(turn), user_action['diaact'], sem2nl(user_action)],
-        ]
+    response = [
+        [ "SYS Turn "+ str(user.state['turn']-1), agent_action['diaact'], agent2nl(agent_action)],
+        [ "Possible values:", possible_answer['count'], possible_answer[request_slot][0:10]],
+        [ "USR Turn "+str(user.state['turn']), user_action['diaact'], sem2nl(user_action)],
+    ]
 
     # Calculate Reward
     if episode_over :
@@ -86,7 +75,7 @@ def usim_request(request):
         response.append(
             [
              "Total episodes: " + str(episode_times), 
-             "Correct times: "+str(correct_times),
+             "Correct times: " + str(correct_times),
              "Accumulate reward: " + str(acc_reward+reward),
             ]
         )
@@ -99,7 +88,7 @@ def usim_request(request):
         possible_answer = {request_slot:answer_set,'count':len(answer_set)}
 
         response.append([ "New Turn!"])
-        response.append(["----------","----------","----------------------------------------"])
+        response.append([ "----------","----------","----------------------------------------"])
         response.append([ "Possible values:", possible_answer['count'], possible_answer[request_slot][0:10]])
         response.append([ "USR Turn "+str(user_action['turn']), user_action['diaact'], sem2nl(user_action)])
 
