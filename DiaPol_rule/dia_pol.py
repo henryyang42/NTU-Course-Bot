@@ -48,27 +48,18 @@ def get_action_from_frame(dia_state):
     print (len(courses))
 
     sys_act = {}
-    if len(courses) == 1:  # find the unique course
-        course = courses[0]
-        sys_act["diaact"] = "inform"
-        inform_slots = {}
-        for slot in dia_state["request_slots"]:
-            inform_slots[slot] = course[slot]
-        # must provide serial_no to complete the task
-        inform_slots["serial_no"] = course["serial_no"]
-        sys_act["inform_slots"] = inform_slots
-        sys_act["request_slots"] = {}
-
-    elif len(courses) == 0:  # fail
+    unique_found = False
+    if len(courses) == 0:  # fail
         sys_act["diaact"] = "closing"
         sys_act["inform_slots"] = {}
-        sys_act["request_slots"] = {}
-
-    else:
+        sys_act["request_slots"] = {} 
+    elif len(courses) == 1:
+        unique_found = True
+    else: # len(courses) >= 2
         sys_act["diaact"] = "request"
         req_slot = None
         max_n = 0
-        for slot in ["title", "instructor", "classroom", "schedule_str"]:
+        for slot in ["title", "instructor", "schedule_str", "classroom"]:# ordered by priority
             # don't ask users something they are asking...
             if slot in dia_state["request_slots"]:
                 continue
@@ -81,9 +72,24 @@ def get_action_from_frame(dia_state):
             if n_values > max_n:
                 max_n = n_values
                 req_slot = slot
-        sys_act["diaact"] = "request"
-        sys_act["inform_slots"] = {}
-        sys_act["request_slots"] = {req_slot: "?"}
+        if max_n > 1:
+            sys_act["diaact"] = "request"
+            sys_act["inform_slots"] = {}
+            sys_act["request_slots"] = {req_slot: "?"}
+        else: # only a course satisfy the constraints
+            unique_found = True
+    
+    if unique_found:  # find the unique course
+        course = courses[0]
+        sys_act["diaact"] = "inform"
+        inform_slots = {}
+        for slot in dia_state["request_slots"]:
+            inform_slots[slot] = course[slot]
+        # must provide serial_no to complete the task
+        inform_slots["serial_no"] = course["serial_no"]
+        sys_act["inform_slots"] = inform_slots
+        sys_act["request_slots"] = {}
+
 
     return sys_act
 
