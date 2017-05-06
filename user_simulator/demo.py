@@ -32,7 +32,8 @@ def usim_initial():
     pickle.dump(user, open('user_simulator/dm.p', 'wb'))
 
     # Suggest Possible Answers
-    request_slot = list(user.goal['request_slots'].keys())[0]
+    request_slot = user.request_slot
+    print(request_slot)
     answer_set = query_course(user.state['history_slots']).values_list(request_slot, flat=True)
     possible_answer = {request_slot:answer_set,'count':len(answer_set)}
 
@@ -51,11 +52,10 @@ def usim_request(request):
 
     if request['diaact'] == 'closing':
         agent_action = request
-        user_action = {'diaact':'closing'}
-        episode_over = True
+        user_action, episode_over = user.next(request)
 
         response = [
-            [ "SYS Turn "+ str(user.state['turn']+1), agent_action['diaact'], agent2nl(agent_action)],
+            [ "SYS Turn "+ str(user.state['turn']-1), agent_action['diaact'], agent2nl(agent_action)],
         ]
 
     else:
@@ -64,7 +64,7 @@ def usim_request(request):
         agent_action = request
 
         # Suggest Possible Answers
-        request_slot = list(user.goal['request_slots'].keys())[0]
+        request_slot = user.request_slot
         answer_set = query_course(user.state['history_slots']).values_list(request_slot, flat=True)
         possible_answer = {request_slot:answer_set,'count':len(answer_set)}
 
@@ -94,7 +94,7 @@ def usim_request(request):
         # New episode
         user_action = user.initialize_episode()
         # Suggest Possible Answers
-        request_slot = list(user.goal['request_slots'].keys())[0]
+        request_slot = user.request_slot
         answer_set = query_course(user.state['history_slots']).values_list(request_slot, flat=True)
         possible_answer = {request_slot:answer_set,'count':len(answer_set)}
 

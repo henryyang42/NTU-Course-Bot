@@ -10,8 +10,9 @@ class RuleSimulator():
         """ Constructor shared by all user simulators """
         self.act_set = ['inform', 'request', 'thanks']
         self.slot_set = ['serial_no', 'title', 'instructor', 'classroom', 'schedule_str']
-        self.max_turn = 50
+        self.max_turn = 20
         self.start_set = start_set
+        #self.request_slot = ''
         self.reward = 0
         self.accumulated_reward = 0
         self.episodes_num = 0
@@ -38,12 +39,11 @@ class RuleSimulator():
 
         # Our Task
         # Without 'serial_no'
-        request_slot = random.choice(self.slot_set[1:])
-        self.goal['request_slots'][request_slot] = 'UNK'
-        del self.goal['inform_slots'][request_slot]
+        self.request_slot = random.choice(self.slot_set[1:])
+        self.goal['request_slots'][self.request_slot] = 'UNK'
+        del self.goal['inform_slots'][self.request_slot]
 
         user_action = self._sample_action()
-
 
         return user_action  
         
@@ -57,6 +57,7 @@ class RuleSimulator():
         if action == 'inform':
             slot = random.choice(list(self.goal['inform_slots'].keys()))
             sample_action['inform_slots'][slot] = self.goal['inform_slots'][slot]
+            self.state['history_slots'].update(sample_action['inform_slots'])
         elif action == 'request':
             sample_action['request_slots'] = self.goal['request_slots']
         else:
@@ -100,8 +101,7 @@ class RuleSimulator():
             elif sys_act == "thanks":
                 self.response_thanks(system_action)
             elif sys_act == "closing":
-                self.episode_over = True
-                self.state['diaact'] = "closing"
+                self.response_closing(system_action)
             else:
                 pass
 
@@ -127,14 +127,14 @@ class RuleSimulator():
     def response_thanks(self, system_action):
         """ Response for Thanks (System Action) """
 
-        
-        if self.state['inform_slots'] or self.state['request_slots']:
-            self.state['diaact'] = 'deny'
-        else:
-            self.state['diaact'] = 'thanks'
+        self.episode_over = True
+        self.state['diaact'] = 'deny'
+
+    def response_closing(self, system_action):
+        """ Response for Thanks (System Action) """
 
         self.episode_over = True
-
+        self.state['diaact'] = 'deny'
 
     def response_request(self, system_action):
         """ Response for Request (System Action) """
@@ -149,6 +149,9 @@ class RuleSimulator():
             elif key in self.goal['request_slots'].keys():
                 self.state['diaact'] = "request"
                 self.state["request_slots"][key] = "UNK"
+
+        self.state['history_slots'].update(self.state['inform_slots'])
+
 
 
     def response_multiple_choice(self, system_action):
@@ -165,6 +168,7 @@ class RuleSimulator():
         for key in system_action['inform_slots'].keys():
             if self.ans['inform_slots'][key] != system_action['inform_slots'][key]:
                 self.state['diaact'] = 'deny'
+
         # System must inform request slot
         for key in self.goal['request_slots'].keys():
             if key in system_action['inform_slots'].keys():
@@ -181,6 +185,7 @@ class RuleSimulator():
 
         self.state['inform_slots'].clear()
         self.state['request_slots'].clear()
+
 
 
     def reward_function(self):
