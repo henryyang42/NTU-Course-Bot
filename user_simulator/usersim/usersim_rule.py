@@ -12,7 +12,7 @@ class RuleSimulator():
         self.slot_set = ['serial_no', 'title', 'instructor', 'classroom', 'schedule_str']
         self.max_turn = 20
         self.start_set = start_set
-        #self.request_slot = ''
+        self.request_slot = 'serial_no' # 
         self.reward = 0
         self.accumulated_reward = 0
         self.episodes_num = 0
@@ -22,6 +22,7 @@ class RuleSimulator():
         
         self.state = {}
         self.state['history_slots'] = {}
+        self.state['history_request_slots'] = {}
         self.state['inform_slots'] = {}
         self.state['request_slots'] = {}
         self.state['rest_slots'] = []
@@ -57,11 +58,14 @@ class RuleSimulator():
         if action == 'inform':
             slot = random.choice(list(self.goal['inform_slots'].keys()))
             sample_action['inform_slots'][slot] = self.goal['inform_slots'][slot]
-            self.state['history_slots'].update(sample_action['inform_slots'])
         elif action == 'request':
             sample_action['request_slots'] = self.goal['request_slots']
         else:
             pass
+       
+        # User inform/request slots history
+        self.state['history_slots'].update(sample_action['inform_slots'])
+        self.state['history_request_slots'].update(sample_action['request_slots'])
 
         sample_action['turn'] = self.state['turn']
         
@@ -144,6 +148,16 @@ class RuleSimulator():
         self.state['request_slots'].clear()
 
         for key in system_action['request_slots'].keys():
+
+            # Penalty.  system request the constraints had been informed before.
+            if key in self.state['history_slots'].keys():
+                self.reward = self.reward - 20
+
+            # Penalty.  system request the constraints had been informed before.
+            if key in self.state['history_request_slots'].keys():
+                self.reward = self.reward - 20
+                print(self.reward)
+
             # System request slot is user constraints
             if key in self.goal['inform_slots'].keys():
                 self.state['inform_slots'][key] = self.goal['inform_slots'][key]
@@ -153,11 +167,8 @@ class RuleSimulator():
                 self.state['diaact'] = "request"
                 self.state["request_slots"][key] = "UNK"
 
-            # Penalty.  system request the slot had been informed before.
-            if key in self.state['history_slots'].keys():
-                self.reward = self.reward - 20
-
         self.state['history_slots'].update(self.state['inform_slots'])
+        self.state['history_request_slots'].update(self.state['request_slots'])
 
 
 
