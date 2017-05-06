@@ -56,8 +56,7 @@ def generate_sentence_auto_mode(status, course):
                                         for x in status_for_MTLU.flatten()])
             #status_for_MTLU = ' '.join(status_for_MTLU.flatten().tolist())
 
-            context = {request[i]: course[request[i]], 'where': random.choice(where), 'time_query': random.choice(
-                time_query), 'course_query': random.choice(course_query), 'instructor_query': random.choice(instructor_query)}
+            context = {request[i]: course[request[i]]}
             # print (context)
             tpl = random.choice(constraint_tpl[i])
             sentence = tpl.render(Context(context))
@@ -134,12 +133,14 @@ def trim_attr(s):
 
     return s
 
+
 for course in all_course:
     titles.append(trim_attr(course.title))
     classrooms.append(trim_attr(course.classroom))
     instructors.append(course.instructor)
     if course.instructor and course.schedule_str:
-        courses.append({'title': course.title, 'instructor': course.instructor, 'when': '星期' + course.schedule_str[:1], 'classroom': course.classroom})
+        courses.append({'title': course.title, 'instructor': course.instructor,
+                        'when': '星期' + course.schedule_str[:1], 'classroom': course.classroom})
 
 
 titles = np.unique([x for x in titles if x and ' ' not in x])
@@ -166,10 +167,14 @@ user_mode = 0
 # what who when where
 # title instructor when classroom
 constraint_tpl = [
-    [Template('{{title}}'), Template('課名是{{title}}'), Template('課程名稱為{{title}}')],
-    [Template('{{instructor}}'), Template('老師是{{instructor}}'), Template('有沒有{{instructor}}老師的課'), Template('教學老師是{{instructor}}'), Template('幫我查{{instructor}}老師的課'), Template('{{instructor}}上的課'), Template('是{{instructor}}教授'), Template('{{instructor}}老師')],
-    [Template('{{when}}'), Template('上課時間是{{when}}'), Template('我想上{{when}}的課'), Template('我想選{{when}}的課'), Template('有沒有{{when}}的課')],
-    [Template('{{classroom}}'), Template('上課教室是{{classroom}}'), Template('在{{classroom}}上課'), Template('在{{classroom}}')]
+    [Template('{{title}}'), Template('課名是{{title}}'),
+     Template('課程名稱為{{title}}')],
+    [Template('{{instructor}}'), Template('老師是{{instructor}}'), Template('有沒有{{instructor}}老師的課'), Template('教學老師是{{instructor}}'), Template(
+        '幫我查{{instructor}}老師的課'), Template('{{instructor}}上的課'), Template('是{{instructor}}教授'), Template('{{instructor}}老師')],
+    [Template('{{when}}'), Template('上課時間是{{when}}'), Template(
+        '我想上{{when}}的課'), Template('我想選{{when}}的課'), Template('有沒有{{when}}的課')],
+    [Template('{{classroom}}'), Template('上課教室是{{classroom}}'),
+     Template('在{{classroom}}上課'), Template('在{{classroom}}')]
 ]
 request_tpl = [
     [Template('請列出課程名稱'), Template('什麼課')],
@@ -179,7 +184,6 @@ request_tpl = [
 
 # status what who when where
 # status = [ confirm_or_not, misunderstood_or_not, inform_or_not, request_or_not, constraint_or_not]
-
 
 
 #status = [[0,0,0,0,0],[0,0,0,0,1],[0,0,0,0,1],[0,0,0,1,0]]
@@ -193,19 +197,20 @@ num_sample = 250
 # ['index_sample', 'index_turn', 'sentence', 'BIO', 'status', 'status_for_MTLU']
 df_log = pd.DataFrame([], columns=['index_sample', 'index_turn',
                                    'sentence', 'BIO', 'status', 'status_for_MTLU'])
+log_data = []
 for j in range(num_sample):
     print(j)
     status = status_maker()
     course = random.choice(courses)
     for i in range(len_history):
-        s, bio, status, status_for_MTLU = generate_sentence_auto_mode(status, course)
+        s, bio, status, status_for_MTLU = generate_sentence_auto_mode(
+            status, course)
         str_status = ' '.join([str(x) for x in status.flatten()])
-        df_temp = pd.DataFrame({'index_sample': [j],
-                                'index_turn': [i],
-                                'sentence': [s],
-                                'BIO': [bio],
-                                'status': [str_status],
-                                'status_for_MTLU': [status_for_MTLU]})
-        df_log = df_log.append(df_temp, ignore_index=True)
+        log_data.append({'index_sample': [j],
+                         'index_turn': [i],
+                         'sentence': [s],
+                         'BIO': [bio],
+                         'status': [str_status],
+                         'status_for_MTLU': [status_for_MTLU]})
+    df_log = pd.DataFrame(log_data).to_csv('./MTLU_template/simmulator_log.csv', index=None)
 
-df_log.to_csv('./MTLU_template/simmulator_log.csv')
