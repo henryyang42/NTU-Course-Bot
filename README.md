@@ -68,3 +68,8 @@ request_template
 - Li, Xuijun, et al. "[End-to-end task-completion neural dialogue systems.](https://arxiv.org/abs/1703.01008)" arXiv preprint arXiv:1703.01008 (2017).  
 (github-repo [here](https://github.com/MiuLab/KB-InfoBot))
 (last updated: 2017/4/23)
+
+- Yun-Nung Chen, et al. "[End-to-End Memory Networks with Knowledge Carryover for Multi-Turn Spoken Language Understanding](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/IS16_ContextualSLU.pdf)
+(last updated: 2017/5/6)
+
+
