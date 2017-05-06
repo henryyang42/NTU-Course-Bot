@@ -23,11 +23,8 @@ if not os.path.exists('dict.big.txt'):
         'dict.big.txt'))
 random.seed(123)
 
-sentence_cache = {}
+
 def BIO(sentence, context):
-    cache = sentence_cache.get(sentence, [])
-    if cache:
-        return cache
     inv_context = {v: k for k, v in context.items()}
     toks = sentence.replace(' ', '')
     toks = list(jieba.cut(toks))
@@ -36,7 +33,6 @@ def BIO(sentence, context):
         tag = inv_context.get(tok, '')
         if tag in ['title', 'when', 'instructor', 'classroom']:
             tags[i] = 'B_%s' % tag
-    sentence_cache[sentence] = tags
     return tags
 
 
