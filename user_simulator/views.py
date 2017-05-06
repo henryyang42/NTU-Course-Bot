@@ -52,7 +52,20 @@ def user_simulator(request):
                 'classroom': DiaactForm.cleaned_data['classroom'],
                 'schedule_str': DiaactForm.cleaned_data['schedule'],
             }
+            action = DiaactForm.cleaned_data['action']
+            slots = {k:v for k, v in slots.items() if v}
 
+            dialogue = { 'diaact': action, 'request_slots':{}, 'inform_slots':{}}
+            if action == 'thanks':
+                pass
+            elif action == 'closing':
+                pass
+            else:
+                if len(slots) > 0:
+                    dialogue[action+'_slots'] = slots
+                else:
+                    dialogue['request_slots'] = {random.choice(['title','instructor','classroom','schedule_str']):'UNK'}
+            """
             if DiaactForm.cleaned_data['action'] == 'request':
                 dialogue = {
                     'diaact': DiaactForm.cleaned_data['action'],
@@ -79,7 +92,6 @@ def user_simulator(request):
                 }
             else:
                 pass
-
             dialogue['request_slots'] = {
                 k: v for k, v in dialogue['request_slots'].items() if v}
             dialogue['inform_slots'] = {
@@ -91,6 +103,7 @@ def user_simulator(request):
                     'request_slots': {random.choice(['title','instructor','classroom','schedule_str']):'UNK'},
                     'inform_slots': {}
                 }
+            """
 
 
             response = JsonResponse(usim_request(dialogue), safe=False)
