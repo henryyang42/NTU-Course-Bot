@@ -17,10 +17,11 @@ from keras import backend as K
 import word2vec
 
 import h5py
+script_dir = os.path.dirname(__file__)
 
-jieba.load_userdict('./entity_dictionary_2_replace.txt')
-model_w2v = word2vec.load('word2vec_corpus.bin')
-model = keras.models.load_model('./model_MTLU.h5')
+jieba.load_userdict(os.path.join(script_dir, 'entity_dictionary_2_replace.txt'))
+model_w2v = word2vec.load(os.path.join(script_dir, 'word2vec_corpus.bin'))
+model = keras.models.load_model(os.path.join(script_dir, 'model_MTLU.h5'))
 print('w2v, model loaded.')
 np.random.seed(123)  # for reproducibility
 

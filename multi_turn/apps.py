@@ -10,7 +10,7 @@ class MultiTurnConfig(AppConfig):
 
         if not settings.DEBUG:  # Only load model in production to speed up debugging.
 
-            print('LU model loaded.')
+            print('[Info] Multi-turn LU model loaded.')
 
         else:
             print('[Info] Under DEBUG mode, multi-turn LU is not loaded.')

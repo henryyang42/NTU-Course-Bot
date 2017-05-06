@@ -73,30 +73,10 @@ def sem2nl(sem_in):
         return '謝謝！'
 
 
-sys_request_tpl = {
-    'title': [
-        Template('請告訴我課程名稱'),
-        Template('有課程名稱資訊嗎?')
-    ],
-    'instructor': [
-        Template('請告訴我老師的名字'),
-        Template('請問老師是誰')
-    ],
-    'schedule_str': [
-        Template('這堂課在星期幾上課?'),
-        Template('上課時間在什麼時候')
-    ],
-    'classroom': [
-        Template('在哪裡上課'),
-        Template('請問教室在哪')
-    ]
-}
-
-
 def agent2nl(sem_in):
     if sem_in['diaact'] == 'request':
         attr = next(iter(sem_in['request_slots']))
-        tpl = random.choice(sys_request_tpl[attr])
+        tpl = random.choice(request_tpl[attr])
         return tpl.render(Context(sem_in['request_slots']))
     elif sem_in['diaact'] == 'inform':
         course = query_course(sem_in['inform_slots']).values()

@@ -3,6 +3,7 @@ import re
 import jieba
 import numpy as np
 from crawler.models import *
+from .decorator import run_once
 
 
 def trim_attr(s):
@@ -16,15 +17,6 @@ def trim_attr(s):
         s = s.replace(rep, '')
 
     return s
-
-
-def run_once(f):
-    def wrapper(*args, **kwargs):
-        if not wrapper.has_run:
-            wrapper.has_run = True
-            return f(*args, **kwargs)
-    wrapper.has_run = False
-    return wrapper
 
 
 @run_once

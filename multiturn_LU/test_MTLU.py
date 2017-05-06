@@ -1,9 +1,14 @@
 #encoding=utf-8
-import model_MTLU
-from model_MTLU import *
+try:
+    from .model_MTLU import *
+except:
+    from model_MTLU import *
+
 import pickle
 import sys
+
 sys.path.append("../")
+
 from DiaPol_rule.dia_pol import *
 from user_simulator.usersim.usersim_rule import *
 from django.db.models import Q
@@ -42,7 +47,6 @@ with open('user_log.pickle', 'wb') as handle:
     pickle.dump({}, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 def understand(user_id, sentence):
-    print('understand', sentence)
     with open('user_log.pickle', 'rb') as handle:
         user_log = pickle.load(handle)
 
@@ -62,7 +66,7 @@ def understand(user_id, sentence):
     user_log[user_id] = user
     with open('user_log.pickle', 'wb') as handle:
         pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
+    print(user)
     return user['state']
 
 if __name__ == '__main__':
@@ -100,14 +104,14 @@ if __name__ == '__main__':
     user_action = user_sim.initialize_episode()
     print('-----# Turn 1-----')
     print('User_action:', user_action)
-    
+
     user_sentence = sem2nl(user_action)
     status = understand(uid1, user_sentence)
     system_action = get_action_from_frame(status)
     print('-----# Turn 2-----')
     print('Status:', status)
     print('System Action:', system_action)
-    
+
     user_action = user_sim.next(system_action)[0]
     user_sentence = sem2nl(user_action)
     status = understand(uid1, user_sentence)
@@ -116,7 +120,7 @@ if __name__ == '__main__':
     print('Status:', status)
     print('User Action:', user_action)
     print('System Action:', system_action)
-   
+
     user_action = user_sim.next(system_action)[0]
     user_sentence = sem2nl(user_action)
     status = understand(uid1, user_sentence)
