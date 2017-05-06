@@ -41,7 +41,7 @@ def get_action_from_frame(dia_state):
             courses.append(c)
     '''
     courses = query_course(dia_state["inform_slots"])
-    courses = [{k: v for k, v in course.__dict__.items()} for c in courses] # convert to dictionary
+    courses = [{k: v for k, v in c.__dict__.items()} for c in courses] # convert to dictionary
 
     #############################################
     print ("[INFO] current set of courses")
