@@ -59,7 +59,8 @@ def get_action_from_frame(dia_state):
         sys_act["diaact"] = "request"
         req_slot = None
         max_n = 0
-        for slot in ["title", "instructor", "schedule_str", "classroom"]:# ordered by priority
+        #for slot in ["title", "instructor", "schedule_str", "classroom"]:# ordered by priority
+        for slot in ["title", "instructor", "schedule_str"]:# ordered by priority
             # don't ask users something they are asking...
             if slot in dia_state["request_slots"]:
                 continue
