@@ -10,6 +10,14 @@ def expand_title(title):
     return q
 
 
+def course_attr_blank(c):
+    return not (c.title and c.instructor and c.schedule_str and c.classroom)
+
+
+def course_equal(c1, c2):
+    return c1.title == c2.title and c1.instructor == c2.instructor and c2.schedule_str[0] == c1.schedule_str[0]
+
+
 def query_course(constraints):
     """Return list of Course objects
     """
@@ -26,5 +34,11 @@ def query_course(constraints):
     # Generate corresponding response to each intent.
     courses = Course.objects.filter(expand_title(constraints.get('title', ''))).filter(**query_term).filter(semester='105-2')
 
-    return courses
+    # Remove redundant courses (same attr but different dept.)
+    unique_courses = []
+    for c1 in courses:
+        if not course_attr_blank(c1) and not any([course_equal(c1, c2) for c2 in unique_courses]):
+            unique_courses.append(c1)
+
+    return Course.objects.filter(pk__in=[course.id for course in unique_courses])
 
