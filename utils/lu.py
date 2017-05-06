@@ -19,8 +19,8 @@ def multi_turn_lu(user_id, sentence):
     multi_turn_lu_setup()
     status = understand(user_id, sentence)
     action = get_action_from_frame(status)
-    # return status, action, agent2nl(action)
-    return status, action, get_NL_from_action(action)
+    return status, action, agent2nl(action)
+    #return status, action, get_NL_from_action(action)
 
 
 def multi_turn_lu2(user_id, sentence, reset=False):
@@ -50,7 +50,8 @@ def multi_turn_lu2(user_id, sentence, reset=False):
         user_log[user_id] = status
     with open('user_log.p', 'wb') as handle:
         pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    return d, status, action, get_NL_from_action(action)
+    return d, status, action, agent2nl(action)
+    #return d, status, action, get_NL_from_action(action)
 
 
 @run_once

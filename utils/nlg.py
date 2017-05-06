@@ -72,7 +72,43 @@ def sem2nl(sem_in):
     else:
         return '謝謝！'
 
+def agent2nl(sys_act):
+    if sys_act["diaact"] == "closing" and len(sys_act["inform_slots"]) == 0:
+        return "不好意思，沒有找到符合條件的課程。"
 
+    res_list = []
+    # reponse in a pre-defined order
+    for slot in ["serial_no", "title", "instructor", "classroom", "schedule_str"]:
+        if slot in sys_act["inform_slots"]:
+            if slot == "serial_no":
+                res_str = "流水號%s。"
+            elif slot == "title":
+                res_str = "課名是%s。"
+            elif slot == "instructor":
+                res_str = "授課教師是%s。"
+            elif slot == "classroom":
+                res_str = "在%s上課。"
+            elif slot == "schedule_str":
+                res_str = "%s上課。"
+            res_str = res_str % sys_act["inform_slots"][slot]
+            res_list.append(res_str)
+
+    # reponse in a pre-defined order
+    for slot in ["title", "instructor", "classroom", "schedule_str"]:
+        if slot in sys_act["request_slots"]:
+            if slot == "title":
+                res_str = "請問要找哪門課?"
+            elif slot == "instructor":
+                res_str = "請問是哪位老師開的?"
+            elif slot == "classroom":
+                res_str = "請問是在哪上課的?"
+            elif slot == "schedule_str":
+                res_str = "請問是哪個時間上課的?"
+            res_list.append(res_str)
+
+    return "".join(res_list)
+
+'''
 def agent2nl(sem_in):
     if sem_in['diaact'] == 'request':
         attr = next(iter(sem_in['request_slots']))
@@ -89,3 +125,4 @@ def agent2nl(sem_in):
         response = '謝謝！'
 
     return response
+'''
