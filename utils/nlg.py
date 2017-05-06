@@ -34,14 +34,12 @@ request_tpl = {
 inform_tpl = {
     'title': [
         Template('{{title}}'),
-        Template('課名是{{title}}'),
-        Template('課程名稱為{{title}}')
+        Template('是{{title}}'),
     ],
     'instructor': [
         Template('{{instructor}}'),
-        Template('教學老師是{{instructor}}'),
-        Template('教學老師是{{instructor}}'),
-        Template('{{instructor}}上的課'),
+        Template('是{{instructor}}老師'),
+        Template('是{{instructor}}上的課'),
         Template('是{{instructor}}教授')
     ],
     'schedule_str': [
