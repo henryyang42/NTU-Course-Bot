@@ -150,5 +150,15 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'multi_turn': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'multi_turn2': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
