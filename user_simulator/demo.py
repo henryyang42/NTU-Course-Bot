@@ -4,8 +4,8 @@ try:
 except ImportError:
     import pickle
 
-from .manager import DialogManager
 from .usersim.usersim_rule import RuleSimulator
+from utils.query import query_course
 
 import django
 from crawler.const import base_url
@@ -19,94 +19,82 @@ from crawler.models import *
 
 from utils.nlg import sem2nl, agent2nl
 
+
 def usim_initial():
 
     # Initialize Course set
     all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2').all().values()[:100]
 
-    # Initialize simulator
-    user_sim = RuleSimulator(all_courses)
-    dialog_manager = DialogManager(None, user_sim)
-    user_action = dialog_manager.initialize_episode()
+    # Initialize user simulator
+    user = RuleSimulator(all_courses)
+    user_action = user.initialize_episode()
 
     # Dump system status
-    pickle.dump(dialog_manager, open('user_simulator/dm.p', 'wb'))
+    pickle.dump(user, open('user_simulator/dm.p', 'wb'))
 
     # Suggest Possible Answers
-    possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
-    possible_num = dialog_manager.possible_answer['count']
+    request_slot = user.request_slot
+    answer_set = query_course(user.state['history_slots']).values_list(request_slot, flat=True)
+    possible_answer = {request_slot:answer_set,'count':len(answer_set)}
 
     # Add Natural language
     user_action['nl'] = sem2nl(user_action)
 
-    return user_sim.goal, user_action, possible_num, possible_answer
+    return user.goal, user_action, possible_answer['count'], possible_answer[request_slot]
 
 def usim_request(request):
 
     # Load system status
-    dialog_manager = pickle.load(open('user_simulator/dm.p', 'rb'))
+    user = pickle.load(open('user_simulator/dm.p', 'rb'))
 
     # Remove blank slots
     request['request_slots'] = {k:v for k, v in request['request_slots'].items() if v}
 
-    if request['diaact'] == 'closing':
-        agent_action = request
-        user_action = {'diaact':'closing'}
-        episode_over = True
+    #
+    user_action, episode_over = user.next(request)
+    agent_action = request
 
-        response = [
-            [ "SYS Turn "+ str(dialog_manager.user.state['turn']+1), agent_action['diaact'], agent2nl(agent_action)],
-        ]
+    # Suggest Possible Answers
+    request_slot = user.request_slot
+    answer_set = query_course(user.state['history_slots']).values_list(request_slot, flat=True)
+    possible_answer = {request_slot:answer_set,'count':len(answer_set)}
 
-    else:
-        #
-        dialog_manager.sys_action = request
-        episode_over = dialog_manager.next_turn()
-        agent_action = dialog_manager.sys_action
-        user_action = dialog_manager.user_action
-
-        # Suggest Possible Answers
-        possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
-        possible_num = dialog_manager.possible_answer['count']
-
-        turn = user_action['turn']
-
-        response = [
-            [ "SYS Turn "+ str(turn-1), agent_action['diaact'], agent2nl(agent_action)],
-            [ "Possible values:", possible_num, possible_answer[0:10]],
-            [ "USR Turn "+str(turn), user_action['diaact'], sem2nl(user_action)],
-        ]
+    response = [
+        [ "SYS Turn "+ str(user.state['turn']-1), agent_action['diaact'], agent2nl(agent_action)],
+        [ "Possible values:", possible_answer['count'], possible_answer[request_slot][0:10]],
+        [ "USR Turn "+str(user.state['turn']), user_action['diaact'], sem2nl(user_action)],
+    ]
 
     # Calculate Reward
     if episode_over :
-        if user_action['diaact'] == 'deny':
-            response.append(["Reward:", -100-turn])
-            dialog_manager.reward = dialog_manager.reward - 100 - turn
-        elif user_action['diaact'] == 'thanks':
-            response.append(["Reward:", 100-turn])
-            dialog_manager.reward = dialog_manager.reward + 100 - turn
-        else:
-            pass
 
+        reward, acc_reward = user.episodes_reward()
+        episode_times, correct_times = user.episodes_times()
+
+        response.append(["Reward:", reward])
         response.append(
             [
-             "Total episodes: " + str(dialog_manager.episode_times), 
-             "Correct times: "+str(dialog_manager.episode_correct),
-             "Accumulate reward: " + str(dialog_manager.reward),
+             "Total episodes: " + str(episode_times), 
+             "Correct times: " + str(correct_times),
+             "Accumulate reward: " + str(acc_reward+reward),
             ]
         )
 
         # New episode
-        user_action = dialog_manager.initialize_episode()
-        possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
-        possible_num = dialog_manager.possible_answer['count']
+        user_action = user.initialize_episode()
+        # Suggest Possible Answers
+        request_slot = user.request_slot
+        answer_set = query_course(user.state['history_slots']).values_list(request_slot, flat=True)
+        possible_answer = {request_slot:answer_set,'count':len(answer_set)}
+
         response.append([ "New Turn!"])
-        response.append([ "Possible values:", possible_num, possible_answer[0:10]])
+        response.append([ "----------","----------","----------------------------------------"])
+        response.append([ "Possible values:", possible_answer['count'], possible_answer[request_slot][0:10]])
         response.append([ "USR Turn "+str(user_action['turn']), user_action['diaact'], sem2nl(user_action)])
 
 
     # Dump system status
-    pickle.dump(dialog_manager, open('user_simulator/dm.p', 'wb'))
+    pickle.dump(user, open('user_simulator/dm.p', 'wb'))
 
     return json.dumps(response)
 

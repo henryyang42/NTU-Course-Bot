@@ -14,15 +14,15 @@ time_query = ['什麼時候', '在幾點', '在星期幾', '在禮拜幾', '幾�
 # Templates
 request_tpl = {
     'title': [
-        Template('請列出課程名稱'),
-        Template('什麼課')
+        Template('有開哪些課'),
+        Template('有哪些課')
     ],
     'instructor': [
-        Template('老師的名字'),
-        Template('老師是誰')
+        Template('老師是誰'),
+        Template('老師是哪位')
     ],
     'schedule_str': [
-        Template('這堂課在星期幾上課?'),
+        Template('什麼時候的課'),
         Template('上課時間在什麼時候')
     ],
     'classroom': [
@@ -34,20 +34,18 @@ request_tpl = {
 inform_tpl = {
     'title': [
         Template('{{title}}'),
-        Template('課名是{{title}}'),
-        Template('課程名稱為{{title}}')
+        Template('是{{title}}'),
     ],
     'instructor': [
         Template('{{instructor}}'),
-        Template('教學老師是{{instructor}}'),
-        Template('教學老師是{{instructor}}'),
-        Template('{{instructor}}上的課'),
+        Template('是{{instructor}}老師'),
+        Template('是{{instructor}}上的課'),
         Template('是{{instructor}}教授')
     ],
     'schedule_str': [
         Template('{{schedule_str}}'),
-        Template('上課時間是{{schedule_str}}'),
-        Template('我想上{{schedule_str}}的課')
+        Template('{{schedule_str}}開的課'),
+        Template('{{schedule_str}}的課')
     ],
     'classroom': [
         Template('{{classroom}}'),
@@ -61,6 +59,11 @@ inform_tpl = {
 def sem2nl(sem_in):
     """Convert sementic to NL using template based NLG.
     """
+    if 'schedule_str' in sem_in['request_slots']:
+        sem_in['request_slots']['schedule_str'] = sem_in['request_slots']['schedule_str'][1]
+    if 'schedule_str' in sem_in['inform_slots']:
+        sem_in['inform_slots']['schedule_str'] = sem_in['inform_slots']['schedule_str'][1]
+
     if sem_in['diaact'] == 'request':
         attr = next(iter(sem_in['request_slots']))
         tpl = random.choice(request_tpl[attr])
@@ -73,6 +76,43 @@ def sem2nl(sem_in):
         return '謝謝！'
 
 
+def agent2nl(sys_act):
+    if sys_act["diaact"] == "closing" and len(sys_act["inform_slots"]) == 0:
+        return "不好意思，沒有找到符合條件的課程。"
+
+    res_list = []
+    # reponse in a pre-defined order
+    for slot in ["serial_no", "title", "instructor", "classroom", "schedule_str"]:
+        if slot in sys_act["inform_slots"]:
+            if slot == "serial_no":
+                res_str = "流水號%s。"
+            elif slot == "title":
+                res_str = "課名是%s。"
+            elif slot == "instructor":
+                res_str = "授課教師是%s。"
+            elif slot == "classroom":
+                res_str = "在%s上課。"
+            elif slot == "schedule_str":
+                res_str = "%s上課。"
+            res_str = res_str % sys_act["inform_slots"][slot]
+            res_list.append(res_str)
+
+    # reponse in a pre-defined order
+    for slot in ["title", "instructor", "classroom", "schedule_str"]:
+        if slot in sys_act["request_slots"]:
+            if slot == "title":
+                res_str = "請問要找哪門課?"
+            elif slot == "instructor":
+                res_str = "請問是哪位老師開的?"
+            elif slot == "classroom":
+                res_str = "請問是在哪上課的?"
+            elif slot == "schedule_str":
+                res_str = "請問是哪個時間上課的?"
+            res_list.append(res_str)
+
+    return "".join(res_list)
+
+'''
 def agent2nl(sem_in):
     if sem_in['diaact'] == 'request':
         attr = next(iter(sem_in['request_slots']))
@@ -89,3 +129,4 @@ def agent2nl(sem_in):
         response = '謝謝！'
 
     return response
+'''

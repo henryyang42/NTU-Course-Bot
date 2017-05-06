@@ -41,7 +41,7 @@ def get_action_from_frame(dia_state):
             courses.append(c)
     '''
     courses = query_course(dia_state["inform_slots"])
-    courses = [{k: v for k, v in c.__dict__.items()} for c in courses] # convert to dictionary
+    courses = [{k: v for k, v in c.__dict__.items()} for c in courses]  # convert to dictionary
 
     #############################################
     print ("[INFO] current set of courses")
@@ -52,14 +52,15 @@ def get_action_from_frame(dia_state):
     if len(courses) == 0:  # fail
         sys_act["diaact"] = "closing"
         sys_act["inform_slots"] = {}
-        sys_act["request_slots"] = {} 
+        sys_act["request_slots"] = {}
     elif len(courses) == 1:
         unique_found = True
     else: # len(courses) >= 2
         sys_act["diaact"] = "request"
         req_slot = None
         max_n = 0
-        for slot in ["title", "instructor", "schedule_str", "classroom"]:# ordered by priority
+        #for slot in ["title", "instructor", "schedule_str", "classroom"]:# ordered by priority
+        for slot in ["title", "instructor", "schedule_str"]:# ordered by priority
             # don't ask users something they are asking...
             if slot in dia_state["request_slots"]:
                 continue
@@ -78,7 +79,7 @@ def get_action_from_frame(dia_state):
             sys_act["request_slots"] = {req_slot: "?"}
         else: # only a course satisfy the constraints
             unique_found = True
-    
+
     if unique_found:  # find the unique course
         course = courses[0]
         sys_act["diaact"] = "inform"
@@ -94,7 +95,7 @@ def get_action_from_frame(dia_state):
     return sys_act
 
 
-def get_NL_from_action(sys_act):
+def get_NL_from_action(sys_act): #DEPRECATED!! use utils/nlg.py:agent2nl()
     if sys_act["diaact"] == "closing" and len(sys_act["inform_slots"]) == 0:
         return "不好意思，沒有找到符合條件的課程。"
 
@@ -128,7 +129,7 @@ def get_NL_from_action(sys_act):
                 res_str = "請問是哪個時間上課的?"
             res_list.append(res_str)
 
-    return "".join(res_list)  # TODO
+    return "".join(res_list)
 
 
 if __name__ == '__main__':
@@ -180,8 +181,8 @@ if __name__ == '__main__':
         sent = input("user>")
         #dia_state = modl.run_MTLU(hist, sent, model_w2v=model_w2v, dim_w2v=modl.dim_w2v)
         dia_state = modl.run_MTLU(hist, sent, model_w2v=model_w2v, dim_w2v=100)
-        hist.append(sent) 
-        
+        hist.append(sent)
+
         print ("\n== Dialogue State ==")
         print (dia_state)
 
