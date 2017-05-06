@@ -14,15 +14,15 @@ time_query = ['什麼時候', '在幾點', '在星期幾', '在禮拜幾', '幾�
 # Templates
 request_tpl = {
     'title': [
-        Template('請列出課程名稱'),
-        Template('什麼課')
+        Template('有開哪些課'),
+        Template('有哪些課')
     ],
     'instructor': [
-        Template('老師的名字'),
-        Template('老師是誰')
+        Template('老師是誰'),
+        Template('老師是哪位')
     ],
     'schedule_str': [
-        Template('這堂課在星期幾上課?'),
+        Template('什麼時候的課'),
         Template('上課時間在什麼時候')
     ],
     'classroom': [
