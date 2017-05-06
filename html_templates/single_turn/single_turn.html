@@ -293,7 +293,7 @@
   }
   // initial
   add_message(server_tpl.format('歡迎來到NTUCB！我能幫您做什麼？', now()));
-
+  speak('歡迎來到NTUCB！我能幫您做什麼？');
   // angularjs thing
   var app = angular.module('chat', []);
   app.controller('chatController', function ($scope) {
