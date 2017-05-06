@@ -1,6 +1,5 @@
 from crawler.models import *
 import numpy as np
-from .apps import *
 from django.db.models import Q
 
 
@@ -62,16 +61,3 @@ def query_course(goal, slot):
         resp_str = '<b>%s</b>的上課時段在<b>星期%s節</b>。' % (courses[0].title, courses[0].schedule_str)
 
     return resp_list, resp_str
-
-
-def understand(input):
-    tokens = [tok for tok in jieba.cut(input)]
-    intent, tokens, labels = get_intent_slot(lu_model, tokens, word2idx, idx2label, idx2intent)
-
-    print (tokens, labels, intent)
-    d = {'tokens': tokens, 'labels': labels, 'intent': intent, 'slot': {}}
-    for label, token in zip(labels, tokens):
-        if label != 'O':
-            d['slot'][label[2:]] = token
-
-    return d

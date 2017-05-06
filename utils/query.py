@@ -2,6 +2,7 @@ from crawler.models import *
 import numpy as np
 from django.db.models import Q
 
+
 def expand_title(title):
     q = Q()
     for c in title:
@@ -12,7 +13,6 @@ def expand_title(title):
 def query_course(constraints):
     """Return list of Course objects
     """
-
     # Transform slot to query terms.
     query_term = {}
     for k, v in constraints.items():
