@@ -34,6 +34,9 @@ def multi_turn_lu2(user_id, sentence, reset=False):
         return
     status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
     d = single_turn_lu(sentence)
+    if 'when' in d['slot']:
+        d['slot']['schedule_str'] = d['slot']['when'][-1]
+        d['slot'].pop('when')
     if not status['request_slots']:
         status['request_slots']['schedule_str' if d['intent'] == 'schedule' else d['intent']] = '?'
     for k, v in d['slot'].items():
