@@ -13,6 +13,9 @@ class RuleSimulator():
         self.max_turn = 50
         self.start_set = start_set
         self.reward = 0
+        self.accumulated_reward = 0
+        self.episodes_num = 0
+        self.correct_num = 0
     
     def initialize_episode(self):
         
@@ -23,6 +26,8 @@ class RuleSimulator():
         self.state['rest_slots'] = []
         self.state['turn'] = 0
         
+        self.accumulated_reward = self.accumulated_reward + self.reward
+        self.episodes_num = self.episodes_num + 1        
         self.reward = 0
         self.episode_over = False
         
@@ -96,12 +101,13 @@ class RuleSimulator():
                 self.response_thanks(system_action)
             elif sys_act == "closing":
                 self.episode_over = True
-                self.state['diaact'] = "GG"
+                self.state['diaact'] = "closing"
             else:
                 pass
 
         if self.state['diaact'] == 'thanks':
             self.reward = self.reward + 100
+            self.correct_num = self.correct_num + 1
         elif self.state['diaact'] == 'deny':
             self.reward = self.reward - 100
 
@@ -176,7 +182,12 @@ class RuleSimulator():
         self.state['inform_slots'].clear()
         self.state['request_slots'].clear()
 
+
     def reward_function(self):
         return self.reward
                 
+    def episodes_reward(self):
+        return self.reward, self.accumulated_reward
 
+    def episodes_times(self):
+        return self.episodes_num, self.correct_num 
