@@ -1,3 +1,4 @@
+import random
 from django import forms
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -6,14 +7,13 @@ from .demo import usim_initial, usim_request
 
 # Create your views here.
 
-
 class DialogAct(forms.Form):
     action = forms.ChoiceField(
         choices=(
             ('request', 'request'),
             ('inform', 'inform'),
             ('thanks', 'thanks'),
-            ('reset', 'reset')
+            ('closing', 'closing')
         )
     )
     """
@@ -71,8 +71,12 @@ def user_simulator(request):
                     'request_slots': {},
                     'inform_slots': {},
                 }
-            elif DiaactForm.cleaned_data['action'] == 'reset':
-                pass
+            elif DiaactForm.cleaned_data['action'] == 'closing':
+                dialogue = {
+                    'diaact': 'closing',
+                    'request_slots': {},
+                    'inform_slots': {},
+                }
             else:
                 pass
 
@@ -80,6 +84,14 @@ def user_simulator(request):
                 k: v for k, v in dialogue['request_slots'].items() if v}
             dialogue['inform_slots'] = {
                 k: v for k, v in dialogue['inform_slots'].items() if v}
+
+            if len(dialogue['request_slots']) + len(dialogue['inform_slots']) == 0:
+                dialogue = {
+                    'diaact': 'request',
+                    'request_slots': {random.choice(['title','instructor','classroom','schedule_str']):'UNK'},
+                    'inform_slots': {}
+                }
+
 
             response = JsonResponse(usim_request(dialogue), safe=False)
 

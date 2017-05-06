@@ -2,7 +2,7 @@
 
 {% block content %}
   <h1>User simulator</h1>
-  <form action="" method="post">
+  <form id="myForm" action="" method="post">
     {% csrf_token %}
     <tr>
     {% for field in diaactform %}
@@ -11,6 +11,8 @@
       <th> <input type="submit" name="Submit" value="Submit" /> </th>
     </tr>
   </form>
+
+<!-- 
   <h5><b>User goal : </b></h5>
   <b>Inform: </b>
   {% for key, value in user_goal.inform_slots.items %}
@@ -22,6 +24,8 @@
     ({{key}}:{{value}})
   {% endfor %}
   <HR size="1">
+--!>
+
   <h5><b>Dialogue </b></h5>
   <table id="chat">
     <tbody>

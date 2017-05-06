@@ -44,7 +44,11 @@ p.deck a {
       event.preventDefault();
       $.post("", $(this).serialize(), function (data) {
 	var obj = JSON.parse(data);
-
+	/*
+	if (obj[0][1] == 'closing'){
+	  $("#chat tr").remove();
+	}
+	*/
 	for (var i=0; i<obj.length; i++){
           ele = $('<tr></tr>');
 	  for (var j=0; j<obj[i].length; j++){
@@ -52,6 +56,7 @@ p.deck a {
 	  }
 	  chat.prepend(ele);
 	}
+	document.getElementById("myForm").reset();
       });
     });
   });
