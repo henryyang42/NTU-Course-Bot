@@ -167,14 +167,14 @@ user_mode = 0
 # title instructor when classroom
 constraint_tpl = [
     [Template('{{title}}'), Template('課名是{{title}}'), Template('課程名稱為{{title}}')],
-    [Template('{{instructor}}'), Template('教學老師是{{instructor}}'), Template('教學老師是{{instructor}}'), Template('{{instructor}}上的課'), Template('是{{instructor}}教授')],
-    [Template('{{when}}'), Template('上課時間是{{when}}'), Template('我想上{{when}}的課')],
+    [Template('{{instructor}}'), Template('老師是{{instructor}}'), Template('有沒有{{instructor}}老師的課'), Template('教學老師是{{instructor}}'), Template('幫我查{{instructor}}老師的課'), Template('{{instructor}}上的課'), Template('是{{instructor}}教授'), Template('{{instructor}}老師')],
+    [Template('{{when}}'), Template('上課時間是{{when}}'), Template('我想上{{when}}的課'), Template('我想選{{when}}的課'), Template('有沒有{{when}}的課')],
     [Template('{{classroom}}'), Template('上課教室是{{classroom}}'), Template('在{{classroom}}上課'), Template('在{{classroom}}')]
 ]
 request_tpl = [
     [Template('請列出課程名稱'), Template('什麼課')],
     [Template('老師的名字'), Template('老師是誰')],
-    [Template('這堂課在星期幾上課?'), Template('上課時間在什麼時候')],
+    [Template('這堂課在星期幾上課?'), Template('上課時間在什麼時候'), Template('上課時間')],
     [Template('在哪裡上課'), Template('教室在哪')]]
 
 # status what who when where
