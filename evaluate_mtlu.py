@@ -4,17 +4,11 @@ from utils.lu import multi_turn_lu2
 from utils.nlg import *
 from user_simulator.usersim.usersim_rule import *
 from django.db.models import Q
-from django.template import Context, Template
 from crawler.models import *
-from django.conf import settings
-from LU_LSTM.lstm_predict import *
-import pickle
+import time
 
+all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2')[:2].all().values()
 
-all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2').all().values()
-multi_turn_lu2('123', 'test')
-multi_turn_lu2('123', 'test')
-multi_turn_lu2('123', 'reset')
 
 for i in range(1):
     uid = i
@@ -29,4 +23,5 @@ for i in range(1):
         user_action = user_sim.next(resp['action'])[0]
         print('User  : %s' % user_sentence)
         print('System: %s' % system_sentence)
+        time.sleep(1)
 
