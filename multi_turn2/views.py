@@ -23,7 +23,7 @@ def multi_turn(request):
             multi_turn_lu2(uid, user_input, reset=True)
             return HttpResponse(json.dumps(resp), content_type="application/json")
         try:
-            resp['status'], resp['action'], resp['resp_str'] = multi_turn_lu2(uid, user_input)
+            resp['sementic'], resp['status'], resp['action'], resp['resp_str'] = multi_turn_lu2(uid, user_input)
             # resp['resp_list'] = str([c.title for c in query_course(resp['sementic']['slot'])][:10])
             logger.debug('%s -> %s\n%s' % (user_input, resp['resp_str'], str(resp)))
             d_log = DialogueLog.objects.create(
