@@ -21,11 +21,13 @@ if not os.path.exists('dict.big.txt'):
     os.system("wget %s -O %s" % (
         'https://raw.githubusercontent.com/fxsjy/jieba/master/extra_dict/dict.txt.big',
         'dict.big.txt'))
-jieba.set_dictionary('dict.big.txt')
 random.seed(123)
 
-
+sentence_cache = {}
 def BIO(sentence, context):
+    cache = sentence_cache.get(sentence, [])
+    if cache:
+        return cache
     inv_context = {v: k for k, v in context.items()}
     toks = sentence.replace(' ', '')
     toks = list(jieba.cut(toks))
@@ -34,7 +36,7 @@ def BIO(sentence, context):
         tag = inv_context.get(tok, '')
         if tag in ['title', 'when', 'instructor', 'classroom']:
             tags[i] = 'B_%s' % tag
-
+    sentence_cache[sentence] = tags
     return tags
 
 
@@ -51,7 +53,6 @@ def generate_sentence_auto_mode(status, course):
             # print('constraint_or_not', request[i])
             st[2] = 1
             status[i] = st
-            status_for_MTLU[i][1] = 1
             status_for_MTLU = ' '.join([str(x)
                                         for x in status_for_MTLU.flatten()])
             #status_for_MTLU = ' '.join(status_for_MTLU.flatten().tolist())
@@ -135,12 +136,14 @@ def trim_attr(s):
 
 
 for course in all_course:
-    titles.append(trim_attr(course.title))
-    classrooms.append(trim_attr(course.classroom))
+    title = trim_attr(course.title)
+    titles.append(title)
+    classroom = trim_attr(course.classroom)
+    classrooms.append(classroom)
     instructors.append(course.instructor)
     if course.instructor and course.schedule_str:
-        courses.append({'title': course.title, 'instructor': course.instructor,
-                        'when': '星期' + course.schedule_str[:1], 'classroom': course.classroom})
+        courses.append({'title': title, 'instructor': course.instructor,
+                        'when': '星期' + course.schedule_str[:1], 'classroom': classroom})
 
 
 titles = np.unique([x for x in titles if x and ' ' not in x])
@@ -156,7 +159,8 @@ lst_dict.extend(['星期幾', '禮拜幾'])
 with open('entity_dictionary_2_replace.txt', 'w') as f:
     f.write('\n'.join(['%s 99999' % s for s in lst_dict]))
 f.close()
-jieba.load_userdict('./entity_dictionary_2_replace.txt')
+jieba.set_dictionary('dict.big.txt')
+jieba.load_userdict('entity_dictionary_2_replace.txt')
 print ('%d titles, %d instructors' % (len(titles), len(instructors)))
 
 template_folder = 'MTLU_template'
@@ -192,7 +196,7 @@ request = ['title', 'instructor', 'when', 'classroom']
 
 
 len_history = 4
-num_sample = 250
+num_sample = 1000
 # shape = (?*4, 6)
 # ['index_sample', 'index_turn', 'sentence', 'BIO', 'status', 'status_for_MTLU']
 df_log = pd.DataFrame([], columns=['index_sample', 'index_turn',
@@ -201,7 +205,7 @@ log_data = []
 for j in range(num_sample):
     print(j)
     status = status_maker()
-    course = random.choice(courses)
+    course = courses[j % len(courses)]
     for i in range(len_history):
         s, bio, status, status_for_MTLU = generate_sentence_auto_mode(
             status, course)
