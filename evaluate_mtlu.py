@@ -8,7 +8,7 @@ from django.db.models import Q
 from crawler.models import *
 
 
-all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2')[:2].all().values()
+all_courses = list(Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2').all().values())
 np.random.shuffle(all_courses)
 
 f = open('mtlu_eval.log', 'w')
