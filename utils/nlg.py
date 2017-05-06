@@ -45,9 +45,9 @@ inform_tpl = {
         Template('是{{instructor}}教授')
     ],
     'schedule_str': [
-        Template('{{when}}'),
-        Template('上課時間是{{when}}'),
-        Template('我想上{{when}}的課')
+        Template('{{schedule_str}}'),
+        Template('上課時間是{{schedule_str}}'),
+        Template('我想上{{schedule_str}}的課')
     ],
     'classroom': [
         Template('{{classroom}}'),
@@ -86,4 +86,6 @@ def agent2nl(sem_in):
         else:
             response = "沒有找到相關課程"
     else:
-        return '謝謝！'
+        response = '謝謝！'
+
+    return response

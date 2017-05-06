@@ -73,10 +73,11 @@ def usim_request(request):
 
         response = [
             [ "SYS Turn "+ str(turn-1), agent_action['diaact'], agent2nl(agent_action)],
-            [ "Possible values:", possible_num, possible_answer],
+            [ "Possible values:", possible_num, possible_answer[0:10]],
             [ "USR Turn "+str(turn), user_action['diaact'], sem2nl(user_action)],
         ]
 
+    # Calculate Reward
     if episode_over :
         if user_action['diaact'] == 'deny':
             response.append(["Reward:", -100-turn])
@@ -88,14 +89,21 @@ def usim_request(request):
             pass
 
         response.append(
-            ["Total episodes: " + str(dialog_manager.episode_times), 
+            [
+             "Total episodes: " + str(dialog_manager.episode_times), 
              "Correct times: "+str(dialog_manager.episode_correct),
              "Accumulate reward: " + str(dialog_manager.reward),
             ]
         )
+
+        # New episode
         user_action = dialog_manager.initialize_episode()
+        possible_answer = dialog_manager.possible_answer[dialog_manager.query_slot]
+        possible_num = dialog_manager.possible_answer['count']
         response.append([ "New Turn!"])
+        response.append([ "Possible values:", possible_num, possible_answer[0:10]])
         response.append([ "USR Turn "+str(user_action['turn']), user_action['diaact'], sem2nl(user_action)])
+
 
     # Dump system status
     pickle.dump(dialog_manager, open('user_simulator/dm.p', 'wb'))

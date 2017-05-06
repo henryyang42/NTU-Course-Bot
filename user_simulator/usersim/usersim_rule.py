@@ -9,7 +9,7 @@ class RuleSimulator():
     def __init__(self, start_set=None):
         """ Constructor shared by all user simulators """
         self.act_set = ['inform', 'request', 'thanks']
-        self.slot_set = ['title', 'instructor', 'classroom', 'schedule_str']
+        self.slot_set = ['serial_no', 'title', 'instructor', 'classroom', 'schedule_str']
         self.max_turn = 50
         self.start_set = start_set
     
@@ -24,12 +24,14 @@ class RuleSimulator():
         
         self.episode_over = False
         
-        self.goal = self._sample_goal(self.start_set)
-
-        self.ans = copy.deepcopy(self.goal)
+        self.ans = self._sample_goal(self.start_set)
+        self.goal = copy.deepcopy(self.ans)
+        if 'serial_no' in self.goal['inform_slots'].keys():
+            del self.goal['inform_slots']['serial_no']
 
         # Our Task
-        request_slot = random.choice(self.slot_set)
+        # Without 'serial_no'
+        request_slot = random.choice(self.slot_set[1:])
         self.goal['request_slots'][request_slot] = 'UNK'
         del self.goal['inform_slots'][request_slot]
 
