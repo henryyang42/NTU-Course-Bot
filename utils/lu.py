@@ -46,6 +46,8 @@ def multi_turn_lu2(user_id, sentence, reset=False):
     # return status, action, agent2nl(action)
     if action['diaact'] in ['inform', 'closing']:
         user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
+    else:
+        user_log[user_id] = status
     with open('user_log.p', 'wb') as handle:
         pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return d, status, action, get_NL_from_action(action)
