@@ -12,6 +12,7 @@ class RuleSimulator():
         self.slot_set = ['serial_no', 'title', 'instructor', 'classroom', 'schedule_str']
         self.max_turn = 50
         self.start_set = start_set
+        self.reward = 0
     
     def initialize_episode(self):
         
@@ -22,6 +23,7 @@ class RuleSimulator():
         self.state['rest_slots'] = []
         self.state['turn'] = 0
         
+        self.reward = 0
         self.episode_over = False
         
         self.ans = self._sample_goal(self.start_set)
@@ -74,6 +76,7 @@ class RuleSimulator():
         """ Generate next User Action based on last System Action """
         
         self.state['turn'] += 2
+        self.reward = self.reward - 1
         self.episode_over = False
         
         sys_act = system_action['diaact']
@@ -97,7 +100,11 @@ class RuleSimulator():
             else:
                 pass
 
-        
+        if self.state['diaact'] == 'thanks':
+            self.reward = self.reward + 100
+        elif self.state['diaact'] == 'deny':
+            self.reward = self.reward - 100
+
         response_action = {}
         response_action['diaact'] = self.state['diaact']
         response_action['inform_slots'] = self.state['inform_slots']
@@ -168,5 +175,8 @@ class RuleSimulator():
 
         self.state['inform_slots'].clear()
         self.state['request_slots'].clear()
+
+    def reward_function(self):
+        return self.reward
                 
 
