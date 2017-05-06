@@ -44,8 +44,8 @@ inform_tpl = {
     ],
     'schedule_str': [
         Template('{{schedule_str}}'),
-        Template('上課時間是{{schedule_str}}'),
-        Template('我想上{{schedule_str}}的課')
+        Template('{{schedule_str}}開的課'),
+        Template('{{schedule_str}}的課')
     ],
     'classroom': [
         Template('{{classroom}}'),
