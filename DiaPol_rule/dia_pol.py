@@ -95,7 +95,7 @@ def get_action_from_frame(dia_state):
     return sys_act
 
 
-def get_NL_from_action(sys_act):
+def get_NL_from_action(sys_act): #DEPRECATED!! use utils/nlg.py:agent2nl()
     if sys_act["diaact"] == "closing" and len(sys_act["inform_slots"]) == 0:
         return "不好意思，沒有找到符合條件的課程。"
 
@@ -129,7 +129,7 @@ def get_NL_from_action(sys_act):
                 res_str = "請問是哪個時間上課的?"
             res_list.append(res_str)
 
-    return "".join(res_list)  # TODO
+    return "".join(res_list)
 
 
 if __name__ == '__main__':
