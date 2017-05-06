@@ -11,6 +11,7 @@ all_courses = Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester
 
 f = open('mtlu_eval.log', 'w')
 tot_reward = 0
+correct = 0
 N = 100
 for i in range(N):
     uid = i
@@ -26,8 +27,11 @@ for i in range(N):
         print('User  : %s' % user_sentence, file=f)
         print('System: %s' % system_sentence, file=f)
         if over or j == 3:
-            tot_reward += user_sim.reward_function()
-            print('Reward: %d\n==============' % user_sim.reward_function(), file=f)
+            reward = user_sim.reward_function()
+            tot_reward += reward
+            correct += 1 if reward > 0 else 0
+            print('Reward: %d\n==============' % reward, file=f)
             break
 
 print('Average reward: %f' % (tot_reward / N), file=f)
+print('Accuracy: %f (%d/%d)' % (correct / N, correct, N), file=f)
