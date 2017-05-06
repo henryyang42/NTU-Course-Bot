@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 from django.conf import settings
 from LU_LSTM.lstm_predict import *
-
+import jieba
 
 class SingleTurnConfig(AppConfig):
     name = 'single_turn'
@@ -10,7 +10,6 @@ class SingleTurnConfig(AppConfig):
     def ready(self):
 
         if not settings.DEBUG:  # Only load model in production to speed up debugging.
-            import jieba
             jieba.load_userdict('%s/crawler/entity_dictionary.txt' % settings.BASE_DIR)
             global lu_model, idx2label, idx2intent, word2idx
 
@@ -25,7 +24,7 @@ class SingleTurnConfig(AppConfig):
 
             # load model
             lu_model = load_model(
-                '%s/LU_LSTM/re_seg.1K+log_extend_1000--LSTM.model' % settings.BASE_DIR)
+                '%s/LU_LSTM/PY3--re_seg.1K+log_extend_1000--LSTM.model' % settings.BASE_DIR)
             print('[Info] Single-turn LU model loaded.')
 
         else:
