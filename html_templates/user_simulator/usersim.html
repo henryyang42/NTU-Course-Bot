@@ -1,0 +1,58 @@
+{% extends "user_simulator/base.html" %}
+
+{% block content %}
+  <h1>User simulator</h1>
+  <form id="myForm" action="" method="post">
+    {% csrf_token %}
+    <tr>
+    {% for field in diaactform %}
+      <th> {{ field }} </th>
+    {% endfor %}
+      <th> <input type="submit" name="Submit" value="Submit" /> </th>
+    </tr>
+  </form>
+
+<!-- 
+  <h5><b>User goal : </b></h5>
+  <b>Inform: </b>
+  {% for key, value in user_goal.inform_slots.items %}
+    ({{key}} {{value}})
+  {% endfor %}
+  <br>
+  <b>Request: </b>
+  {% for key, value in user_goal.request_slots.items %}
+    ({{key}}:{{value}})
+  {% endfor %}
+  <HR size="1">
+--!>
+
+  <h5><b>Dialogue </b></h5>
+  <table id="chat">
+    <tbody>
+      <tr>
+	<td> USR Turn 0 </td>
+	<td> {{ user_action.diaact}} </td>
+        <td> {{ user_action.nl }} </td>
+      </tr>
+      <tr>
+	<td><b> Possible values: <b></td>
+	<td><b>{{num}}</b></td>
+	<td>
+		{% if num > 5 %}
+		  {% for item in suggest|slice:":10" %}
+		    {{ item }}
+		  {% endfor %}
+		  ............
+		{% else %}
+		  {% for item in suggest %}
+		    {{ item }}
+		  {% endfor %}
+		{% endif %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock content %}
+
+{% block afterbody %}
+{% endblock afterbody %}

@@ -8,6 +8,6 @@ python3 manage.py migrate
 python3 manage.py createsuperuser
 
 echo "Moving data to database..."
-python3 install_db.py
+python3 misc_scripts/install_db.py
 echo "Done."
 python3 manage.py runserver

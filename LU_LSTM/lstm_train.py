@@ -51,10 +51,10 @@ idx2word = ["#", "<UNK>"] # "#" for padding
 label2idx = {"#": 0}
 idx2label = ["#"]
 max_seq_len = 0
-pat_split = re.compile(ur"\s+")
+pat_split = re.compile(r"\s+")
 with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
     lines = f_in.readlines()
-    print "# data:", len(lines)/3
+    print ("# data:", len(lines)/3)
     for i in range(0, len(lines), 3):
         # intent
         intent = lines[i].strip()
@@ -79,21 +79,21 @@ with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
         # BIO labels 
         labels = pat_split.split(lines[i+2].strip())
         if len(tokens) != len(labels):
-            print "[error] # tokens & # labels do not match", len(tokens), len(labels)
-            print " ".join(tokens)
-            print " ".join(labels)
+            print ("[error] # tokens & # labels do not match", len(tokens), len(labels))
+            print (" ".join(tokens))
+            print (" ".join(labels))
         for l in labels:
             if l not in label2idx:
                 label2idx[l] = len(idx2label)
                 idx2label.append(l)
         idx_seq = seq_word2idx(labels, label2idx)
         Y.append(idx_seq)
-print "Vocab. size:", len(idx2word)
-print "== reading data done =="
+print ("Vocab. size:", len(idx2word))
+print ("== reading data done ==")
 # pad sequences
 X = sequence.pad_sequences(X, maxlen=max_seq_len)
 Y = list(sequence.pad_sequences(Y, maxlen=max_seq_len))
-print "== padding done =="
+print ("== padding done ==")
 
 # convert BIO labels to one-hot encoding
 #print Y.shape
@@ -101,7 +101,7 @@ for i, y in enumerate(Y):
     Y[i] = np_utils.to_categorical(y, len(idx2label))
 
 Y = np.array(Y)
-print Y.shape
+print (Y.shape)
 
 Y2 = np_utils.to_categorical(Y2)
 
@@ -164,7 +164,7 @@ earlyStopping = EarlyStopping(monitor='val_loss', patience=2, verbose=0, mode='m
 cb.append(earlyStopping)
 # save best
 best_weights_filepath = "/tmp/LU-LSTM_best_weights.hdf5"
-print best_weights_filepath
+print (best_weights_filepath)
 saveBestModel = ModelCheckpoint(best_weights_filepath, monitor='val_loss', verbose=0, save_best_only=True, mode='min')
 cb.append(saveBestModel)
 
@@ -172,7 +172,7 @@ optm = Adam(lr=args.learning_rate)
 
 intent_weight = args.intent_weight
 model.compile(loss=args.cost, optimizer=optm, loss_weights=[1.0-intent_weight, intent_weight])
-print "== model compilation done =="
+print ("== model compilation done ==")
 
 model.fit(X, [Y, Y2], validation_split=0.1, nb_epoch=args.epoch, callbacks=cb)
 

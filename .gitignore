@@ -1,11 +1,18 @@
+# Corpus
+dict.big.txt
+word2vec_corpus.tmp
+word2vec_corpus
+word2vec_corpus_phrases
+
 # Static files
 static
 html
 *.png
 __MACOSX
 request_template
-
-# Static
+*.swp
+*.p
+*.pickle
 .DS_Store
 *.zip
 *.sqlite3-journal
