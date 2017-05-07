@@ -40,7 +40,8 @@ def multi_turn_lu2(user_id, sentence, reset=False):
     if not status['request_slots']:
         status['request_slots']['schedule_str' if d['intent'] == 'schedule' else d['intent']] = '?'
     for k, v in d['slot'].items():
-        status['inform_slots'][k] = v
+        if k not in status['inform_slots']:
+            status['inform_slots'][k] = v
 
     action = get_action_from_frame(status)
     # return status, action, agent2nl(action)
