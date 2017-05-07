@@ -40,5 +40,5 @@ for i in range(N):
 
 print('Average reward: %f' % (tot_reward / N), file=f)
 print('Accuracy: %f (%d/%d)' % (correct / N, correct, N), file=f)
-print('Average Turn: %f' % (tot_turn / N))
+print('Average Turn: %f' % (tot_turn / N), file=f)
 f.close()
