@@ -70,10 +70,9 @@ agent_request_tpl = {
     ],
     'classroom': [
         Template('請問是在哪上課的?'),
-        Template('請問是教室在哪間教室的?')
+        Template('請問是在哪間教室的?')
     ]
 }
-
 
 
 def sem2nl(sem_in):
