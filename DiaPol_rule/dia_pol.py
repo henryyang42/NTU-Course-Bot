@@ -77,7 +77,7 @@ def get_action_from_frame(dia_state):
             sys_act["diaact"] = "request"
             sys_act["inform_slots"] = {}
             sys_act["request_slots"] = {req_slot: "?"}
-        else: # only a course satisfy the constraints
+        else: # only one course satisfy the constraints
             unique_found = True
 
     if unique_found:  # find the unique course
@@ -87,7 +87,7 @@ def get_action_from_frame(dia_state):
         for slot in dia_state["request_slots"]:
             inform_slots[slot] = course[slot]
         inform_slots["serial_no"] = course["serial_no"] # must provide serial_no to complete the task
-        inform_slots["title"] = course["title"] # return course name the unsure the correct course is found
+        inform_slots["title"] = course["title"] # return course name the ensure the correct course is found
         sys_act["inform_slots"] = inform_slots
         sys_act["request_slots"] = {}
 

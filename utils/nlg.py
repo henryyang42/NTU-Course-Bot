@@ -55,6 +55,26 @@ inform_tpl = {
     ]
 }
 
+agent_request_tpl = {
+    'title': [
+        Template('請問要找哪門課?'),
+        Template('請問課程名稱是?')
+    ],
+    'instructor': [
+        Template('請問是哪位老師開的?'),
+        Template('請問是誰開的?')
+    ],
+    'schedule_str': [
+        Template('什麼時候的課?'),
+        Template('請問是哪個時間上課的?')
+    ],
+    'classroom': [
+        Template('請問是在哪上課的?'),
+        Template('請問是教室在哪間教室的?')
+    ]
+}
+
+
 
 def sem2nl(sem_in):
     """Convert sementic to NL using template based NLG.
@@ -81,7 +101,7 @@ def agent2nl(sys_act):
         return "不好意思，沒有找到符合條件的課程。"
 
     res_list = []
-    # reponse in a pre-defined order
+    # response in a pre-defined order
     for slot in ["serial_no", "title", "instructor", "classroom", "schedule_str"]:
         if slot in sys_act["inform_slots"]:
             if slot == "serial_no":
@@ -97,9 +117,10 @@ def agent2nl(sys_act):
             res_str = res_str % sys_act["inform_slots"][slot]
             res_list.append(res_str)
 
-    # reponse in a pre-defined order
+    # request in a pre-defined order
     for slot in ["title", "instructor", "classroom", "schedule_str"]:
         if slot in sys_act["request_slots"]:
+            '''
             if slot == "title":
                 res_str = "請問要找哪門課?"
             elif slot == "instructor":
@@ -108,6 +129,9 @@ def agent2nl(sys_act):
                 res_str = "請問是在哪上課的?"
             elif slot == "schedule_str":
                 res_str = "請問是哪個時間上課的?"
+            '''
+            tpl = random.choice(agent_request_tpl[slot])
+            res_str = tpl.render(Context(sys_act["request_slots"]))
             res_list.append(res_str)
 
     return "".join(res_list)
