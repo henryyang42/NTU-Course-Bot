@@ -41,19 +41,19 @@ def get_action_from_frame(dia_state):
             courses.append(c)
     '''
     courses = query_course(dia_state["inform_slots"])
-    courses = [{k: v for k, v in c.__dict__.items()} for c in courses]  # convert to dictionary
+    course_ct = courses.count()
+    courses = courses.values()
 
     #############################################
-    print ("[INFO] current set of courses")
-    print (len(courses))
+    print ("[INFO] current set of courses: %d" % course_ct)
 
     sys_act = {}
     unique_found = False
-    if len(courses) == 0:  # fail
+    if course_ct == 0:  # fail
         sys_act["diaact"] = "closing"
         sys_act["inform_slots"] = {}
         sys_act["request_slots"] = {}
-    elif len(courses) == 1:
+    elif course_ct == 1:
         unique_found = True
     else: # len(courses) >= 2
         sys_act["diaact"] = "request"
