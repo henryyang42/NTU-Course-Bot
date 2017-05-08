@@ -112,20 +112,20 @@ seq_input = Input(shape=(max_seq_len,), dtype='int32')
 
 # [embedding layer]
 init_emb_W = None #TODO pre-trained word embedding?
-embedding = Embedding(len(idx2word), args.emb_size, input_length=max_seq_len, dropout=0.2, weights=init_emb_W, trainable=True)(seq_input)
+embedding = Embedding(len(idx2word), args.emb_size, input_length=max_seq_len, weights=init_emb_W, trainable=True)(seq_input)
 
 # [LSTM for slot]
 if args.bi_direct:
-    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, return_sequences=True), name='slot LSTM')(embedding)
+    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout=0.2, recurrent_dropout=0.2, return_sequences=True), name='slot LSTM')(embedding)
 else:
-    slot_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, return_sequences=True, name='slot LSTM')(embedding)
+    slot_lstm_out = LSTM(args.emb_size, dropout=0.2, recurrent_dropout=0.2, return_sequences=True, name='slot LSTM')(embedding)
 
 if args.batch_norm:
     slot_lstm_out = BatchNormalization(slot_lstm_out)
 
 # [LSTM for intent]
 if args.attention:
-    intent_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, name='intent LSTM', return_sequences=True)(slot_lstm_out)
+    intent_lstm_out = LSTM(args.emb_size, dropout=0.2, recurrent_dropout=0.2, name='intent LSTM', return_sequences=True)(slot_lstm_out)
     attn = TimeDistributed(Dense(1, activation=args.activation))(intent_lstm_out)
     attn = Flatten()(attn)
     attn = Activation('softmax')(attn)
@@ -137,7 +137,7 @@ if args.attention:
     intent_lstm_out = Flatten()(intent_lstm_out)
 
 else:
-    intent_lstm_out = LSTM(args.emb_size, dropout_W=0.2, dropout_U=0.2, name='intent LSTM')(slot_lstm_out)
+    intent_lstm_out = LSTM(args.emb_size, dropout=0.2, recurrent_dropout=0.2, name='intent LSTM')(slot_lstm_out)
 
 # [transformation for slot]
 x = TimeDistributed(Dense(args.emb_size), name='slot transformation 1')(slot_lstm_out)
@@ -154,7 +154,7 @@ intent_output = Activation('softmax', name='intent')(x2)
 
 
 # connect nodes to the model
-model = Model(input=seq_input, output=[slot_output, intent_output])
+model = Model(inputs=seq_input, outputs=[slot_output, intent_output])
 
 ##### ##### #####
 
@@ -174,7 +174,7 @@ intent_weight = args.intent_weight
 model.compile(loss=args.cost, optimizer=optm, loss_weights=[1.0-intent_weight, intent_weight])
 print ("== model compilation done ==")
 
-model.fit(X, [Y, Y2], validation_split=0.1, nb_epoch=args.epoch, callbacks=cb)
+model.fit(X, [Y, Y2], validation_split=0.1, epochs=args.epoch, callbacks=cb)
 
 
 model.load_weights(best_weights_filepath)
