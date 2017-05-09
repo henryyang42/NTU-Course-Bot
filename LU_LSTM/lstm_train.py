@@ -56,17 +56,23 @@ pat_split = re.compile(r"\s+")
 with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
     lines = f_in.readlines()
     print ("# data:", len(lines)/3)
-    for i in range(0, len(lines), 3):
-        # intent
+    for i in range(0, len(lines), 3): 
+        # verify data
         intent = lines[i].strip()
+        tokens = pat_split.split(lines[i+1].strip()) 
+        labels = pat_split.split(lines[i+2].strip())
+        if len(tokens) != len(labels):
+            print ("[error] # tokens & # labels do not match", len(tokens), len(labels))
+            print (" ".join(tokens))
+            print (" ".join(labels))
+            continue # skip instance
+
+        # intent
         if intent not in intent2idx:
             intent2idx[intent] = len(idx2intent)
             idx2intent.append(intent)
-        Y2.append(intent2idx[intent])
 
         # tokens
-        tokens = pat_split.split(lines[i+1].strip())
-        #print tokens[0], repr(tokens[0])
         if len(tokens) > max_seq_len:
             max_seq_len = len(tokens)
         for t in tokens:
@@ -74,21 +80,19 @@ with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
             if t not in word2idx:
                 word2idx[t] = len(idx2word)
                 idx2word.append(t)
-        idx_seq = seq_word2idx(tokens, word2idx)
-        X.append(idx_seq)
+        x_idx_seq = seq_word2idx(tokens, word2idx)
 
         # BIO labels 
-        labels = pat_split.split(lines[i+2].strip())
-        if len(tokens) != len(labels):
-            print ("[error] # tokens & # labels do not match", len(tokens), len(labels))
-            print (" ".join(tokens))
-            print (" ".join(labels))
         for l in labels:
             if l not in label2idx:
                 label2idx[l] = len(idx2label)
                 idx2label.append(l)
-        idx_seq = seq_word2idx(labels, label2idx)
-        Y.append(idx_seq)
+        y_idx_seq = seq_word2idx(labels, label2idx)
+        
+        # valid data
+        X.append(x_idx_seq)
+        Y.append(y_idx_seq)
+        Y2.append(intent2idx[intent])
 print ("Vocab. size:", len(idx2word))
 print ("== reading data done ==")
 # pad sequences
@@ -123,7 +127,7 @@ else:
     slot_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True, name='slot LSTM')(embedding)
 
 if args.batch_norm:
-    slot_lstm_out = BatchNormalization(slot_lstm_out)
+    slot_lstm_out = BatchNormalization()(slot_lstm_out)
 
 # [LSTM for intent]
 if args.attention:
