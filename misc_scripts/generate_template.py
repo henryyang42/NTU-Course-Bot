@@ -79,13 +79,14 @@ if __name__ == '__main__':
     #
     with open(filename, 'w') as f:
         for intent, tpls in templates.items():
-            tpl = random.choice(tpls)
-            course = random.choice(courses)
-            # Jieba cut sentence
-            sentence = ' '.join(cut(tpl.render(Context(course))))
-            # BIO tagged sentence
-            bio_tagged = ' '.join(BIO(sentence, course))
+            for _ in range(N):
+                tpl = random.choice(tpls)
+                course = random.choice(courses)
+                # Jieba cut sentence
+                sentence = ' '.join(cut(tpl.render(Context(course))))
+                # BIO tagged sentence
+                bio_tagged = ' '.join(BIO(sentence, course))
 
-            f.write(intent)
-            f.write(sentence)
-            f.write(bio_tagged)
+                f.write(intent + '\n')
+                f.write(sentence + '\n')
+                f.write(bio_tagged + '\n')
