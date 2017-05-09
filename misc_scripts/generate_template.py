@@ -281,8 +281,8 @@ if __name__ == '__main__':
     print('[Info] Start generating templates')
     # TODO Change to argparse
     filename = 'training_template.txt'
-    N = 1
-    courses = query_course({'title': '自然語言處理'}).values()  # Get all course
+    N = 1000
+    courses = query_course({}).values()  # Get all course
     # TODO Refine request_schedule_str to when
     #
     with open(filename, 'w') as f:
