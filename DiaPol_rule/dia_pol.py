@@ -55,8 +55,10 @@ def get_action_from_frame(dia_state):
         sys_act["request_slots"] = {}
     elif course_ct == 1:
         unique_found = True
+    elif course_ct <= 5: # provide choices if the set of courses is small enough
+        sys_act["diaact"] = "multiple_choice"
+        sys_act["choice"] = courses
     else: # len(courses) >= 2
-        sys_act["diaact"] = "request"
         req_slot = None
         max_n = 0
         #for slot in ["title", "instructor", "schedule_str", "classroom"]:# ordered by priority
@@ -167,6 +169,7 @@ if __name__ == '__main__':
 
         print ("----------\n")
 
+    '''
     ########################
     ### interactive demo ###
     ########################
@@ -196,4 +199,4 @@ if __name__ == '__main__':
         print (NL)
 
         print ("----------\n")
-
+    '''
