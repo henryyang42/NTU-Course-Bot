@@ -5,6 +5,8 @@ import numpy as np
 from crawler.models import *
 from .decorator import run_once
 
+possible_slots = ['title', 'when', 'instructor', 'classroom', 'designated_for', 'required_elective', 'sel_method']
+
 
 def trim_attr(s):
     s = re.sub(r'\（[^)]*\）', '', s)
@@ -59,7 +61,7 @@ def BIO(sentence, context):
     tags = ['O'] * len(toks)
     for i, tok in enumerate(toks):
         tag = inv_context.get(tok, '')
-        if tag in ['title', 'when', 'instructor', 'classroom']:
+        if tag in possible_slots:
             tags[i] = 'B_%s' % tag
 
     return tags

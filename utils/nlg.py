@@ -151,3 +151,32 @@ def agent2nl(sem_in):
 
     return response
 '''
+
+
+def formulate(**kwargs):
+    kwlist = list(kwargs.items())
+    len_kw = len(kwlist)
+    state = [0] * (len_kw + 1)
+
+    total = 1
+    for _, l in kwlist:
+        total *= len(l)
+
+    print ('Formulating %d sentences...' % total)
+
+    while True:
+        d = {}
+        for i, v in enumerate(state[:-1]):
+            d[kwlist[i][0]] = kwlist[i][1][v]
+        yield d
+
+        state[0] += 1
+        ind = 0
+
+        while ind < len_kw and state[ind] == len(kwlist[ind][1]):
+            state[ind] = 0
+            state[ind + 1] += 1
+            ind += 1
+
+        if len_kw == ind:
+            break
