@@ -5,6 +5,8 @@ import numpy as np
 from crawler.models import *
 from .decorator import run_once
 
+possible_slots = ['title', 'when', 'instructor', 'classroom', 'designated_for', 'required_elective', 'sel_method']
+
 
 def trim_attr(s):
     s = re.sub(r'\（[^)]*\）', '', s)
@@ -21,6 +23,7 @@ def trim_attr(s):
 
 @run_once
 def jieba_setup():
+    # Use zh-tw for better accuracy
     if not os.path.exists('dict.big.txt'):
         os.system("wget %s -O %s" % (
             'https://raw.githubusercontent.com/fxsjy/jieba/master/extra_dict/dict.txt.big',
@@ -33,6 +36,7 @@ def jieba_setup():
         entities.append(trim_attr(course.title))
         entities.append(trim_attr(course.classroom))
         entities.append(course.instructor)
+        # TODO More slot should be added...
     entities = np.unique([entity for entity in entities if entity and ' ' not in entity])
 
     with open('entity.log', 'w') as f:
@@ -59,7 +63,7 @@ def BIO(sentence, context):
     tags = ['O'] * len(toks)
     for i, tok in enumerate(toks):
         tag = inv_context.get(tok, '')
-        if tag in ['title', 'when', 'instructor', 'classroom']:
+        if tag in possible_slots:
             tags[i] = 'B_%s' % tag
 
     return tags
