@@ -106,6 +106,10 @@ class RuleSimulator():
                 self.response_inform(system_action)
             elif sys_act == "request":
                 self.response_request(system_action) 
+            elif sys_act == "confirm":
+                self.response_confirm(system_action)
+            elif sys_act == "multiple_choice":
+                self.response_multiple_choice(system_action)
             elif sys_act == "thanks":
                 self.response_thanks(system_action)
             elif sys_act == "closing":
@@ -131,8 +135,45 @@ class RuleSimulator():
     
     def response_confirm(self, system_action):
         """ Response for Confirm_Answer (System Action) """
-        pass 
-            
+
+        self.state['diaact'] = 'inform'
+        self.state['inform_slots'].clear()
+        self.state['request_slots'].clear()
+
+        for slot in system_action['inform_slots'].keys():
+            if slot in self.goal['inform_slots'].keys():
+                self.state['inform_slots'][slot] = self.goal['inform_slots'][slot]
+
+        for slot in system_action['request_slots'].keys():
+            if slot in self.goal['request_slots'][slot]:
+                self.state['diaact'] = 'request'
+                self.state['request_slots'][slot] = self.goal['request_slots'][slot]
+
+    def response_multiple_choice(self, system_action):
+        """ Response for Confirm_Answer (System Action) """
+
+        self.state['diaact'] = 'inform'
+        self.state['inform_slots'].clear()
+        self.state['request_slots'].clear()
+        print(system_action)
+        choices = system_action['choice']
+        print(choices)
+        for choice in choices:
+            print(choice)
+            choose = True
+            for slot in choice.keys():
+                if choice[slot] != self.ans['inform_slots'][slot]:
+                    choose = False
+                    break
+
+            if choose:
+                self.state['inform_slots'] = {slot:choice[slot] for slot in choice.keys()}
+                print(self.state['inform_slots'])
+                return
+
+        self.state['diaact'] = 'deny'
+
+
     def response_thanks(self, system_action):
         """ Response for Thanks (System Action) """
 
@@ -175,11 +216,6 @@ class RuleSimulator():
         self.state['history_slots'].update(self.state['inform_slots'])
         self.state['history_request_slots'].update(self.state['request_slots'])
 
-
-
-    def response_multiple_choice(self, system_action):
-        """ Response for Multiple_Choice (System Action) """
-        pass 
 
     def response_inform(self, system_action):
         """ Response for Inform (System Action) """
