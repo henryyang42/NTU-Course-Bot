@@ -156,8 +156,8 @@ if __name__ == '__main__':
     
     # 3. multiple choices
     dia_state = {}
-    dia_state["request_slots"] = {"title": "機器學習"}
-    dia_state["inform_slots"] = {"schedule_str": "?"}
+    dia_state["request_slots"] = {"schedule_str": "?"}
+    dia_state["inform_slots"] = {"title": "機器學習"}
     test_dia_states.append(dia_state)
 
 
