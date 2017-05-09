@@ -2,10 +2,10 @@
 from access_django import *
 import random
 import numpy as np
-from crawler.const import base_url
 from django.template import Context, Template
-from crawler.models import *
-
+from utils.nlg import *
+from utils.tagger import *
+from utils.query import *
 # Templates
 # possible_slots = [
 # 'title',
@@ -55,3 +55,37 @@ templates = {
         Template(''),
     ]
 }
+
+if __name__ == '__main__':
+    print('[Info] Start generating templates')
+    """
+    In this format:
+    Line1: Intent
+    Line2: Tokenized sentence
+    Line3: BIO
+    ======
+    classroom
+    禮拜三 高分子材料概論 在 哪個 系館 哪間 教室 上課 嗎 ?
+    B_when B_title O O O O O O O O
+    title
+    幫 我 找 吳俊傑 教 哪些 課 ?
+    O O O B_instructor O O O O
+    """
+    # TODO Change to argparse
+    filename = 'training_template.txt'
+    N = 10
+    courses = query_course({}).values()  # Get all course
+    # TODO Refine request_schedule_str to when
+    #
+    with open(filename, 'w') as f:
+        for intent, tpls in templates.items():
+            tpl = random.choice(tpls)
+            course = random.choice(courses)
+            # Jieba cut sentence
+            sentence = ' '.join(cut(tpl.render(Context(course))))
+            # BIO tagged sentence
+            bio_tagged = ' '.join(BIO(sentence, course))
+
+            f.write(intent)
+            f.write(sentence)
+            f.write(bio_tagged)
