@@ -115,3 +115,7 @@ VENV/
 
 # Rope project settings
 .ropeproject
+
+
+# VIM temp files
+*.un~

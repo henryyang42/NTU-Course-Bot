@@ -47,12 +47,15 @@ def get_action_from_frame(dia_state):
     #############################################
     print ("[INFO] current set of courses: %d" % course_ct)
 
-    sys_act = {}
+    # required fields
+    sys_act = {} 
+    sys_act["inform_slots"] = {}
+    sys_act["request_slots"] = {}
+    
+    # decide action by # courses satisfying the constraints
     unique_found = False
     if course_ct == 0:  # fail
         sys_act["diaact"] = "closing"
-        sys_act["inform_slots"] = {}
-        sys_act["request_slots"] = {}
     elif course_ct == 1:
         unique_found = True
     elif course_ct <= 5: # provide choices if the set of courses is small enough
@@ -69,6 +72,7 @@ def get_action_from_frame(dia_state):
             # don't ask users something already known
             if slot in dia_state["inform_slots"]:
                 continue
+
             # max # different values --> largest diversity
             n_values = len(set([c[slot] for c in courses]))
             print ("[INFO] slot %s, # values = %d" % (slot, n_values))
@@ -77,8 +81,7 @@ def get_action_from_frame(dia_state):
                 req_slot = slot
         if max_n > 1:
             sys_act["diaact"] = "request"
-            sys_act["inform_slots"] = {}
-            sys_act["request_slots"] = {req_slot: "?"}
+            sys_act["request_slots"][req_slot] = "?"
         else: # only one course satisfy the constraints
             unique_found = True
 
@@ -91,8 +94,6 @@ def get_action_from_frame(dia_state):
         inform_slots["serial_no"] = course["serial_no"] # must provide serial_no to complete the task
         inform_slots["title"] = course["title"] # return course name the ensure the correct course is found
         sys_act["inform_slots"] = inform_slots
-        sys_act["request_slots"] = {}
-
 
     return sys_act
 
