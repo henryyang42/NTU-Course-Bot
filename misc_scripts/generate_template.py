@@ -264,6 +264,15 @@ templates = {
     ]
 }
 
+
+def trim_course(course):
+    course['when'] = random.choice(['星期', '禮拜']) + course['schedule_str'][0]
+    course['be'] = random.choice(be)
+    course['ask'] = random.choice(ask)
+    for k in course.keys():
+        course[k] = trim_attr(course[k])
+    return course
+
 if __name__ == '__main__':
     """
     In this format:
@@ -290,9 +299,7 @@ if __name__ == '__main__':
             for tpl in tpls:
                 for _ in range(N):
                     course = random.choice(courses)
-                    course['when'] = random.choice(['星期', '禮拜']) + course['schedule_str'][0]
-                    course['be'] = random.choice(be)
-                    course['ask'] = random.choice(ask)
+                    course = trim_course(course)
                     # Jieba cut sentence
                     sentence = ' '.join(cut(tpl.render(Context(course))))
                     # BIO tagged sentence

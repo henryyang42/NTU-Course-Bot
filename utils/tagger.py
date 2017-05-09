@@ -12,9 +12,9 @@ def trim_attr(s):
     s = re.sub(r'\（[^)]*\）', '', s)
     s = re.sub(r'\([^)]*\)', '', s)
     s = re.sub(r'\-[^)]*', '', s)
-    for _ in range(3):
-        if s and s[-1] in '一二三四五六上下':
-            s = s[:-1]
+    # for _ in range(3):
+    #     if s and s[-1] in '一二三四五六上下':
+    #         s = s[:-1]
     for rep in ' ()（）：:-「」《》、/+':
         s = s.replace(rep, '')
 
@@ -37,6 +37,7 @@ def jieba_setup():
         entities.append(trim_attr(course.classroom))
         entities.append(course.instructor)
         entities.append(course.designated_for)
+        entities.append(course.required_elective)
         # TODO More slot should be added...
     entities = np.unique([entity for entity in entities if entity and ' ' not in entity])
 
