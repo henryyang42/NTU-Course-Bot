@@ -1,6 +1,8 @@
-#from .usersim import UserSimulator
-import argparse, json, random, copy
+import argparse, json, random, copy, re
 
+from django.template import Context, Template
+
+from misc_scripts.generate_template import templates, ask, be
 
 
 class RuleSimulator():
@@ -9,7 +11,10 @@ class RuleSimulator():
     def __init__(self, start_set=None):
         """ Constructor shared by all user simulators """
         self.act_set = ['inform', 'request', 'thanks']
-        self.slot_set = ['serial_no', 'title', 'instructor', 'classroom', 'schedule_str']
+        self.slot_set = ['serial_no', 'title', 'instructor', 'classroom', 'schedule_str', 'designated_for', 'required_elective', 'sel_method']
+        self.inform_set = copy.deepcopy(self.slot_set)
+        self.inform_set.remove('serial_no')
+        self.inform_set.append('when')
         self.max_turn = 20
         self.start_set = start_set
         self.request_slot = 'serial_no' # 
@@ -33,16 +38,6 @@ class RuleSimulator():
         self.reward = 0
         self.episode_over = False
         
-        self.ans = self._sample_goal(self.start_set)
-        self.goal = copy.deepcopy(self.ans)
-        if 'serial_no' in self.goal['inform_slots'].keys():
-            del self.goal['inform_slots']['serial_no']
-
-        # Our Task
-        # Without 'serial_no'
-        self.request_slot = random.choice(self.slot_set[1:])
-        self.goal['request_slots'][self.request_slot] = 'UNK'
-        del self.goal['inform_slots'][self.request_slot]
 
         user_action = self._sample_action()
 
@@ -52,34 +47,43 @@ class RuleSimulator():
 
         """ randomly sample a start action based on user goal """
 
-        action = random.choice(['inform', 'request'])
-        sample_action = {'diaact':action, 'inform_slots':{}, 'request_slots':{}}
-        
-        if action == 'inform':
-            slot = random.choice(list(self.goal['inform_slots'].keys()))
-            sample_action['inform_slots'][slot] = self.goal['inform_slots'][slot]
-        elif action == 'request':
-            sample_action['request_slots'] = self.goal['request_slots']
-        else:
-            pass
-       
-        # User inform/request slots history
-        self.state['history_slots'].update(sample_action['inform_slots'])
-        self.state['history_request_slots'].update(sample_action['request_slots'])
-
-        sample_action['turn'] = self.state['turn']
-        
-        return sample_action
-    
-    def _sample_goal(self, goal_set):
-        """ sample a user goal  """
-        
         sample_course = random.choice(self.start_set)
-        sample_goal = {'inform_slots':{key:sample_course[key] for key in self.slot_set}, 'request_slots':{}}
-        # print(sample_goal)
+        self.ans = {k:sample_course[k] for k in self.slot_set}
+
+        request_type = random.choice([type for type in list(templates.keys()) if 'request' in type])
+        # review not support yet :'(
+        while request_type == 'request_review':
+            request_type = random.choice([type for type in list(templates.keys()) if 'request' in type])
+        #################################################
+
+        tpl = random.choice(templates[request_type])
+
+        # Map schedule_str to when
+        day = re.findall(r'一|二|三|四|五|六|日', self.ans['schedule_str'])
+        time = re.findall(r'\d|[A-D]', self.ans['schedule_str'])
+        self.ans['when'] = ('星期'+ day[0] if day else self.ans['schedule_str'])
+
+        # Template NLG
+        sample_action = {'nl':tpl.render(Context(self.ans)), 'diaact': request_type, 'inform_slots':{},'request_slots':{}}
+        sample_action['request_slots'][request_type.replace('request_','')] = 'UNK'
+        self.request_slot = request_type.replace('request_','')
+
+        # Semantic Frame
+        for node in tpl.nodelist:
+            if node.token.contents in self.inform_set:
+                sample_action['inform_slots'][node.token.contents] = self.ans[node.token.contents]
+       
+        self.state['history_slots'].update(sample_action['inform_slots'])
+
+        # Sample Goal
+        self.goal = {'request_slots':sample_action['request_slots']}
+        self.goal['inform_slots'] = copy.deepcopy(self.ans)
+        self.ans['inform_slots'] = self.ans
+        for slot in self.goal['request_slots'].keys():
+            del self.goal['inform_slots'][slot]
 
 
-        return sample_goal
+        return sample_action
     
         
     def next(self, system_action):
@@ -119,12 +123,13 @@ class RuleSimulator():
         response_action['diaact'] = self.state['diaact']
         response_action['inform_slots'] = self.state['inform_slots']
         response_action['request_slots'] = self.state['request_slots']
+        response_action['nl'] = self.user2nl()
         response_action['turn'] = self.state['turn']
         
         return response_action, self.episode_over
     
     
-    def response_confirm_answer(self, system_action):
+    def response_confirm(self, system_action):
         """ Response for Confirm_Answer (System Action) """
         pass 
             
@@ -204,7 +209,25 @@ class RuleSimulator():
         self.state['inform_slots'].clear()
         self.state['request_slots'].clear()
 
+    def user2nl(self):
 
+        nl_response = 'GG...user2nl壞了'
+        random.shuffle(templates['inform'])
+
+        for tpl in templates['inform']:
+            
+            tpl_keys = [node.token.contents for node in tpl.nodelist if node.token.contents in self.inform_set]
+            choose = True
+            for slot in self.state['inform_slots'].keys():
+                if not slot in tpl_keys:
+                    choose = False
+                    break
+            if choose:
+                nl_response = tpl.render(Context(self.ans))
+                break
+
+        print(nl_response)
+        return nl_response
 
     def reward_function(self):
         return self.reward
@@ -214,3 +237,5 @@ class RuleSimulator():
 
     def episodes_times(self):
         return self.episodes_num, self.correct_num 
+
+

@@ -38,7 +38,7 @@ def usim_initial():
     possible_answer = {request_slot:answer_set,'count':len(answer_set)}
 
     # Add Natural language
-    user_action['nl'] = sem2nl(user_action)
+    #user_action['nl'] = sem2nl(user_action)
 
     return user.goal, user_action, possible_answer['count'], possible_answer[request_slot]
 
@@ -62,7 +62,7 @@ def usim_request(request):
     response = [
         [ "SYS Turn "+ str(user.state['turn']-1), agent_action['diaact'], agent2nl(agent_action)],
         [ "Possible values:", possible_answer['count'], possible_answer[request_slot][0:10]],
-        [ "USR Turn "+str(user.state['turn']), user_action['diaact'], sem2nl(user_action)],
+        [ "USR Turn "+str(user.state['turn']), user_action['diaact'], user_action['nl']],
     ]
 
     # Calculate Reward
@@ -90,7 +90,7 @@ def usim_request(request):
         response.append([ "New Turn!"])
         response.append([ "----------","----------","----------------------------------------"])
         response.append([ "Possible values:", possible_answer['count'], possible_answer[request_slot][0:10]])
-        response.append([ "USR Turn "+str(user_action['turn']), user_action['diaact'], sem2nl(user_action)])
+        response.append([ "USR Turn "+str(user_action['turn']), user_action['diaact'], user_action['nl']])
 
 
     # Dump system status
