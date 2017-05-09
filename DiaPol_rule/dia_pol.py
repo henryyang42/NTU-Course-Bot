@@ -153,6 +153,13 @@ if __name__ == '__main__':
     dia_state["request_slots"] = {"instructor": "林智星"}
     dia_state["inform_slots"] = {"classroom": "?"}
     test_dia_states.append(dia_state)
+    
+    # 3. multiple choices
+    dia_state = {}
+    dia_state["request_slots"] = {"title": "機器學習"}
+    dia_state["inform_slots"] = {"schedule_str": "?"}
+    test_dia_states.append(dia_state)
+
 
     for dia_state in test_dia_states:
         print ("\n== Dialogue State ==")
