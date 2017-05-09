@@ -1,5 +1,5 @@
 # coding: utf-8
-from access_django import *
+from .access_django import *
 import random
 from django.template import Context, Template
 from utils.nlg import *
