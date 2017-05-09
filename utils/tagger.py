@@ -23,6 +23,7 @@ def trim_attr(s):
 
 @run_once
 def jieba_setup():
+    # Use zh-tw for better accuracy
     if not os.path.exists('dict.big.txt'):
         os.system("wget %s -O %s" % (
             'https://raw.githubusercontent.com/fxsjy/jieba/master/extra_dict/dict.txt.big',
@@ -35,6 +36,7 @@ def jieba_setup():
         entities.append(trim_attr(course.title))
         entities.append(trim_attr(course.classroom))
         entities.append(course.instructor)
+        # TODO More slot should be added...
     entities = np.unique([entity for entity in entities if entity and ' ' not in entity])
 
     with open('entity.log', 'w') as f:
