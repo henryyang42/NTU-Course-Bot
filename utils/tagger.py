@@ -36,6 +36,7 @@ def jieba_setup():
         entities.append(trim_attr(course.title))
         entities.append(trim_attr(course.classroom))
         entities.append(course.instructor)
+        entities.append(course.designated_for)
         # TODO More slot should be added...
     entities = np.unique([entity for entity in entities if entity and ' ' not in entity])
 
