@@ -8,7 +8,7 @@ from keras.models import Model, Sequential
 from keras.layers import Dense, Activation, Dropout, Embedding, TimeDistributed, LSTM
 from keras.layers.core import Dropout, Flatten, RepeatVector, Permute
 from keras.layers.wrappers import Bidirectional
-from keras.layers import Input, merge
+from keras.layers import Input, merge, multiply
 from keras.layers.pooling import AveragePooling1D
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import *
@@ -30,6 +30,7 @@ ap.add_argument("out_model", type=str, help="")
 ap.add_argument("out_vocab", type=str, help="word, label, intent vocabulary")
 ap.add_argument("-i", "--epoch", type=int, default=10, help="# epochs")
 ap.add_argument("-lr", "--learning-rate", type=float, default=0.001, help="")
+ap.add_argument("-dr", "--dropout", type=float, default=0.2, help="")
 ap.add_argument("-c", "--cost", type=str, default="categorical_crossentropy", help="loss (cost) function")
 ap.add_argument("-l", "--log", type=str, help="output prediction result for analysis")
 ap.add_argument("-b", "--bi-direct", action="store_true", help="bidirectional LSTM")
@@ -113,31 +114,33 @@ seq_input = Input(shape=(max_seq_len,), dtype='int32')
 # [embedding layer]
 init_emb_W = None #TODO pre-trained word embedding?
 embedding = Embedding(len(idx2word), args.emb_size, input_length=max_seq_len, weights=init_emb_W, trainable=True)(seq_input)
+embedding = Dropout(args.dropout)(embedding)
 
 # [LSTM for slot]
 if args.bi_direct:
-    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout=0.2, recurrent_dropout=0.2, return_sequences=True), name='slot LSTM')(embedding)
+    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True), name='slot LSTM')(embedding)
 else:
-    slot_lstm_out = LSTM(args.emb_size, dropout=0.2, recurrent_dropout=0.2, return_sequences=True, name='slot LSTM')(embedding)
+    slot_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True, name='slot LSTM')(embedding)
 
 if args.batch_norm:
     slot_lstm_out = BatchNormalization(slot_lstm_out)
 
 # [LSTM for intent]
 if args.attention:
-    intent_lstm_out = LSTM(args.emb_size, dropout=0.2, recurrent_dropout=0.2, name='intent LSTM', return_sequences=True)(slot_lstm_out)
+    intent_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, name='intent LSTM', return_sequences=True)(slot_lstm_out)
     attn = TimeDistributed(Dense(1, activation=args.activation))(intent_lstm_out)
     attn = Flatten()(attn)
     attn = Activation('softmax')(attn)
     attn = RepeatVector(args.emb_size)(attn)
     attn = Permute([2, 1])(attn)
     
-    intent_lstm_out = merge([intent_lstm_out, attn], mode='mul')
-    intent_lstm_out = AveragePooling1D(pool_length=max_seq_len)(intent_lstm_out)
+    #intent_lstm_out = merge([intent_lstm_out, attn], mode='mul')
+    intent_lstm_out = multiply([intent_lstm_out, attn])
+    intent_lstm_out = AveragePooling1D(max_seq_len)(intent_lstm_out)
     intent_lstm_out = Flatten()(intent_lstm_out)
 
 else:
-    intent_lstm_out = LSTM(args.emb_size, dropout=0.2, recurrent_dropout=0.2, name='intent LSTM')(slot_lstm_out)
+    intent_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, name='intent LSTM')(slot_lstm_out)
 
 # [transformation for slot]
 x = TimeDistributed(Dense(args.emb_size), name='slot transformation 1')(slot_lstm_out)
