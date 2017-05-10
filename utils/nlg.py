@@ -74,6 +74,21 @@ agent_request_tpl = {
     ]
 }
 
+agent_confirm_tpl = {
+    'title': [
+        Template('請問要找{{title}}這門課嗎?'),
+        Template('請問是不是{{title}}?')
+    ],
+    'instructor': [
+        Template('請問授課教師是{{instructor}}嗎?'),
+        Template('請問是{{instructor}}老師的?')
+    ],
+    'schedule_str': [
+        Template('請問是{{schedule_str}}的課嗎?'),
+        Template('請問上課時段是{{schedule_str}}嗎?')
+    ]
+}
+#FIXME transform 
 
 def sem2nl(sem_in):
     """Convert sementic to NL using template based NLG.
@@ -99,37 +114,36 @@ def agent2nl(sys_act):
 
     res_list = []
     # response in a pre-defined order
-    for slot in ["serial_no", "title", "instructor", "classroom", "schedule_str"]:
-        if slot in sys_act["inform_slots"]:
-            if slot == "serial_no":
-                res_str = "流水號%s。"
-            elif slot == "title":
-                res_str = "課名是%s。"
-            elif slot == "instructor":
-                res_str = "授課教師是%s。"
-            elif slot == "classroom":
-                res_str = "在%s上課。"
-            elif slot == "schedule_str":
-                res_str = "%s上課。"
-            res_str = res_str % sys_act["inform_slots"][slot]
-            res_list.append(res_str)
+    if sys_act["diaact"] == "inform":
+        for slot in ["serial_no", "title", "instructor", "classroom", "schedule_str"]:
+            if slot in sys_act["inform_slots"]:
+                if slot == "serial_no":
+                    res_str = "流水號%s。"
+                elif slot == "title":
+                    res_str = "課名是%s。"
+                elif slot == "instructor":
+                    res_str = "授課教師是%s。"
+                elif slot == "classroom":
+                    res_str = "在%s上課。"
+                elif slot == "schedule_str":
+                    res_str = "%s上課。"
+                res_str = res_str % sys_act["inform_slots"][slot]
+                res_list.append(res_str)
 
     # request in a pre-defined order
-    for slot in ["title", "instructor", "classroom", "schedule_str"]:
-        if slot in sys_act["request_slots"]:
-            '''
-            if slot == "title":
-                res_str = "請問要找哪門課?"
-            elif slot == "instructor":
-                res_str = "請問是哪位老師開的?"
-            elif slot == "classroom":
-                res_str = "請問是在哪上課的?"
-            elif slot == "schedule_str":
-                res_str = "請問是哪個時間上課的?"
-            '''
-            tpl = random.choice(agent_request_tpl[slot])
-            res_str = tpl.render(Context(sys_act["request_slots"]))
-            res_list.append(res_str)
+    if sys_act["diaact"] == "request":
+        for slot in ["title", "instructor", "classroom", "schedule_str"]:
+            if slot in sys_act["request_slots"]:
+                tpl = random.choice(agent_request_tpl[slot])
+                res_str = tpl.render(Context(sys_act["request_slots"]))
+                res_list.append(res_str)
+
+    # confirm: only confirm one slot 
+    if sys_act["diaact"] == "confirm":
+        slot = next(iter(sys_act["inform_slots"]))
+        tpl = random.choice(agent_confirm_tpl[slot])
+        res_str = tpl.render(Context(sys_act["inform_slots"]))
+        res_list.append(res_str)
 
     return "".join(res_list)
 

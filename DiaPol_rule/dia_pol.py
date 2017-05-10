@@ -54,8 +54,24 @@ def get_action_from_frame(dia_state):
     
     # decide action by # courses satisfying the constraints
     unique_found = False
-    if course_ct == 0:  # fail
-        sys_act["diaact"] = "closing"
+    if course_ct == 0:  # no course satisfying all constraints
+        wrong_slot = None
+        # remove the constraints one by one
+        for slot in ["title", "instructor", "schedule_str"]:
+            if slot in dia_state["inform_slots"]:
+                tmp_inform_slots = dia_state["inform_slots"].copy()
+                del tmp_inform_slots[slot]
+                #print (tmp_inform_slots)
+                tmp_cnt = query_course(tmp_inform_slots).count()
+                print ("[INFO] try removing slot %s, # courses = %d" % (slot, tmp_cnt))
+                if tmp_cnt > 0:
+                    wrong_slot = slot
+                    break
+        if wrong_slot is not None:
+            sys_act["diaact"] = "confirm"
+            sys_act["inform_slots"][wrong_slot] = dia_state["inform_slots"][wrong_slot]#TODO
+        else:
+            sys_act["diaact"] = "closing" # not satisfiable
     elif course_ct == 1:
         unique_found = True
     elif course_ct <= 5: # provide choices if the set of courses is small enough
@@ -151,8 +167,8 @@ if __name__ == '__main__':
 
     # 3. unsatisfiable
     dia_state = {}
-    dia_state["request_slots"] = {"instructor": "林智星"}
-    dia_state["inform_slots"] = {"classroom": "?"}
+    dia_state["request_slots"] = {"classroom": "?"}
+    dia_state["inform_slots"] = {"instructor": "林智星"}
     test_dia_states.append(dia_state)
     
     # 3. multiple choices
@@ -160,7 +176,12 @@ if __name__ == '__main__':
     dia_state["request_slots"] = {"schedule_str": "?"}
     dia_state["inform_slots"] = {"title": "機器學習"}
     test_dia_states.append(dia_state)
-
+    
+    # 4. confirm
+    dia_state = {}
+    dia_state["request_slots"] = {"schedule_str": "?"}
+    dia_state["inform_slots"] = {"title": "機協", "instructor": "林軒田"}
+    test_dia_states.append(dia_state)
 
     for dia_state in test_dia_states:
         print ("\n== Dialogue State ==")
@@ -172,8 +193,10 @@ if __name__ == '__main__':
         print (sys_act)
         NL = get_NL_from_action(sys_act)
 
+        '''
         print ("\n== Template-based NLG ==")
         print (NL)
+        '''
 
         print ("----------\n")
 

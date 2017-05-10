@@ -23,12 +23,15 @@ for i in range(N):
 
     for j in range(4):
         tot_turn += 2
-        user_sentence = sem2nl(user_action)
+        #print(user_action, file=f)
+        #user_sentence = sem2nl(user_action)
+        user_sentence = user_action['nl']
         resp = {}
         resp['sementic'], resp['status'], resp['action'], resp['resp_str'] = multi_turn_lu2(uid, user_sentence)
         system_sentence = agent2nl(resp['action'])
         user_action, over = user_sim.next(resp['action'])
         print('User  : %s' % user_sentence, file=f)
+        #print(resp['action'], file=f)
         print('System: %s' % system_sentence, file=f)
         if over or j == 3:
             reward = user_sim.reward_function()
