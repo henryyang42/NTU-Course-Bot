@@ -80,7 +80,7 @@ class RuleSimulator():
         # Sample Goal
         self.goal = {'request_slots':sample_action['request_slots']}
         self.goal['inform_slots'] = copy.deepcopy(self.ans)
-        self.ans['inform_slots'] = self.ans
+
         for slot in self.goal['request_slots'].keys():
             del self.goal['inform_slots'][slot]
 
@@ -155,6 +155,7 @@ class RuleSimulator():
                 self.state['diaact'] = 'request'
                 self.state['request_slots'][slot] = self.goal['request_slots'][slot]
 
+
     def response_multiple_choice(self, system_action):
         """ Response for Confirm_Answer (System Action) """
 
@@ -167,9 +168,9 @@ class RuleSimulator():
         for choice in choices:
             #print(choice)
             choose = True
-            #for slot in choice.keys():
-            for slot in self.slot_set:
-                if choice[slot] != self.ans['inform_slots'][slot]:
+            for slot in choice.keys():
+            #for slot in self.slot_set:
+                if choice[slot] != self.ans[slot]:
                     choose = False
                     break
 
@@ -235,7 +236,7 @@ class RuleSimulator():
 
         # System inform slots must match all slots
         for key in system_action['inform_slots'].keys():
-            if self.ans['inform_slots'][key] != system_action['inform_slots'][key]:
+            if self.ans[key] != system_action['inform_slots'][key]:
                 self.state['diaact'] = 'deny'
 
         # System must inform request slot
@@ -247,7 +248,7 @@ class RuleSimulator():
 
         # System give serial no. 
         if 'serial_no' in system_action['inform_slots'].keys():
-            if self.ans['inform_slots']['serial_no'] == system_action['inform_slots']['serial_no']:
+            if self.ans['serial_no'] == system_action['inform_slots']['serial_no']:
                 self.state['diaact'] = 'thanks'
             else:
                 self.state['diaact'] = 'deny'
