@@ -26,7 +26,7 @@ templates = {
         Template('{{ask}}{{instructor}}在{{when}}有哪些課'),
         Template('{{ask}}{{instructor}}有開哪些課'),
         Template('{{ask}}{{instructor}}有開什麼課'),
-        Template('{{ask}}{{designated_for}}在{when}}有哪些課'),
+        Template('{{ask}}{{designated_for}}在{{when}}有哪些課'),
         Template('{{ask}}{{designated_for}}有開哪些課'),
         Template('{{ask}}{{designated_for}}{{instructor}}老師有開哪些課'),
         Template('{{ask}}{{when}}有哪些課'),
