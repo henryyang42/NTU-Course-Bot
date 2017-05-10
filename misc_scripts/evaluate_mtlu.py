@@ -6,9 +6,9 @@ from utils.nlg import *
 from user_simulator.usersim.usersim_rule import *
 from django.db.models import Q
 from crawler.models import *
+from utils.query import *
 
-
-all_courses = list(Course.objects.filter(~Q(classroom=''),~Q(instructor=''), semester='105-2').all().values())
+all_courses = list(query_course({}).values())
 np.random.shuffle(all_courses)
 
 f = open('mtlu_eval.log', 'w')

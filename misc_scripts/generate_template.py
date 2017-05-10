@@ -227,6 +227,20 @@ templates = {
         Template('別問我'),
         Template('我怎麼知道')
     ],
+    'thanks': [
+        Template('謝謝'),
+        Template('感謝你'),
+        Template('感恩'),
+    ],
+    'deny': [
+        Template('錯了'),
+        Template('爛耶'),
+        Template('太爛了吧'),
+        Template('大錯特錯'),
+    ],
+    'closing': [
+        Template('再見'),
+    ],
     'other': [
         Template('快被當了怎模辦QQ'),
         Template('什麼時候可以停修QQ'),
