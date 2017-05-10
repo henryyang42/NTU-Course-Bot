@@ -40,6 +40,7 @@ class RuleSimulator():
         
 
         user_action = self._sample_action()
+        user_action['turn'] = self.state['turn']
 
         return user_action  
         
@@ -129,6 +130,8 @@ class RuleSimulator():
         response_action['request_slots'] = self.state['request_slots']
         response_action['nl'] = self.user2nl()
         response_action['turn'] = self.state['turn']
+
+        print(response_action)
         
         return response_action, self.episode_over
     
@@ -155,11 +158,11 @@ class RuleSimulator():
         self.state['diaact'] = 'inform'
         self.state['inform_slots'].clear()
         self.state['request_slots'].clear()
-        print(system_action)
+        #print(system_action)
         choices = system_action['choice']
-        print(choices)
+        #print(choices)
         for choice in choices:
-            print(choice)
+            #print(choice)
             choose = True
             for slot in choice.keys():
                 if choice[slot] != self.ans['inform_slots'][slot]:
@@ -168,7 +171,7 @@ class RuleSimulator():
 
             if choose:
                 self.state['inform_slots'] = {slot:choice[slot] for slot in choice.keys()}
-                print(self.state['inform_slots'])
+                #print(self.state['inform_slots'])
                 return
 
         self.state['diaact'] = 'deny'
@@ -210,7 +213,7 @@ class RuleSimulator():
 
             # System request slot is user want
             elif key in self.goal['request_slots'].keys():
-                self.state['diaact'] = "request"
+                self.state['diaact'] = "request_" + key
                 self.state["request_slots"][key] = "UNK"
 
         self.state['history_slots'].update(self.state['inform_slots'])
@@ -221,6 +224,9 @@ class RuleSimulator():
         """ Response for Inform (System Action) """
 
         self.state['diaact'] = 'thanks'
+        self.state['inform_slots'].clear()
+        self.state['request_slots'].clear()
+
         self.episode_over = True
 
         # System inform slots must match all slots
@@ -242,15 +248,14 @@ class RuleSimulator():
             else:
                 self.state['diaact'] = 'deny'
 
-        self.state['inform_slots'].clear()
-        self.state['request_slots'].clear()
+        print(self.state)
 
     def user2nl(self):
 
         nl_response = 'GG...user2nl壞了'
         random.shuffle(templates['inform'])
 
-        for tpl in templates['inform']:
+        for tpl in templates[self.state['diaact']]:
             
             tpl_keys = [node.token.contents for node in tpl.nodelist if node.token.contents in self.inform_set]
             choose = True
