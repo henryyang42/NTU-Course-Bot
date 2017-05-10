@@ -10,6 +10,7 @@ try:
     all_courses = [{k: v for k, v in course.__dict__.items()}
                    for course in Course.objects.filter(semester='105-2')]
     from utils.query import query_course
+    from utils.nlg import *
 except:
     # some fake courses
     all_courses = [
@@ -72,12 +73,15 @@ def get_action_from_frame(dia_state):
             sys_act["inform_slots"][wrong_slot] = dia_state["inform_slots"][wrong_slot]#TODO
         else:
             sys_act["diaact"] = "closing" # not satisfiable
+
     elif course_ct == 1:
         unique_found = True
+
     elif course_ct <= 5: # provide choices if the set of courses is small enough
         sys_act["diaact"] = "multiple_choice"
-        sys_act["choice"] = courses
-    else: # len(courses) >= 2
+        sys_act["choice"] = list(courses) # pass list to user
+
+    else: # len(courses) > 5
         req_slot = None
         max_n = 0
         #for slot in ["title", "instructor", "schedule_str", "classroom"]:# ordered by priority
@@ -191,12 +195,13 @@ if __name__ == '__main__':
 
         print ("\n== System Action ==")
         print (sys_act)
-        NL = get_NL_from_action(sys_act)
 
-        '''
+        #NL = get_NL_from_action(sys_act)
+        NL = agent2nl(sys_act)
+        
         print ("\n== Template-based NLG ==")
         print (NL)
-        '''
+        
 
         print ("----------\n")
 
