@@ -168,8 +168,8 @@ class RuleSimulator():
         for choice in choices:
             #print(choice)
             choose = True
-            for slot in choice.keys():
-            #for slot in self.slot_set:
+            #for slot in choice.keys():
+            for slot in self.slot_set:
                 if choice[slot] != self.ans[slot]:
                     choose = False
                     break
