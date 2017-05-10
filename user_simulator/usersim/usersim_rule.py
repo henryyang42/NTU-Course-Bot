@@ -52,6 +52,7 @@ class RuleSimulator():
         self.ans = {k:sample_course[k] for k in self.slot_set}
 
         request_type = random.choice([type for type in list(templates.keys()) if 'request' in type])
+
         # review not support yet :'(
         while request_type == 'request_review':
             request_type = random.choice([type for type in list(templates.keys()) if 'request' in type])
@@ -99,6 +100,8 @@ class RuleSimulator():
         if (self.max_turn > 0 and self.state['turn'] > self.max_turn):
             self.episode_over = True
             self.state['diaact'] = "closing"
+            self.state['inform_slots'].clear()
+            self.state['request_slots'].clear()
         else:
             self.state['history_slots'].update(self.state['inform_slots'])
             self.state['inform_slots'].clear()
@@ -131,7 +134,7 @@ class RuleSimulator():
         response_action['nl'] = self.user2nl()
         response_action['turn'] = self.state['turn']
 
-        print(response_action)
+        #print(response_action)
         
         return response_action, self.episode_over
     
@@ -205,7 +208,7 @@ class RuleSimulator():
             # Penalty.  system request the constraints had been informed before.
             if key in self.state['history_request_slots'].keys():
                 self.reward = self.reward - 20
-                print(self.reward)
+                #print(self.reward)
 
             # System request slot is user constraints
             if key in self.goal['inform_slots'].keys():
@@ -248,13 +251,19 @@ class RuleSimulator():
             else:
                 self.state['diaact'] = 'deny'
 
-        print(self.state)
+        #print(self.state)
 
     def user2nl(self):
 
         nl_response = 'GG...user2nl壞了'
-        random.shuffle(templates['inform'])
+        random.shuffle(templates[self.state['diaact']])
 
+        # 'schedule_str' not in our templates
+        if 'schedule_str' in self.state['inform_slots'].keys():
+            self.state['inform_slots']['when'] = self.state['inform_slots']['schedule_str']
+            del self.state['inform_slots']['schedule_str']
+
+        # Search suitable template
         for tpl in templates[self.state['diaact']]:
             
             tpl_keys = [node.token.contents for node in tpl.nodelist if node.token.contents in self.inform_set]
@@ -267,7 +276,7 @@ class RuleSimulator():
                 nl_response = tpl.render(Context(self.ans))
                 break
 
-        print(nl_response)
+        #print(nl_response)
         return nl_response
 
     def reward_function(self):
