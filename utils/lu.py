@@ -61,6 +61,7 @@ def single_turn_lu_setup():
 
     # load vocab
     obj = json.load(open('%s/LU_LSTM/re_seg.1K+log_extend_1000.vocab.json' % settings.BASE_DIR, "r"))
+    #obj = json.load(open('%s/LU_LSTM/training_template_1000.vocab.json' % settings.BASE_DIR, "r"))
     idx2label = obj["slot_vocab"]
     idx2intent = obj["intent_vocab"]
     word2idx = {}
@@ -69,6 +70,7 @@ def single_turn_lu_setup():
 
     # load model
     lu_model = load_model('%s/LU_LSTM/PY3--re_seg.1K+log_extend_1000--LSTM.model' % settings.BASE_DIR)
+    #lu_model = load_model('%s/LU_LSTM/PY3--training_template_1000--LSTM.model' % settings.BASE_DIR)
     print('[Info] Single-turn LU model loaded.')
 
     with open('user_log.p', 'wb') as handle:
