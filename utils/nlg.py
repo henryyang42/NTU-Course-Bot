@@ -77,7 +77,7 @@ agent_request_tpl = {
 agent_confirm_tpl = {
     'title': [
         Template('請問要找{{title}}這門課嗎?'),
-        Template('請問是不是{{title}}?')
+        Template('請問課名是不是{{title}}?')
     ],
     'instructor': [
         Template('請問授課教師是{{instructor}}嗎?'),
@@ -88,7 +88,7 @@ agent_confirm_tpl = {
         Template('請問上課時段是{{schedule_str}}嗎?')
     ]
 }
-#FIXME transform 
+#FIXME transform schedule_str
 
 def sem2nl(sem_in):
     """Convert sementic to NL using template based NLG.

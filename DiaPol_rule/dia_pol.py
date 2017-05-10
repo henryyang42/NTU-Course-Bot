@@ -77,14 +77,11 @@ def get_action_from_frame(dia_state):
     elif course_ct == 1:
         unique_found = True
 
-    elif course_ct <= 5: # provide choices if the set of courses is small enough
-        sys_act["diaact"] = "multiple_choice"
-        sys_act["choice"] = list(courses) # pass list to user
-
-    else: # len(courses) > 5
+    else: # [ len(courses) > 1 ] `request` / `multiple_choice`
         req_slot = None
+        choice_set = None
         max_n = 0
-        #for slot in ["title", "instructor", "schedule_str", "classroom"]:# ordered by priority
+        #TODO refine a set of slots that the system can request
         for slot in ["title", "instructor", "schedule_str"]:# ordered by priority
             # don't ask users something they are asking...
             if slot in dia_state["request_slots"]:
@@ -94,16 +91,22 @@ def get_action_from_frame(dia_state):
                 continue
 
             # max # different values --> largest diversity
-            n_values = len(set([c[slot] for c in courses]))
+            values_set = set([c[slot] for c in courses])
+            n_values = len(values_set)
             print ("[INFO] slot %s, # values = %d" % (slot, n_values))
             if n_values > max_n:
                 max_n = n_values
                 req_slot = slot
-        if max_n > 1:
+                choice_set = values_set
+                
+        if max_n <= 1: # only one course satisfy the constraints
+            unique_found = True
+        elif max_n <= 5: # no more than 5 values => `multiple_choice`
+            sys_act["diaact"] = "multiple_choice"
+            sys_act["choice"] = [{req_slot:v} for v in choice_set] # pass list to user
+        else: # `request`
             sys_act["diaact"] = "request"
             sys_act["request_slots"][req_slot] = "?"
-        else: # only one course satisfy the constraints
-            unique_found = True
 
     if unique_found:  # find the unique course
         course = courses[0]
