@@ -40,8 +40,11 @@ def multi_turn_lu2(user_id, sentence, reset=False):
     if not status['request_slots']:
         status['request_slots']['schedule_str' if d['intent'] == 'schedule' else d['intent']] = '?'
     for k, v in d['slot'].items():
+        '''
         if k not in status['inform_slots']:
             status['inform_slots'][k] = v
+        '''
+        status['inform_slots'][k] = v # allow updating slots
 
     action = get_action_from_frame(status)
     # return status, action, agent2nl(action)
@@ -89,5 +92,5 @@ def single_turn_lu(sentence):
     for label, token in zip(labels, tokens):
         if label != 'O':
             d['slot'][label[2:]] = token
-
+    #FIXME handle multiple B_xx for same slot (rule-based decision?)
     return d
