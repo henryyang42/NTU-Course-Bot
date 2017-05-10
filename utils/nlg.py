@@ -81,7 +81,7 @@ agent_confirm_tpl = {
     ],
     'instructor': [
         Template('請問授課教師是{{instructor}}嗎?'),
-        Template('請問是{{instructor}}老師的?')
+        Template('請問是{{instructor}}老師的嗎?')
     ],
     'schedule_str': [
         Template('請問是{{schedule_str}}的課嗎?'),
