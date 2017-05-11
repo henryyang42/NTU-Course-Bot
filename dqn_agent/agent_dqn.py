@@ -57,7 +57,7 @@ class AgentDQN(Agent):
 
         self.cur_bellman_err = 0
 
-        # Prediction Mode: load trained DQN model
+        # Prediction Mode: load trained DQN model (in our case, default = False)
         if params['trained_model_path'] != None:
             self.dqn.model = copy.deepcopy(
                 self.load_trained_DQN(params['trained_model_path']))
@@ -66,12 +66,14 @@ class AgentDQN(Agent):
             self.warm_start = 2
 
     def initialize_episode(self):
-        """ Initialize a new episode. This function is called every time a new episode is run. """
+        """ Initialize a new episode.
+            This function is called every time a new episode is run.
+        """
 
         self.current_slot_id = 0
         self.phase = 0
-        self.request_set = ['moviename', 'starttime',
-                            'city', 'date', 'theater', 'numberofpeople']
+        self.request_set = ['title', 'instructor',
+                            'schedule_str']
 
     def state_to_action(self, state):
         """ DQN: Input state, output action """
@@ -89,51 +91,53 @@ class AgentDQN(Agent):
         kb_results_dict = state['kb_results_dict']
         agent_last = state['agent_action']
 
-        #######################################################################
+        ##################################################################
         #   Create one-hot of acts to represent the current user action
-        #######################################################################
+        ##################################################################
         user_act_rep = np.zeros((1, self.act_cardinality))
         user_act_rep[0, self.act_set[user_action['diaact']]] = 1.0
 
-        #######################################################################
-        #     Create bag of inform slots representation to represent the current user action
-        #######################################################################
+        ##################################################################
+        #     Create bag of inform slots representation to represent the
+        #     current user action
+        ##################################################################
         user_inform_slots_rep = np.zeros((1, self.slot_cardinality))
         for slot in user_action['inform_slots'].keys():
             user_inform_slots_rep[0, self.slot_set[slot]] = 1.0
 
-        #######################################################################
-        #   Create bag of request slots representation to represent the current user action
-        #######################################################################
+        ##################################################################
+        #   Create bag of request slots representation to represent the
+        #   current user action
+        ##################################################################
         user_request_slots_rep = np.zeros((1, self.slot_cardinality))
         for slot in user_action['request_slots'].keys():
             user_request_slots_rep[0, self.slot_set[slot]] = 1.0
 
-        #######################################################################
+        ##################################################################
         #   Creat bag of filled_in slots based on the current_slots
-        #######################################################################
+        ##################################################################
         current_slots_rep = np.zeros((1, self.slot_cardinality))
         for slot in current_slots['inform_slots']:
             current_slots_rep[0, self.slot_set[slot]] = 1.0
 
-        #######################################################################
+        ##################################################################
         #   Encode last agent act
-        #######################################################################
+        ##################################################################
         agent_act_rep = np.zeros((1, self.act_cardinality))
         if agent_last:
             agent_act_rep[0, self.act_set[agent_last['diaact']]] = 1.0
 
-        #######################################################################
+        ##################################################################
         #   Encode last agent inform slots
-        #######################################################################
+        ##################################################################
         agent_inform_slots_rep = np.zeros((1, self.slot_cardinality))
         if agent_last:
             for slot in agent_last['inform_slots'].keys():
                 agent_inform_slots_rep[0, self.slot_set[slot]] = 1.0
 
-        #######################################################################
+        ##################################################################
         #   Encode last agent request slots
-        #######################################################################
+        ##################################################################
         agent_request_slots_rep = np.zeros((1, self.slot_cardinality))
         if agent_last:
             for slot in agent_last['request_slots'].keys():
@@ -141,15 +145,15 @@ class AgentDQN(Agent):
 
         turn_rep = np.zeros((1, 1)) + state['turn'] / 10.
 
-        #######################################################################
+        ##################################################################
         #  One-hot representation of the turn count?
-        #######################################################################
+        ##################################################################
         turn_onehot_rep = np.zeros((1, self.max_turn))
         turn_onehot_rep[0, state['turn']] = 1.0
 
-        #######################################################################
+        ##################################################################
         #   Representation of KB results (scaled counts)
-        #######################################################################
+        ##################################################################
         kb_count_rep = np.zeros((1, self.slot_cardinality + 1)) + \
             kb_results_dict['matching_all_constraints'] / 100.
         for slot in kb_results_dict:
@@ -157,9 +161,9 @@ class AgentDQN(Agent):
                 kb_count_rep[0, self.slot_set[slot]
                              ] = kb_results_dict[slot] / 100.
 
-        #######################################################################
+        ##################################################################
         #   Representation of KB results (binary)
-        #######################################################################
+        ##################################################################
         kb_binary_rep = np.zeros((1, self.slot_cardinality + 1)) + \
             np.sum(kb_results_dict['matching_all_constraints'] > 0.)
         for slot in kb_results_dict:
@@ -246,9 +250,9 @@ class AgentDQN(Agent):
             print("Current Bellman Error %.4f, Experience-Replay Pool %s" %
                   (float(self.cur_bellman_err) / len(self.experience_replay_pool), len(self.experience_replay_pool)))
 
-    ##########################################################################
+    ######################################################################
     #    Debug Functions
-    ##########################################################################
+    ######################################################################
     def save_experience_replay_to_file(self, path):
         """ Save the experience replay pool to a file """
 
