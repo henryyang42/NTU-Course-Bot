@@ -25,8 +25,8 @@ from qlearning import DQN
 
 
 class AgentDQN(Agent):
-    def __init__(self, movie_dict=None, act_set=None, slot_set=None, params=None):
-        self.movie_dict = movie_dict
+    def __init__(self, course_dict=None, act_set=None, slot_set=None, params=None):
+        self.course_dict = course_dict
         self.act_set = act_set
         self.slot_set = slot_set
         self.act_cardinality = len(act_set.keys())
