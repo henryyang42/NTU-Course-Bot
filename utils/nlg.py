@@ -85,10 +85,12 @@ agent_confirm_tpl = {
     ],
     'schedule_str': [
         Template('請問是{{schedule_str}}的課嗎?'),
-        Template('請問上課時段是{{schedule_str}}嗎?')
+        Template('請問上課時段是在{{schedule_str}}嗎?')
     ]
 }
-#FIXME transform schedule_str
+#TODO other system inform slots
+
+agent_choice_tpl = {} #TODO
 
 def sem2nl(sem_in):
     """Convert sementic to NL using template based NLG.
