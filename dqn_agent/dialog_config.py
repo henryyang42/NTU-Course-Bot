@@ -12,8 +12,9 @@ sys_inform_slots = ['serial_no', 'title', 'instructor',
                     'required_elective', 'sel_method']
 
 start_dia_acts = {
-    # 'greeting': [],
-    'request': ['moviename', 'starttime', 'theater', 'city', 'state', 'date', 'genre', 'ticket', 'numberofpeople']
+    'request': ['serial_no', 'title', 'instructor',
+                'classroom', 'schedule_str', 'designated_for',
+                'required_elective', 'sel_method']
 }
 
 #########################################################################

@@ -19,12 +19,36 @@ import copy
 import json
 import pickle
 import numpy as np
-
-from .dialog_config import *
+from dialog_config import *
 from qlearning import DQN
+try:
+    sys.path.append('../')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "NTUCB.settings")
+    django.setup()
+    from crawler.models import *
+    all_courses = [{k: v for k, v in course.__dict__.items()}
+                   for course in Course.objects.filter(semester='105-2')]
+    from utils.query import query_course
+    from utils.nlg import *
+except:
+    # some fake courses
+    all_courses = [
+        {"serial_no": "0001", "title": "機器學習技法", "instructor": "林軒田",
+            "classroom": "資102", "schedule_str": "二5,6"},
+        {"serial_no": "0002", "title": "機器學習技法", "instructor": "張軒田",
+         "classroom": "資102", "schedule_str": "二5,6"},
+        {"serial_no": "0003", "title": "機器學習技法", "instructor": "林軒田",
+         "classroom": "資103", "schedule_str": "二5,6"},
+        {"serial_no": "0004", "title": "機器學習技法", "instructor": "林軒田",
+         "classroom": "資102", "schedule_str": "二7,8"},
+        {"serial_no": "0005", "title": "機器學習技法", "instructor": "林軒田",
+         "classroom": "資204", "schedule_str": "二5,6"}
+    ]
+    print('Fail to connect to DB, use fake courses instead.')
+    print('Please cd to DiaPol-rule folder.')
 
 
-class AgentDQN(Agent):
+class AgentDQN():
     def __init__(self, course_dict=None, act_set=None, slot_set=None, params=None):
         self.course_dict = course_dict
         self.act_set = act_set
@@ -32,12 +56,10 @@ class AgentDQN(Agent):
         self.act_cardinality = len(act_set.keys())
         self.slot_cardinality = len(slot_set.keys())
 
-        self.feasible_actions = dialog_config.feasible_actions
+        self.feasible_actions = feasible_actions
         self.num_actions = len(self.feasible_actions)
 
         self.epsilon = params['epsilon']
-        self.agent_run_mode = params['agent_run_mode']
-        self.agent_act_level = params['agent_act_level']
         self.experience_replay_pool = []  # experience replay pool <s_t, a_t, r_t, s_t+1>
 
         self.experience_replay_pool_size = params.get(
@@ -215,7 +237,7 @@ class AgentDQN(Agent):
         for (i, action) in enumerate(self.feasible_actions):
             if act_slot_response == action:
                 return i
-        print act_slot_response
+        print(act_slot_response)
         raise Exception("action index not found")
         return None
 
@@ -258,10 +280,10 @@ class AgentDQN(Agent):
 
         try:
             pickle.dump(self.experience_replay_pool, open(path, "wb"))
-            print 'saved model in %s' % (path, )
-        except Exception, e:
-            print 'Error: Writing model fails: %s' % (path, )
-            print e
+            print('saved model in %s' % (path, ))
+        except Exception as e:
+            print('Error: Writing model fails: %s' % (path, ))
+            print(e)
 
     def load_experience_replay_from_file(self, path):
         """ Load the experience replay pool from a file"""
@@ -274,5 +296,22 @@ class AgentDQN(Agent):
         trained_file = pickle.load(open(path, 'rb'))
         model = trained_file['model']
 
-        print "trained DQN Parameters:", json.dumps(trained_file['params'], indent=2)
+        print("trained DQN Parameters:", json.dumps(trained_file['params'], indent=2))
         return model
+
+
+if __name__ == "__main__":
+    course_dict = all_courses
+    act_set = {"request": 0, "confirm": 1, "multiple_choice": 2,
+               "inform": 3, "closing": 4}
+    slot_set = {"serial_no": 0, "title": 1, "instructor": 2, "classroom": 3,
+                "schedule_str": 4, "designated_for": 5, "required_elective": 6,
+                "sel_method": 7}
+    dqn_agent_params = {
+        'epsilon': 0.9, 'gamma': 0.9, 'dqn_hidden_size': 50,
+        'experience_replay_pool_size': 1000, 'trained_model_path': None,
+        'predict_mode': False, 'warm_start': 0, 'max_turn': 4}
+
+    dqn_agent = AgentDQN(course_dict=course_dict,
+                         act_set=act_set, slot_set=slot_set, params=dqn_agent_params)
+
