@@ -14,19 +14,18 @@ Command: python ./run.py --agt 9 --usr 1 --max_turn 40 --movie_kb_path .\deep_di
 '''
 
 
-import random, copy, json
-import cPickle as pickle
+import random
+import copy
+import json
+import pickle
 import numpy as np
 
-from deep_dialog import dialog_config
-
-from agent import Agent
-from deep_dialog.qlearning import DQN
-
+from .dialog_config import *
+from qlearning import DQN
 
 
 class AgentDQN(Agent):
-    def __init__(self, movie_dict=None, act_set=None, slot_set=None, params=None):
+    def __init__(self, course_dict=None, act_set=None, slot_set=None, params=None):
         self.movie_dict = movie_dict
         self.act_set = act_set
         self.slot_set = slot_set
@@ -37,8 +36,6 @@ class AgentDQN(Agent):
         self.num_actions = len(self.feasible_actions)
 
         self.epsilon = params['epsilon']
-        self.agent_run_mode = params['agent_run_mode']
-        self.agent_act_level = params['agent_act_level']
         self.experience_replay_pool = [] # experience replay pool <s_t, a_t, r_t, s_t+1>
 
         self.experience_replay_pool_size = params.get('experience_replay_pool_size', 1000)
