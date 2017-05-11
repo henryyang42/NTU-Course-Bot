@@ -58,6 +58,39 @@ def multi_turn_lu2(user_id, sentence, reset=False):
     #return d, status, action, get_NL_from_action(action)
 
 
+def multi_turn_lu3(user_id, sentence, reset=False):
+    single_turn_lu_setup()
+    with open('user_log.p', 'rb') as handle:
+        user_log = pickle.load(handle)
+    if reset:
+        user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
+        with open('user_log.p', 'wb') as handle:
+            pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        return
+    status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
+    d = single_turn_lu(sentence)
+    if 'when' in d['slot']:
+        d['slot']['schedule_str'] = d['slot']['when'][-1]
+        d['slot'].pop('when')
+
+    if d['intent'].startswith('request'):
+        status['request_slots'][d['intent'][8:]] = '?'
+    elif d['intent'] == 'inform':
+        for k, v in d['slot'].items():
+            status['inform_slots'][k] = v
+
+    action = get_action_from_frame(status)
+    # return status, action, agent2nl(action)
+    if action['diaact'] in ['inform', 'closing']:
+        user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
+    else:
+        user_log[user_id] = status
+    with open('user_log.p', 'wb') as handle:
+        pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    return d, status, action, agent2nl(action)
+    #return d, status, action, get_NL_from_action(action)
+
+
 @run_once
 def single_turn_lu_setup():
     global lu_model, idx2label, idx2intent, word2idx
