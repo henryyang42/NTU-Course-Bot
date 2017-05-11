@@ -59,7 +59,7 @@ def cut(sentence):
 
 
 def BIO(sentence, context):
-    inv_context = {v.strip(): k for k, v in context.items()}
+    inv_context = {str(v).strip(): k for k, v in context.items()}
     toks = sentence.replace(' ', '')
     toks = cut(toks)
     tags = ['O'] * len(toks)
