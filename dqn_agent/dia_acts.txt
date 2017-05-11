@@ -1,0 +1,5 @@
+request
+confirm
+multiple_choice
+inform
+closing
