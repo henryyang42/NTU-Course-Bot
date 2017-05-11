@@ -21,6 +21,9 @@ import pickle
 import numpy as np
 from dialog_config import *
 from qlearning import DQN
+from user_simulator.usersim.usersim_rule import *
+from util import *
+from utils.nlg import *
 try:
     sys.path.append('../')
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "NTUCB.settings")
@@ -71,7 +74,9 @@ class AgentDQN():
 
         self.max_turn = params['max_turn'] + 4
         self.state_dimension = 2 * self.act_cardinality + \
-            7 * self.slot_cardinality + 3 + self.max_turn
+                               7 * self.slot_cardinality + \
+                               3 + \
+                               self.max_turn
 
         self.dqn = DQN(self.state_dimension,
                        self.hidden_size, self.num_actions)
@@ -91,7 +96,6 @@ class AgentDQN():
         """ Initialize a new episode.
             This function is called every time a new episode is run.
         """
-
         self.current_slot_id = 0
         self.phase = 0
         self.request_set = ['title', 'instructor',
@@ -99,7 +103,6 @@ class AgentDQN():
 
     def state_to_action(self, state):
         """ DQN: Input state, output action """
-
         self.representation = self.prepare_state_representation(state)
         self.action = self.run_policy(self.representation)
         act_slot_response = copy.deepcopy(self.feasible_actions[self.action])
@@ -107,7 +110,6 @@ class AgentDQN():
 
     def prepare_state_representation(self, state):
         """ Create the representation for each state """
-
         user_action = state['user_action']
         current_slots = state['current_slots']
         kb_results_dict = state['kb_results_dict']
@@ -193,8 +195,9 @@ class AgentDQN():
                 kb_binary_rep[0, self.slot_set[slot]] = np.sum(
                     kb_results_dict[slot] > 0.)
 
-        self.final_representation = np.hstack([user_act_rep, user_inform_slots_rep, user_request_slots_rep, agent_act_rep,
-                                               agent_inform_slots_rep, agent_request_slots_rep, current_slots_rep, turn_rep, turn_onehot_rep, kb_binary_rep, kb_count_rep])
+        self.final_representation = np.hstack([user_act_rep,user_inform_slots_rep, user_request_slots_rep,
+                                               agent_act_rep, agent_inform_slots_rep, agent_request_slots_rep,
+                                               current_slots_rep, turn_rep, turn_onehot_rep, kb_binary_rep, kb_count_rep])
         return self.final_representation
 
     def run_policy(self, representation):
@@ -302,16 +305,222 @@ class AgentDQN():
 
 if __name__ == "__main__":
     course_dict = all_courses
-    act_set = {"request": 0, "confirm": 1, "multiple_choice": 2,
-               "inform": 3, "closing": 4}
-    slot_set = {"serial_no": 0, "title": 1, "instructor": 2, "classroom": 3,
-                "schedule_str": 4, "designated_for": 5, "required_elective": 6,
-                "sel_method": 7}
+    act_set = text_to_dict("./dqn_agent/dia_acts.txt")
+    slot_set = text_to_dict("./dqn_agent/slot_set.txt")
     dqn_agent_params = {
         'epsilon': 0.9, 'gamma': 0.9, 'dqn_hidden_size': 50,
         'experience_replay_pool_size': 1000, 'trained_model_path': None,
         'predict_mode': False, 'warm_start': 0, 'max_turn': 4}
 
+    user_sim = RuleSimulator(course_dict)
     dqn_agent = AgentDQN(course_dict=course_dict,
                          act_set=act_set, slot_set=slot_set, params=dqn_agent_params)
 
+
+    status = {'successes': 0, 'count': 0, 'cumulative_reward': 0}
+    simulation_epoch_size = params['simulation_epoch_size']
+    batch_size = 16
+    warm_start = 1
+    warm_start_epochs = 100
+    success_rate_threshold = 0.3
+    save_check_point = 10
+
+
+    """ Initialization of Best Model and Performance Records """
+    best_model = {}
+    best_res = {'success_rate': 0, 'ave_reward': float(
+        '-inf'), 'ave_turns': float('inf'), 'epoch': 0}
+    best_model['model'] = copy.deepcopy(agent)
+    best_res['success_rate'] = 0
+
+    performance_records = {}
+    performance_records['success_rate'] = {}
+    performance_records['ave_turns'] = {}
+    performance_records['ave_reward'] = {}
+
+
+""" Run N-Simulation Dialogues """
+def simulation_epoch(simulation_epoch_size):
+    successes = 0
+    cumulative_reward = 0
+    cumulative_turns = 0
+
+    res = {}
+    for episode in range(simulation_epoch_size):
+        dialog_manager.initialize_episode()
+        episode_over = False
+        while not episode_over:
+            episode_over, reward = dialog_manager.next_turn()
+            cumulative_reward += reward
+            if episode_over:
+                if reward > 0:
+                    successes += 1
+                    print("simulation episode %s: Success" % (episode))
+                else:
+                    print("simulation episode %s: Fail" % (episode))
+                cumulative_turns += dialog_manager.state_tracker.turn_count
+
+    res['success_rate'] = float(successes) / simulation_epoch_size
+    res['ave_reward'] = float(cumulative_reward) / simulation_epoch_size
+    res['ave_turns'] = float(cumulative_turns) / simulation_epoch_size
+    print("simulation success rate %s, ave reward %s, ave turns %s" %
+          (res['success_rate'], res['ave_reward'], res['ave_turns']))
+    return(res)
+
+
+""" Warm_Start Simulation (by Rule Policy) """
+def warm_start_simulation():
+    successes = 0
+    cumulative_reward = 0
+    cumulative_turns = 0
+
+    res = {}
+    for episode in range(warm_start_epochs):
+        dialog_manager.initialize_episode()
+        episode_over = False
+        while not episode_over:
+            episode_over, reward = dialog_manager.next_turn()
+            cumulative_reward += reward
+            if episode_over:
+                if reward > 0:
+                    successes += 1
+                    print("warm_start simulation episode %s: Success" %
+                          (episode))
+                else:
+                    print("warm_start simulation episode %s: Fail" % (episode))
+                cumulative_turns += dialog_manager.state_tracker.turn_count
+
+        if len(agent.experience_replay_pool) >= agent.experience_replay_pool_size:
+            break
+
+    agent.warm_start = 2  # just a counter to avoid executing warm simulation twice
+    res['success_rate'] = float(successes) / simulation_epoch_size
+    res['ave_reward'] = float(cumulative_reward) / simulation_epoch_size
+    res['ave_turns'] = float(cumulative_turns) / simulation_epoch_size
+    print("Warm_Start %s epochs, success rate %s, ave reward %s, ave turns %s" % (
+        episode + 1, res['success_rate'], res['ave_reward'], res['ave_turns']))
+    print("Current experience replay buffer size %s" %
+          (len(agent.experience_replay_pool)))
+
+
+def next_turn(state, record_training_data=True):
+    """ This function initiates each subsequent exchange between agent and user (agent first) """
+    ########################################################################
+    #   CALL AGENT TO TAKE ITS TURN
+    ########################################################################
+    # self.state = self.state_tracker.get_state_for_agent()
+    agent_action = self.agent.state_to_action(state)
+
+    #######################################################################
+    #   Register AGENT action with the state_tracker
+    #######################################################################
+    # self.state_tracker.update(agent_action=self.agent_action)
+
+    # add NL to Agent Dia_Act
+    system_sentence = agent2nl(agent_action)
+    # self.agent.add_nl_to_action(self.agent_action)
+    # self.print_function(
+    #     agent_action=self.agent_action['act_slot_response'])
+
+    #######################################################################
+    #   CALL USER TO TAKE HIS OR HER TURN
+    #######################################################################
+    sys_action = self.state_tracker.dialog_history_dictionaries()[-1]
+    resp = {}
+    resp['sementic'], resp['status'], resp['action'], resp['resp_str'] = multi_turn_lu2(uid, user_sentence)
+    user_action, over = user_sim.next(resp['action'])
+    # self.user_action, self.episode_over, dialog_status = self.user.next(
+    #     self.sys_action)
+    # self.reward = self.reward_function(dialog_status)
+
+    #######################################################################
+    #   Update state tracker with latest user action
+    #######################################################################
+    if self.episode_over != True:
+        self.state_tracker.update(user_action=self.user_action)
+        self.print_function(user_action=self.user_action)
+
+    #######################################################################
+    #  Inform agent of the outcome for this timestep (s_t, a_t, r, s_{t+1}, episode_over)
+    #######################################################################
+    if record_training_data:
+        self.agent.register_experience_replay_tuple(
+            self.state, self.agent_action, self.reward, self.state_tracker.get_state_for_agent(), self.episode_over)
+
+def run_episodes(count, status, dqn_agent, user_sim, params):
+    successes = 0
+    cumulative_reward = 0
+    cumulative_turns = 0
+
+    if agt == 9 and params['trained_model_path'] == None and warm_start == 1:
+        print('warm_start starting ...')
+        warm_start_simulation()
+        print('warm_start finished, start RL training ...')
+
+    for episode in range(count):
+        print("Episode: %s" % (episode))
+        user_action = user_sim.initialize_episode()
+        dqn_agent.initialize_episode()
+        reward = 0
+        episode_over = False
+        # dialog_manager.initialize_episode()
+
+        while not episode_over:
+            episode_over, reward = next_turn()
+            cumulative_reward += reward
+
+            if episode_over:
+                if reward > 0:
+                    print("Successful Dialog!")
+                    successes += 1
+                else:
+                    print("Failed Dialog!")
+
+                cumulative_turns += dialog_manager.state_tracker.turn_count
+
+        # simulation
+        if agt == 9 and params['trained_model_path'] == None:
+            agent.predict_mode = True
+            simulation_res = simulation_epoch(simulation_epoch_size)
+
+            performance_records['success_rate'][episode] = simulation_res['success_rate']
+            performance_records['ave_turns'][episode] = simulation_res['ave_turns']
+            performance_records['ave_reward'][episode] = simulation_res['ave_reward']
+
+            if simulation_res['success_rate'] >= best_res['success_rate']:
+                if simulation_res['success_rate'] >= success_rate_threshold:  # threshold = 0.30
+                    agent.experience_replay_pool = []
+                    simulation_epoch(simulation_epoch_size)
+
+            if simulation_res['success_rate'] > best_res['success_rate']:
+                best_model['model'] = copy.deepcopy(agent)
+                best_res['success_rate'] = simulation_res['success_rate']
+                best_res['ave_reward'] = simulation_res['ave_reward']
+                best_res['ave_turns'] = simulation_res['ave_turns']
+                best_res['epoch'] = episode
+
+            agent.clone_dqn = copy.deepcopy(agent.dqn)
+            agent.train(batch_size, 1)
+            agent.predict_mode = False
+
+            print("Simulation success rate %s, Ave reward %s, Ave turns %s, Best success rate %s" % (
+                performance_records['success_rate'][episode], performance_records['ave_reward'][episode], performance_records['ave_turns'][episode], best_res['success_rate']))
+            # save the model every 10 episodes
+            if episode % save_check_point == 0 and params['trained_model_path'] == None:
+                save_model(params['write_model_dir'], agt, best_res['success_rate'],
+                           best_model['model'], best_res['epoch'], episode)
+                save_performance_records(
+                    params['write_model_dir'], agt, performance_records)
+
+        print("Progress: %s / %s, Success rate: %s / %s Avg reward: %.2f Avg turns: %.2f" % (episode + 1, count,
+                                                                                             successes, episode + 1, float(cumulative_reward) / (episode + 1), float(cumulative_turns) / (episode + 1)))
+    print("Success rate: %s / %s Avg reward: %.2f Avg turns: %.2f" % (successes,
+                                                                      count, float(cumulative_reward) / count, float(cumulative_turns) / count))
+    status['successes'] += successes
+    status['count'] += count
+
+    if agt == 9 and params['trained_model_path'] == None:
+        save_model(params['write_model_dir'], agt, float(
+            successes) / count, best_model['model'], best_res['epoch'], count)
+        save_performance_records(
+            params['write_model_dir'], agt, performance_records)
