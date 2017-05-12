@@ -75,6 +75,8 @@ def multi_turn_lu3(user_id, sentence, reset=False):
 
     if d['intent'].startswith('request'):
         status['request_slots'][d['intent'][8:]] = '?'
+        for k, v in d['slot'].items():
+            status['inform_slots'][k] = v
     elif d['intent'] == 'inform':
         for k, v in d['slot'].items():
             status['inform_slots'][k] = v
