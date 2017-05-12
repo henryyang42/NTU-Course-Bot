@@ -59,7 +59,7 @@ def multi_turn_lu2(user_id, sentence, reset=False):
 
 
 def multi_turn_lu3(user_id, sentence, reset=False):
-    single_turn_lu_setup()
+    single_turn_lu_setup_new()
     with open('user_log.p', 'rb') as handle:
         user_log = pickle.load(handle)
     if reset:
@@ -97,7 +97,6 @@ def single_turn_lu_setup():
 
     # load vocab
     obj = json.load(open('%s/LU_LSTM/re_seg.1K+log_extend_1000.vocab.json' % settings.BASE_DIR, "r"))
-    #obj = json.load(open('%s/LU_LSTM/training_template_1000.vocab.json' % settings.BASE_DIR, "r"))
     idx2label = obj["slot_vocab"]
     idx2intent = obj["intent_vocab"]
     word2idx = {}
@@ -106,11 +105,30 @@ def single_turn_lu_setup():
 
     # load model
     lu_model = load_model('%s/LU_LSTM/PY3--re_seg.1K+log_extend_1000--LSTM.model' % settings.BASE_DIR)
-    #lu_model = load_model('%s/LU_LSTM/PY3--training_template_1000--LSTM.model' % settings.BASE_DIR)
     print('[Info] Single-turn LU model loaded.')
 
     with open('user_log.p', 'wb') as handle:
         pickle.dump({}, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+@run_once
+def single_turn_lu_setup_new(): # load new LU models (output new intents)
+    global lu_model, idx2label, idx2intent, word2idx
+
+    # load vocab
+    obj = json.load(open('%s/LU_LSTM/training_template0511.vocab.json' % settings.BASE_DIR, "r"))
+    idx2label = obj["slot_vocab"]
+    idx2intent = obj["intent_vocab"]
+    word2idx = {}
+    for i, w in enumerate(obj["word_vocab"]):
+        word2idx[w] = i
+
+    # load model
+    lu_model = load_model('%s/LU_LSTM/PY3--training_template0511--LSTM.model' % settings.BASE_DIR)
+    print('[Info] Single-turn LU model loaded.')
+
+    with open('user_log.p', 'wb') as handle:
+        pickle.dump({}, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 
 def single_turn_lu(sentence):
