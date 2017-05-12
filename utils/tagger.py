@@ -55,11 +55,11 @@ def cut(sentence):
         Entities will be tokenized in this function.
     """
     jieba_setup()
-    return list(jieba.cut(sentence))
+    return list([tok.strip() for tok in jieba.cut(sentence) if tok.strip()])
 
 
 def BIO(sentence, context):
-    inv_context = {v: k for k, v in context.items()}
+    inv_context = {str(v).strip(): k for k, v in context.items()}
     toks = sentence.replace(' ', '')
     toks = cut(toks)
     tags = ['O'] * len(toks)
