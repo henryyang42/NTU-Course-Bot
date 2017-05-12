@@ -253,8 +253,9 @@ class RuleSimulator():
 
         # 'schedule_str' not in our templates
         if 'schedule_str' in self.state['inform_slots'].keys():
-            self.state['inform_slots']['when'] = self.state['inform_slots']['schedule_str']
-            self.ans['when'] = self.state['inform_slots']['when']
+            # self.state['inform_slots']['when'] = self.state['inform_slots']['schedule_str']
+            # self.ans['when'] = self.state['inform_slots']['when']
+            self.state['inform_slots']['when'] = self.ans['when']
             del self.state['inform_slots']['schedule_str']
 
         # Search suitable template
