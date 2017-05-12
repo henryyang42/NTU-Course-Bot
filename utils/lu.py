@@ -68,7 +68,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
             pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
         return
     status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
-    d = single_turn_lu(sentence)
+    d = single_turn_lu_new(sentence)
     if 'when' in d['slot']:
         d['slot']['schedule_str'] = d['slot']['when'][-1]
         d['slot'].pop('when')
@@ -133,6 +133,21 @@ def single_turn_lu_setup_new(): # load new LU models (output new intents)
 
 def single_turn_lu(sentence):
     single_turn_lu_setup()
+    tokens = cut(sentence)
+    intent, tokens, labels = get_intent_slot(
+        lu_model, tokens, word2idx, idx2label, idx2intent
+    )
+
+    print (tokens, labels, intent)
+    d = {'tokens': tokens, 'labels': labels, 'intent': intent, 'slot': {}}
+    for label, token in zip(labels, tokens):
+        if label != 'O':
+            d['slot'][label[2:]] = token
+    #FIXME handle multiple B_xx for same slot (rule-based decision?)
+    return d
+
+def single_turn_lu_new(sentence):
+    single_turn_lu_setup_new()
     tokens = cut(sentence)
     intent, tokens, labels = get_intent_slot(
         lu_model, tokens, word2idx, idx2label, idx2intent
