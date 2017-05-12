@@ -83,9 +83,10 @@ def get_action_from_frame(dia_state):
         max_n = 0
         #TODO refine a set of slots that the system can request
         for slot in ["title", "instructor", "schedule_str"]:# ordered by priority
-            # don't ask users something they are asking...
+            '''
             if slot in dia_state["request_slots"]:
                 continue
+            '''
             # don't ask users something already known
             if slot in dia_state["inform_slots"]:
                 continue
@@ -95,9 +96,10 @@ def get_action_from_frame(dia_state):
             n_values = len(values_set)
             print ("[INFO] slot %s, # values = %d" % (slot, n_values))
             if n_values > max_n:
-                max_n = n_values
-                req_slot = slot
-                choice_set = values_set
+                if n_values <= 5 or slot not in dia_state["request_slots"]: # don't ask users something they are asking...
+                    max_n = n_values
+                    req_slot = slot
+                    choice_set = values_set
                 
         if max_n <= 1: # only one course satisfy the constraints
             unique_found = True
