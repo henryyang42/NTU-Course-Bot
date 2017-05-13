@@ -140,12 +140,18 @@ def agent2nl(sys_act):
                 res_str = tpl.render(Context(sys_act["request_slots"]))
                 res_list.append(res_str)
 
-    # confirm: only confirm one slot 
+    # confirm: only confirm one slot
     if sys_act["diaact"] == "confirm":
         slot = next(iter(sys_act["inform_slots"]))
         tpl = random.choice(agent_confirm_tpl[slot])
         res_str = tpl.render(Context(sys_act["inform_slots"]))
         res_list.append(res_str)
+
+    if sys_act["diaact"] == "multiple_choice":
+        res_list.append("請從以下選擇一個：<br>")
+        for course in sys_act["choice"]:
+            for k, v in course.items():
+                res_list.append("<a href='#' onclick=\"scope.send('%s')\">%s</a><br>" % (v, v))
 
     return "".join(res_list)
 
