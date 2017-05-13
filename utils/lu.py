@@ -155,8 +155,21 @@ def single_turn_lu_new(sentence):
 
     print (tokens, labels, intent)
     d = {'tokens': tokens, 'labels': labels, 'intent': intent, 'slot': {}}
+    # select heuristically from multiple B_xx for same slot
+    slot_value_list = {}
     for label, token in zip(labels, tokens):
         if label != 'O':
-            d['slot'][label[2:]] = token
-    #FIXME handle multiple B_xx for same slot (rule-based decision?)
+            slot, value = label[2:], token
+            if slot not in slot_value_list:
+                slot_value_list[slot] = []
+            slot_value_list[slot].append( value )
+    for slot in slot_value_list: # Comparison rule: (1)longer first (2)left first
+        max_n_char = 0
+        best_value = None
+        for value in slot_value_list[slot]:
+            n_char = len(list(value))
+            if n_char > max_n_char:
+                max_n_char = n_char
+                best_value = value
+        d['slot'][slot] = best_value
     return d
