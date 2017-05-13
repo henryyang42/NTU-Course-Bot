@@ -81,16 +81,13 @@ def get_action_from_frame(dia_state):
     else: # [ len(courses) > 1 ] `request` / `multiple_choice`
         req_slot = None
         choice_set = None
-        max_n = 0
         req_max_n = 0 # only consider the slots that can be requested
         #TODO refine a set of slots that the system can request
         for slot in ["title", "instructor", "designated_for", "schedule_str"]:# ordered by priority
             # max # different values --> largest diversity
-            values_set = set([c[slot] for c in courses])
+            values_set = set([c[slot] for c in courses if len(c[slot])>0])
             n_values = len(values_set)
             print ("[INFO] slot %s, # values = %d" % (slot, n_values))
-            if n_values > max_n: # for checking whether a unique course is found
-                max_n = n_values
 
             if n_values > req_max_n:
                 if n_values > 5: # not taking `multiple_choice` action
@@ -106,9 +103,9 @@ def get_action_from_frame(dia_state):
                 req_slot = slot
                 choice_set = values_set
 
-        if max_n <= 1: # only one course satisfy the constraints
+        if req_max_n <= 1: # only one course satisfy the constraints
             unique_found = True
-        elif choice_set is not None and req_max_n <= 5: # no more than 5 values => `multiple_choice`
+        elif req_max_n <= 5: # no more than 5 values => `multiple_choice`
             sys_act["diaact"] = "multiple_choice"
             sys_act["choice"] = [{req_slot:v} for v in choice_set] # pass list to user
         elif req_slot is not None: # `request`
