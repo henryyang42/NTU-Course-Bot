@@ -154,7 +154,7 @@ def agent2nl(sys_act):
             for k, v in course.items():
                 if k == 'schedule_str':
                     v = '星期' + v[0]
-                res_list.append("<a href='#' onclick=\"scope.send('%s')\">%s</a><br>" % (v, v))
+                res_list.append("<a href='#' class='selection'>%s</a><br>" % (v))
         res_list = sorted(np.unique(res_list))
         res_list = ["請從以下選擇一個：<br>"] + res_list
 

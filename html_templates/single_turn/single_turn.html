@@ -309,10 +309,13 @@
           add_message(server_tpl.format(
             '{0}<br><br>{1}<br><i id="sucks{2}" onClick="sucks({2})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, JSON.stringify(data), data.id), now()));
           speak(data.resp_str);
+          $('.selection').click(function () {
+            $scope.send($(this).html());
+          })
         });
     }
   });
-    var scope;
+  var scope;
   $(function() {
     scope = angular.element($("#demo-chat-body")).scope();
   })
