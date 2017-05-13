@@ -143,7 +143,8 @@ def agent2nl(sys_act):
     # confirm: only confirm one slot
     if sys_act["diaact"] == "confirm":
         slot = next(iter(sys_act["inform_slots"]))
-        tpl = random.choice(agent_confirm_tpl[slot])
+        #tpl = random.choice(agent_confirm_tpl[slot])
+        tpl = random.choice(agent_request_tpl[slot]) # System just requests the slot again
         res_str = tpl.render(Context(sys_act["inform_slots"]))
         res_list.append(res_str)
 
