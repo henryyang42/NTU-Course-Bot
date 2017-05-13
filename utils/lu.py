@@ -77,7 +77,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         status['request_slots'][d['intent'][8:]] = '?'
 
     for k, v in d['slot'].items():
-        if len(v) > 1:
+        if len(v) > 1 or k in ['schedule_str']:
             status['inform_slots'][k] = v
     action = get_action_from_frame(status)
     # return status, action, agent2nl(action)
