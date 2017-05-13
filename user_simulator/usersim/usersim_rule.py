@@ -133,8 +133,6 @@ class RuleSimulator():
         response_action['request_slots'] = self.state['request_slots']
         response_action['nl'] = self.user2nl()
         response_action['turn'] = self.state['turn']
-
-        #print(response_action)
         
         return response_action, self.episode_over
     
@@ -152,8 +150,8 @@ class RuleSimulator():
 
         for slot in system_action['request_slots'].keys():
             if slot in self.goal['request_slots'][slot]:
-                self.state['diaact'] = 'request'
-                self.state['request_slots'][slot] = self.goal['request_slots'][slot]
+                self.state['diaact'] = 'request_' + slot
+                self.state['request_slots'][slot] = 'UNK'
 
 
     def response_multiple_choice(self, system_action):
@@ -162,20 +160,16 @@ class RuleSimulator():
         self.state['diaact'] = 'inform'
         self.state['inform_slots'].clear()
         self.state['request_slots'].clear()
-        #print(system_action)
         choices = system_action['choice']
-        #print(choices)
         for choice in choices:
-            #print(choice)
             choose = True
             for slot in choice.keys():
-                if slot in self.ans[slot] and choice[slot] != self.ans[slot]:
+                if (not slot in self.ans) or (choice[slot] != self.ans[slot]):
                     choose = False
                     break
 
             if choose:
                 self.state['inform_slots'] = {slot:choice[slot] for slot in choice.keys()}
-                #print(self.state['inform_slots'])
                 return
 
         self.state['diaact'] = 'deny'
@@ -209,7 +203,6 @@ class RuleSimulator():
             # Penalty.  system request the constraints had been informed before.
             if key in self.state['history_request_slots'].keys():
                 self.reward = self.reward - 20
-                #print(self.reward)
 
             # System request slot is user constraints
             if key in self.goal['inform_slots'].keys():
@@ -252,7 +245,6 @@ class RuleSimulator():
             else:
                 self.state['diaact'] = 'deny'
 
-        #print(self.state)
 
     def user2nl(self):
 
@@ -261,7 +253,9 @@ class RuleSimulator():
 
         # 'schedule_str' not in our templates
         if 'schedule_str' in self.state['inform_slots'].keys():
-            self.state['inform_slots']['when'] = self.state['inform_slots']['schedule_str']
+            # self.state['inform_slots']['when'] = self.state['inform_slots']['schedule_str']
+            # self.ans['when'] = self.state['inform_slots']['when']
+            self.state['inform_slots']['when'] = self.ans['when']
             del self.state['inform_slots']['schedule_str']
 
         # Search suitable template
@@ -277,8 +271,8 @@ class RuleSimulator():
                 nl_response = tpl.render(Context(self.ans))
                 break
 
-        #print(nl_response)
         return nl_response
+
 
     def reward_function(self):
         return self.reward
