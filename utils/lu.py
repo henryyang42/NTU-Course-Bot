@@ -77,7 +77,8 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         status['request_slots'][d['intent'][8:]] = '?'
 
     for k, v in d['slot'].items():
-        status['inform_slots'][k] = v
+        if len(v) > 1:
+            status['inform_slots'][k] = v
     action = get_action_from_frame(status)
     # return status, action, agent2nl(action)
     if action['diaact'] in ['inform', 'closing']:
