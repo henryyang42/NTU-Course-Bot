@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from django.template import Context, Template
 from .query import query_course
 
@@ -152,7 +153,10 @@ def agent2nl(sys_act):
         res_list.append("請從以下選擇一個：<br>")
         for course in sys_act["choice"]:
             for k, v in course.items():
+                if k == 'schedule_str':
+                    v = '星期' + v[0]
                 res_list.append("<a href='#' onclick=\"scope.send('%s')\">%s</a><br>" % (v, v))
+        res_list = sorted(np.unique(res_list))
 
     return "".join(res_list)
 
