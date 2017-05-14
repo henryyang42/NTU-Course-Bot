@@ -3,6 +3,7 @@ dict.big.txt
 word2vec_corpus.tmp
 word2vec_corpus
 word2vec_corpus_phrases
+whoosh_index
 
 # Static files
 static
