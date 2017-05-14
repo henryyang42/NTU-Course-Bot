@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from django.template import Context, Template
 from .query import query_course
 
@@ -120,7 +121,7 @@ def agent2nl(sys_act):
         for slot in ["serial_no", "title", "instructor", "classroom", "schedule_str"]:
             if slot in sys_act["inform_slots"]:
                 if slot == "serial_no":
-                    res_str = "流水號%s。"
+                    res_str = "流水號<a href='#' class='serial_no'>%s</a>。"
                 elif slot == "title":
                     res_str = "課名是%s。"
                 elif slot == "instructor":
@@ -143,15 +144,19 @@ def agent2nl(sys_act):
     # confirm: only confirm one slot
     if sys_act["diaact"] == "confirm":
         slot = next(iter(sys_act["inform_slots"]))
-        tpl = random.choice(agent_confirm_tpl[slot])
+        #tpl = random.choice(agent_confirm_tpl[slot])
+        tpl = random.choice(agent_request_tpl[slot]) # System just requests the slot again
         res_str = tpl.render(Context(sys_act["inform_slots"]))
         res_list.append(res_str)
 
     if sys_act["diaact"] == "multiple_choice":
-        res_list.append("請從以下選擇一個：<br>")
         for course in sys_act["choice"]:
             for k, v in course.items():
-                res_list.append("<a href='#' onclick=\"scope.send('%s')\">%s</a><br>" % (v, v))
+                if k == 'schedule_str':
+                    v = '星期' + v[0]
+                res_list.append("<a href='#' class='selection'>%s</a><br>" % (v))
+        res_list = sorted(np.unique(res_list))
+        res_list = ["請從以下選擇一個：<br>"] + res_list
 
     return "".join(res_list)
 

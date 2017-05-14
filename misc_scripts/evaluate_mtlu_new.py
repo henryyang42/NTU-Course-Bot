@@ -16,12 +16,13 @@ tot_reward = 0
 correct = 0
 tot_turn = 0
 N = 100
+MAX_BI_TURN = 5
 user_sim = RuleSimulator(all_courses)
 for i in range(N):
     uid = i
     user_action = user_sim.initialize_episode()
 
-    for j in range(4):
+    for j in range(MAX_BI_TURN):
         tot_turn += 2
         print('User_act', user_action, file=f)
         #user_sentence = sem2nl(user_action)
@@ -35,7 +36,7 @@ for i in range(N):
         print('Sys_in', resp['status'], file=f)
         print('Sys_act', resp['action'], file=f)
         print('System: %s' % system_sentence, file=f)
-        if over or j == 3:
+        if over or j == MAX_BI_TURN-1:
             reward = user_sim.reward_function()
             tot_reward += reward
             correct += 1 if reward > 0 else 0

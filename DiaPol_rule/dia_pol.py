@@ -28,6 +28,10 @@ except:
     print('Fail to connect to DB, use fake courses instead.')
     print('Please cd to DiaPol-rule folder.')
 
+############
+# Settings #
+############
+MAX_N_CHOICE = 10
 
 def get_action_from_frame(dia_state):
     # filter courses according to dia_state
@@ -50,6 +54,7 @@ def get_action_from_frame(dia_state):
 
     # required fields
     sys_act = {} 
+    sys_act["diaact"] = "closing"
     sys_act["inform_slots"] = {}
     sys_act["request_slots"] = {}
     
@@ -59,7 +64,7 @@ def get_action_from_frame(dia_state):
         wrong_slot = None
         # remove the constraints one by one
         for slot in ["title", "instructor", "schedule_str"]:
-            if slot in dia_state["inform_slots"]:
+            if slot not in dia_state["request_slots"] and slot in dia_state["inform_slots"]:
                 tmp_inform_slots = dia_state["inform_slots"].copy()
                 del tmp_inform_slots[slot]
                 #print (tmp_inform_slots)
@@ -80,40 +85,44 @@ def get_action_from_frame(dia_state):
     else: # [ len(courses) > 1 ] `request` / `multiple_choice`
         req_slot = None
         choice_set = None
-        max_n = 0
+        req_max_n = 0 # only consider the slots that can be requested
         #TODO refine a set of slots that the system can request
-        for slot in ["title", "instructor", "schedule_str"]:# ordered by priority
+        for slot in ["title", "instructor", "designated_for", "schedule_str"]:# ordered by priority
             # max # different values --> largest diversity
-            values_set = set([c[slot] for c in courses])
+            values_set = set([c[slot] for c in courses if len(c[slot])>0])
             n_values = len(values_set)
             print ("[INFO] slot %s, # values = %d" % (slot, n_values))
-            if n_values > max_n:
-                if n_values > 5: # not taking `multiple_choice` action
-                    # don't ask users something they are asking
+
+            if n_values > req_max_n:
+                if n_values > MAX_N_CHOICE: # not taking `multiple_choice` action
+                    # don't ask users something they are askin
                     if slot in dia_state["request_slots"]:
                         continue
-                    # don't ask users something already known
-                    if slot in dia_state["inform_slots"] and slot != "schedule_str": # "schedule_str" could be incomplete
-                        continue
-                max_n = n_values
+                # don't ask users something already known
+                #if slot in dia_state["inform_slots"] and slot != "schedule_str": # "schedule_str" could be incomplete
+                if slot in dia_state["inform_slots"]:
+                    continue
+
+                req_max_n = n_values
                 req_slot = slot
                 choice_set = values_set
-                
-        if max_n <= 1: # only one course satisfy the constraints
+
+        if req_max_n <= 1: # only one course satisfy the constraints
             unique_found = True
-        elif max_n <= 5: # no more than 5 values => `multiple_choice`
+        elif req_max_n <= MAX_N_CHOICE: # no more than 5 values => `multiple_choice`
             sys_act["diaact"] = "multiple_choice"
             sys_act["choice"] = [{req_slot:v} for v in choice_set] # pass list to user
-        else: # `request`
+        elif req_slot is not None: # `request`
             sys_act["diaact"] = "request"
             sys_act["request_slots"][req_slot] = "?"
 
-    if unique_found:  # find the unique course
+    if unique_found: # find the unique course
         course = courses[0]
         sys_act["diaact"] = "inform"
         inform_slots = {}
         for slot in dia_state["request_slots"]:
-            inform_slots[slot] = course[slot]
+            if slot in course:
+                inform_slots[slot] = course[slot]
         inform_slots["serial_no"] = course["serial_no"] # must provide serial_no to complete the task
         inform_slots["title"] = course["title"] # return course name the ensure the correct course is found
         sys_act["inform_slots"] = inform_slots
@@ -178,13 +187,13 @@ if __name__ == '__main__':
     dia_state["inform_slots"] = {"instructor": "林智星"}
     test_dia_states.append(dia_state)
     
-    # 3. multiple choices
+    # 4. multiple choices
     dia_state = {}
     dia_state["request_slots"] = {"schedule_str": "?"}
     dia_state["inform_slots"] = {"title": "機器學習"}
     test_dia_states.append(dia_state)
     
-    # 4. confirm
+    # 5. confirm
     dia_state = {}
     dia_state["request_slots"] = {"schedule_str": "?"}
     dia_state["inform_slots"] = {"title": "機協", "instructor": "林軒田"}

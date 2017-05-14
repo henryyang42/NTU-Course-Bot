@@ -36,9 +36,10 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'web_api.apps.WebApiConfig',
     'user_simulator.apps.UserSimulatorConfig',
     'multi_turn.apps.MultiTurnConfig',
-    'single_turn.apps.SingleTurnConfig',
+    # 'single_turn.apps.SingleTurnConfig',
     'crawler.apps.CrawlerConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 'django_extensions',
+    'haystack',
 ]
 
 MIDDLEWARE = [
@@ -162,3 +164,14 @@ LOGGING = {
         },
     },
 }
+
+# Haystack
+# https://django-haystack.readthedocs.io/en/v2.6.0/settings.html
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+    },
+}
+HAYSTACK_LIMIT_TO_REGISTERED_MODELS = False
