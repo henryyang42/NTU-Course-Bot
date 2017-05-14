@@ -3,9 +3,12 @@ Created on May 11, 2017
 
 @author: haley
 '''
+import itertools
 
-sys_request_slots = ['title', 'instructor',
-                     'schedule_str']  # ordered by priority
+
+sys_request_slots = ['serial_no', 'title', 'instructor',
+                     'classroom', 'schedule_str', 'designated_for',
+                     'required_elective', 'sel_method']
 
 sys_inform_slots = ['serial_no', 'title', 'instructor',
                     'classroom', 'schedule_str', 'designated_for',
@@ -34,7 +37,7 @@ PER_TURN_REWARD = -1
 #########################################################################
 I_DO_NOT_CARE = "I do not care"
 NO_VALUE_MATCH = "NO VALUE MATCHES!!!"
-TICKET_AVAILABLE = 'Ticket Available'
+COURSE_AVAILABLE = 'Course Available'
 
 #########################################################################
 #  Constraint Check
@@ -53,8 +56,8 @@ nlg_beam_size = 10
 #           1 for dia_act
 #           2 for both
 #########################################################################
-run_mode = 0
-auto_suggest = 0
+run_mode = 3
+auto_suggest = 1
 
 #########################################################################
 #   A Basic Set of Feasible actions to be Consdered By an RL agent
@@ -73,7 +76,7 @@ feasible_actions = [
     #####################################################################
     #   multiple_choice action
     #####################################################################
-    {'diaact': "multiple_choice", 'inform_slots': {}, 'request_slots': {}},
+    {'diaact': "multiple_choice", 'choice': [], 'inform_slots': {}, 'request_slots': {}},
 
     #####################################################################
     #   inform action
@@ -87,13 +90,22 @@ feasible_actions = [
 ]
 
 #########################################################################
-#   Adding the inform actions
+#   Adding all the possible inform actions
 #########################################################################
-for slot in sys_inform_slots:
-    feasible_actions.append({'diaact': 'inform', 'inform_slots': {slot: "PLACEHOLDER"}, 'request_slots': {}})
+for r in range(1, len(sys_inform_slots) + 1):
+    for c in itertools.combinations(sys_inform_slots, r):
+        feasible_actions.append({'diaact': 'inform',
+                                'inform_slots': {slot: "PLACEHOLDER" for slot in c}, 'request_slots': {}})
+# for slot in sys_inform_slots:
+#     feasible_actions.append({'diaact': 'inform', 'inform_slots': {slot: "PLACEHOLDER"}, 'request_slots': {}})
 
 #########################################################################
-#   Adding the request actions
+#   Adding all the possible request actions
 #########################################################################
-for slot in sys_request_slots:
-    feasible_actions.append({'diaact': 'request', 'inform_slots': {}, 'request_slots': {slot: "UNK"}})
+for r in range(1, len(sys_request_slots) + 1):
+    for c in itertools.combinations(sys_request_slots, r):
+        feasible_actions.append({'diaact': 'request',
+                                 'inform_slots': {},
+                                 'request_slots': {slot: "UNK" for slot in c}})
+# for slot in sys_request_slots:
+#     feasible_actions.append({'diaact': 'request', 'inform_slots': {}, 'request_slots': {slot: "UNK"}})

@@ -13,43 +13,27 @@ Command: python ./run.py --agt 9 --usr 1 --max_turn 40 --movie_kb_path .\deep_di
 @author: xiul
 '''
 
-
-import random
 import copy
 import json
+import os
 import pickle
+import random
+import sys
 import numpy as np
 from dialog_config import *
 from qlearning import DQN
-from user_simulator.usersim.usersim_rule import *
-from util import *
-from utils.nlg import *
-try:
-    sys.path.append('../')
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "NTUCB.settings")
-    django.setup()
-    from crawler.models import *
-    all_courses = [{k: v for k, v in course.__dict__.items()}
-                   for course in Course.objects.filter(semester='105-2')]
-    from utils.query import query_course
-    from utils.nlg import *
-except:
-    # some fake courses
-    all_courses = [
-        {"serial_no": "0001", "title": "機器學習技法", "instructor": "林軒田",
-            "classroom": "資102", "schedule_str": "二5,6"},
-        {"serial_no": "0002", "title": "機器學習技法", "instructor": "張軒田",
-         "classroom": "資102", "schedule_str": "二5,6"},
-        {"serial_no": "0003", "title": "機器學習技法", "instructor": "林軒田",
-         "classroom": "資103", "schedule_str": "二5,6"},
-        {"serial_no": "0004", "title": "機器學習技法", "instructor": "林軒田",
-         "classroom": "資102", "schedule_str": "二7,8"},
-        {"serial_no": "0005", "title": "機器學習技法", "instructor": "林軒田",
-         "classroom": "資204", "schedule_str": "二5,6"}
-    ]
-    print('Fail to connect to DB, use fake courses instead.')
-    print('Please cd to DiaPol-rule folder.')
 
+from util import *
+sys.path.append(os.getcwd())
+sys.path.append(os.path.pardir)
+from misc_scripts.access_django import *
+from utils.lu import multi_turn_lu3
+from utils.nlg import *
+from user_simulator.usersim.usersim_rule import *
+from django.db.models import Q
+from crawler.models import *
+from utils.query import *
+from DiaPol_rule.dia_pol import *
 
 class AgentDQN():
     def __init__(self, course_dict=None, act_set=None, slot_set=None, params=None):
@@ -96,16 +80,20 @@ class AgentDQN():
         """ Initialize a new episode.
             This function is called every time a new episode is run.
         """
-        self.current_slot_id = 0
+        # self.request_slot_name = 'title'
         self.phase = 0
-        self.request_set = ['title', 'instructor',
-                            'schedule_str']
+        self.request_set = {'title': 0, 'instructor': 0, 'schedule_str': 0}
 
     def state_to_action(self, state):
         """ DQN: Input state, output action """
         self.representation = self.prepare_state_representation(state)
-        self.action = self.run_policy(self.representation)
+        self.action = self.run_policy(self.representation, state)
+        print("DQN-Agent - state_to_action -> self.action:\n\t", self.action, '\n')
+
         act_slot_response = copy.deepcopy(self.feasible_actions[self.action])
+        print("DQN-Agent - state_to_action -> act_slot_response:\n\t",
+              act_slot_response, '\n')
+
         return {'act_slot_response': act_slot_response, 'act_slot_value_response': None}
 
     def prepare_state_representation(self, state):
@@ -120,6 +108,7 @@ class AgentDQN():
         ##################################################################
         user_act_rep = np.zeros((1, self.act_cardinality))
         user_act_rep[0, self.act_set[user_action['diaact']]] = 1.0
+        print("user_act_rep:\n\t", user_act_rep, '\n')
 
         ##################################################################
         #     Create bag of inform slots representation to represent the
@@ -128,6 +117,7 @@ class AgentDQN():
         user_inform_slots_rep = np.zeros((1, self.slot_cardinality))
         for slot in user_action['inform_slots'].keys():
             user_inform_slots_rep[0, self.slot_set[slot]] = 1.0
+        print("user_inform_slots_rep:\n\t", user_inform_slots_rep, '\n')
 
         ##################################################################
         #   Create bag of request slots representation to represent the
@@ -136,6 +126,7 @@ class AgentDQN():
         user_request_slots_rep = np.zeros((1, self.slot_cardinality))
         for slot in user_action['request_slots'].keys():
             user_request_slots_rep[0, self.slot_set[slot]] = 1.0
+        print("user_request_slots_rep:\n\t", user_request_slots_rep, '\n')
 
         ##################################################################
         #   Creat bag of filled_in slots based on the current_slots
@@ -143,6 +134,7 @@ class AgentDQN():
         current_slots_rep = np.zeros((1, self.slot_cardinality))
         for slot in current_slots['inform_slots']:
             current_slots_rep[0, self.slot_set[slot]] = 1.0
+        print("current_slots_rep:\n\t", current_slots_rep, '\n')
 
         ##################################################################
         #   Encode last agent act
@@ -150,6 +142,7 @@ class AgentDQN():
         agent_act_rep = np.zeros((1, self.act_cardinality))
         if agent_last:
             agent_act_rep[0, self.act_set[agent_last['diaact']]] = 1.0
+        print("agent_act_rep:\n\t", agent_act_rep, '\n')
 
         ##################################################################
         #   Encode last agent inform slots
@@ -158,6 +151,7 @@ class AgentDQN():
         if agent_last:
             for slot in agent_last['inform_slots'].keys():
                 agent_inform_slots_rep[0, self.slot_set[slot]] = 1.0
+        print("agent_inform_slots_rep:\n\t", agent_inform_slots_rep, '\n')
 
         ##################################################################
         #   Encode last agent request slots
@@ -168,22 +162,25 @@ class AgentDQN():
                 agent_request_slots_rep[0, self.slot_set[slot]] = 1.0
 
         turn_rep = np.zeros((1, 1)) + state['turn'] / 10.
+        print("agent_request_slots_rep:\n\t", agent_request_slots_rep, '\n')
+        # print("turn_rep:", turn_rep)
 
         ##################################################################
         #  One-hot representation of the turn count?
         ##################################################################
         turn_onehot_rep = np.zeros((1, self.max_turn))
         turn_onehot_rep[0, state['turn']] = 1.0
+        # print("turn_onehot_rep:", turn_onehot_rep)
 
         ##################################################################
         #   Representation of KB results (scaled counts)
         ##################################################################
         kb_count_rep = np.zeros((1, self.slot_cardinality + 1)) + \
-            kb_results_dict['matching_all_constraints'] / 100.
+                        kb_results_dict['matching_all_constraints'] / 100.
         for slot in kb_results_dict:
             if slot in self.slot_set:
-                kb_count_rep[0, self.slot_set[slot]
-                             ] = kb_results_dict[slot] / 100.
+                kb_count_rep[0, self.slot_set[slot]] = kb_results_dict[slot] / 100.
+        # print("kb_count_rep:", kb_count_rep)
 
         ##################################################################
         #   Representation of KB results (binary)
@@ -194,13 +191,19 @@ class AgentDQN():
             if slot in self.slot_set:
                 kb_binary_rep[0, self.slot_set[slot]] = np.sum(
                     kb_results_dict[slot] > 0.)
+        # print("kb_binary_rep:", kb_binary_rep)
 
-        self.final_representation = np.hstack([user_act_rep,user_inform_slots_rep, user_request_slots_rep,
-                                               agent_act_rep, agent_inform_slots_rep, agent_request_slots_rep,
-                                               current_slots_rep, turn_rep, turn_onehot_rep, kb_binary_rep, kb_count_rep])
+        self.final_representation = np.hstack([user_act_rep,user_inform_slots_rep,
+                                               user_request_slots_rep, agent_act_rep,
+                                               agent_inform_slots_rep, agent_request_slots_rep,
+                                               current_slots_rep, turn_rep, turn_onehot_rep,
+                                               kb_binary_rep, kb_count_rep])
+
+        # print("Final Representation Dimension:", np.shape(self.final_representation))
+        # print("final_representation:", self.final_representation)
         return self.final_representation
 
-    def run_policy(self, representation):
+    def run_policy(self, representation, state=None):
         """ epsilon-greedy policy """
 
         if random.random() < self.epsilon:
@@ -209,40 +212,102 @@ class AgentDQN():
             if self.warm_start == 1:
                 if len(self.experience_replay_pool) > self.experience_replay_pool_size:
                     self.warm_start = 2
-                return self.rule_policy()
+                return self.rule_policy(state)
             else:
                 return self.dqn.predict(representation, {}, predict_model=True)
 
-    def rule_policy(self):
+    def rule_policy(self, state=None):
         """ Rule Policy """
 
-        if self.current_slot_id < len(self.request_set):
-            slot = self.request_set[self.current_slot_id]
-            self.current_slot_id += 1
-
+        # if the unique course is found
+        if state['kb_results_dict']['matching_all_constraints'] == 1:
             act_slot_response = {}
-            act_slot_response['diaact'] = "request"
+            act_slot_response['diaact'] = "inform"
+            act_slot_response['inform_slots'] = {
+                list(state['current_slots']['request_slots'].keys())[0]: "PLACEHOLDER"}
+            act_slot_response['request_slots'] = {}
+            print('DQN-Agent - rule_policy -> unique course is found: act_slot_response\n\t',
+                  act_slot_response, '\n')
+
+        # if there are multiple courses are found
+        elif state['kb_results_dict']['matching_all_constraints'] > 1:
+            act_slot_response = {}
+            act_slot_response['diaact'] = "multiple_choice"
+            act_slot_response['choice'] = []
             act_slot_response['inform_slots'] = {}
-            act_slot_response['request_slots'] = {slot: "UNK"}
-        elif self.phase == 0:
-            act_slot_response = {'diaact': "inform", 'inform_slots': {
-                'taskcomplete': "PLACEHOLDER"}, 'request_slots': {}}
-            self.phase += 1
-        elif self.phase == 1:
-            act_slot_response = {'diaact': "thanks",
-                                 'inform_slots': {}, 'request_slots': {}}
+            act_slot_response['request_slots'] = {}
+            print('DQN-Agent - rule_policy -> multiple courses are found: act_slot_response\n\t',
+                  act_slot_response, '\n')
+
+        # if the conditions of the course in not enough
+        else:
+
+            # fill in the informed slot to agent's request set
+            for slot in state['current_slots']['inform_slots'].keys():
+                dict_slot = 'schedule_str' if slot == 'when' else slot
+                self.request_set[dict_slot] = 1
+
+            filled_in_slots_num = sum(list(self.request_set.values()))
+            print('DQN-Agent - rule_policy -> filled_in_slots_num\n\t',
+                  filled_in_slots_num, '\n')
+            print('DQN-Agent - rule_policy -> len(self.request_set)\n\t',
+                  len(self.request_set), '\n')
+
+            # necessary slots not all filled in with correct values
+            if filled_in_slots_num < len(self.request_set):
+                slot = 'title'
+                for k, v in self.request_set.items():
+                    if v == 0:
+                        slot = k
+                        break
+                print('DQN-Agent - rule_policy -> slot\n\t', slot, '\n')
+
+                sys_act = get_action_from_frame(state['current_slots'])
+                print('DQN-Agent - rule_policy -> sys_act\n\t', sys_act, '\n')
+
+                act_slot_response = {}
+                act_slot_response['diaact'] = "request"
+                act_slot_response['inform_slots'] = {}
+                act_slot_response['request_slots'] = {slot: "UNK"}
+                print('DQN-Agent - rule_policy -> conditions of the course in not enough: act_slot_response\n\t',
+                      act_slot_response, '\n')
+
+            elif self.phase == 0:
+                act_slot_response = {'diaact': "inform",
+                                    'inform_slots': {},
+                                    'request_slots': {}}
+                self.phase += 1
+            elif self.phase == 1:
+                act_slot_response = {'diaact': "closing", 'inform_slots': {},
+                                    'request_slots': {}}
 
         return self.action_index(act_slot_response)
 
     def action_index(self, act_slot_response):
         """ Return the index of action """
-
         for (i, action) in enumerate(self.feasible_actions):
             if act_slot_response == action:
                 return i
-        print(act_slot_response)
-        raise Exception("action index not found")
+        raise Exception("Action Index Not Found")
         return None
+
+    def add_nl_to_action(self, agent_action):
+        """ Add NL to Agent Dia_Act """
+        system_sentence = agent2nl(resp['action'])
+        if agent_action['act_slot_response']:
+            agent_action['act_slot_response']['nl'] = ""
+            # self.nlg_model.translate_diaact(agent_action['act_slot_response'])
+            # # NLG
+            user_nlg_sentence = self.nlg_model.convert_diaact_to_nl(
+                agent_action['act_slot_response'], 'agt')
+            agent_action['act_slot_response']['nl'] = user_nlg_sentence
+        elif agent_action['act_slot_value_response']:
+            agent_action['act_slot_value_response']['nl'] = ""
+            # self.nlg_model.translate_diaact(agent_action['act_slot_value_response'])
+            # # NLG
+            user_nlg_sentence = self.nlg_model.convert_diaact_to_nl(
+                agent_action['act_slot_value_response'], 'agt')
+            agent_action['act_slot_response']['nl'] = user_nlg_sentence
 
     def register_experience_replay_tuple(self, s_t, a_t, reward, s_tplus1, episode_over):
         """ Register feedback from the environment, to be stored as future training data """
@@ -304,7 +369,10 @@ class AgentDQN():
 
 
 if __name__ == "__main__":
-    course_dict = all_courses
+    all_courses = list(query_course({}).values())
+    np.random.shuffle(all_courses)
+    course_dict = {k: v for k in range(len(all_courses)) for v in all_courses}
+    print(len(course_dict))
     act_set = text_to_dict("./dqn_agent/dia_acts.txt")
     slot_set = text_to_dict("./dqn_agent/slot_set.txt")
     dqn_agent_params = {
@@ -312,7 +380,7 @@ if __name__ == "__main__":
         'experience_replay_pool_size': 1000, 'trained_model_path': None,
         'predict_mode': False, 'warm_start': 0, 'max_turn': 4}
 
-    user_sim = RuleSimulator(course_dict)
+    user_sim = RuleSimulator(all_courses)
     dqn_agent = AgentDQN(course_dict=course_dict,
                          act_set=act_set, slot_set=slot_set, params=dqn_agent_params)
 
@@ -325,7 +393,6 @@ if __name__ == "__main__":
     success_rate_threshold = 0.3
     save_check_point = 10
 
-
     """ Initialization of Best Model and Performance Records """
     best_model = {}
     best_res = {'success_rate': 0, 'ave_reward': float(
@@ -335,192 +402,7 @@ if __name__ == "__main__":
 
     performance_records = {}
     performance_records['success_rate'] = {}
-    performance_records['ave_turns'] = {}
-    performance_records['ave_reward'] = {}
+    performance_records['avg_turns'] = {}
+    performance_records['avg_reward'] = {}
 
 
-""" Run N-Simulation Dialogues """
-def simulation_epoch(simulation_epoch_size):
-    successes = 0
-    cumulative_reward = 0
-    cumulative_turns = 0
-
-    res = {}
-    for episode in range(simulation_epoch_size):
-        dialog_manager.initialize_episode()
-        episode_over = False
-        while not episode_over:
-            episode_over, reward = dialog_manager.next_turn()
-            cumulative_reward += reward
-            if episode_over:
-                if reward > 0:
-                    successes += 1
-                    print("simulation episode %s: Success" % (episode))
-                else:
-                    print("simulation episode %s: Fail" % (episode))
-                cumulative_turns += dialog_manager.state_tracker.turn_count
-
-    res['success_rate'] = float(successes) / simulation_epoch_size
-    res['ave_reward'] = float(cumulative_reward) / simulation_epoch_size
-    res['ave_turns'] = float(cumulative_turns) / simulation_epoch_size
-    print("simulation success rate %s, ave reward %s, ave turns %s" %
-          (res['success_rate'], res['ave_reward'], res['ave_turns']))
-    return(res)
-
-
-""" Warm_Start Simulation (by Rule Policy) """
-def warm_start_simulation():
-    successes = 0
-    cumulative_reward = 0
-    cumulative_turns = 0
-
-    res = {}
-    for episode in range(warm_start_epochs):
-        dialog_manager.initialize_episode()
-        episode_over = False
-        while not episode_over:
-            episode_over, reward = dialog_manager.next_turn()
-            cumulative_reward += reward
-            if episode_over:
-                if reward > 0:
-                    successes += 1
-                    print("warm_start simulation episode %s: Success" %
-                          (episode))
-                else:
-                    print("warm_start simulation episode %s: Fail" % (episode))
-                cumulative_turns += dialog_manager.state_tracker.turn_count
-
-        if len(agent.experience_replay_pool) >= agent.experience_replay_pool_size:
-            break
-
-    agent.warm_start = 2  # just a counter to avoid executing warm simulation twice
-    res['success_rate'] = float(successes) / simulation_epoch_size
-    res['ave_reward'] = float(cumulative_reward) / simulation_epoch_size
-    res['ave_turns'] = float(cumulative_turns) / simulation_epoch_size
-    print("Warm_Start %s epochs, success rate %s, ave reward %s, ave turns %s" % (
-        episode + 1, res['success_rate'], res['ave_reward'], res['ave_turns']))
-    print("Current experience replay buffer size %s" %
-          (len(agent.experience_replay_pool)))
-
-
-def next_turn(state, record_training_data=True):
-    """ This function initiates each subsequent exchange between agent and user (agent first) """
-    ########################################################################
-    #   CALL AGENT TO TAKE ITS TURN
-    ########################################################################
-    # self.state = self.state_tracker.get_state_for_agent()
-    agent_action = self.agent.state_to_action(state)
-
-    #######################################################################
-    #   Register AGENT action with the state_tracker
-    #######################################################################
-    # self.state_tracker.update(agent_action=self.agent_action)
-
-    # add NL to Agent Dia_Act
-    system_sentence = agent2nl(agent_action)
-    # self.agent.add_nl_to_action(self.agent_action)
-    # self.print_function(
-    #     agent_action=self.agent_action['act_slot_response'])
-
-    #######################################################################
-    #   CALL USER TO TAKE HIS OR HER TURN
-    #######################################################################
-    sys_action = self.state_tracker.dialog_history_dictionaries()[-1]
-    resp = {}
-    resp['sementic'], resp['status'], resp['action'], resp['resp_str'] = multi_turn_lu2(uid, user_sentence)
-    user_action, over = user_sim.next(resp['action'])
-    # self.user_action, self.episode_over, dialog_status = self.user.next(
-    #     self.sys_action)
-    # self.reward = self.reward_function(dialog_status)
-
-    #######################################################################
-    #   Update state tracker with latest user action
-    #######################################################################
-    if self.episode_over != True:
-        self.state_tracker.update(user_action=self.user_action)
-        self.print_function(user_action=self.user_action)
-
-    #######################################################################
-    #  Inform agent of the outcome for this timestep (s_t, a_t, r, s_{t+1}, episode_over)
-    #######################################################################
-    if record_training_data:
-        self.agent.register_experience_replay_tuple(
-            self.state, self.agent_action, self.reward, self.state_tracker.get_state_for_agent(), self.episode_over)
-
-def run_episodes(count, status, dqn_agent, user_sim, params):
-    successes = 0
-    cumulative_reward = 0
-    cumulative_turns = 0
-
-    if agt == 9 and params['trained_model_path'] == None and warm_start == 1:
-        print('warm_start starting ...')
-        warm_start_simulation()
-        print('warm_start finished, start RL training ...')
-
-    for episode in range(count):
-        print("Episode: %s" % (episode))
-        user_action = user_sim.initialize_episode()
-        dqn_agent.initialize_episode()
-        reward = 0
-        episode_over = False
-        # dialog_manager.initialize_episode()
-
-        while not episode_over:
-            episode_over, reward = next_turn()
-            cumulative_reward += reward
-
-            if episode_over:
-                if reward > 0:
-                    print("Successful Dialog!")
-                    successes += 1
-                else:
-                    print("Failed Dialog!")
-
-                cumulative_turns += dialog_manager.state_tracker.turn_count
-
-        # simulation
-        if agt == 9 and params['trained_model_path'] == None:
-            agent.predict_mode = True
-            simulation_res = simulation_epoch(simulation_epoch_size)
-
-            performance_records['success_rate'][episode] = simulation_res['success_rate']
-            performance_records['ave_turns'][episode] = simulation_res['ave_turns']
-            performance_records['ave_reward'][episode] = simulation_res['ave_reward']
-
-            if simulation_res['success_rate'] >= best_res['success_rate']:
-                if simulation_res['success_rate'] >= success_rate_threshold:  # threshold = 0.30
-                    agent.experience_replay_pool = []
-                    simulation_epoch(simulation_epoch_size)
-
-            if simulation_res['success_rate'] > best_res['success_rate']:
-                best_model['model'] = copy.deepcopy(agent)
-                best_res['success_rate'] = simulation_res['success_rate']
-                best_res['ave_reward'] = simulation_res['ave_reward']
-                best_res['ave_turns'] = simulation_res['ave_turns']
-                best_res['epoch'] = episode
-
-            agent.clone_dqn = copy.deepcopy(agent.dqn)
-            agent.train(batch_size, 1)
-            agent.predict_mode = False
-
-            print("Simulation success rate %s, Ave reward %s, Ave turns %s, Best success rate %s" % (
-                performance_records['success_rate'][episode], performance_records['ave_reward'][episode], performance_records['ave_turns'][episode], best_res['success_rate']))
-            # save the model every 10 episodes
-            if episode % save_check_point == 0 and params['trained_model_path'] == None:
-                save_model(params['write_model_dir'], agt, best_res['success_rate'],
-                           best_model['model'], best_res['epoch'], episode)
-                save_performance_records(
-                    params['write_model_dir'], agt, performance_records)
-
-        print("Progress: %s / %s, Success rate: %s / %s Avg reward: %.2f Avg turns: %.2f" % (episode + 1, count,
-                                                                                             successes, episode + 1, float(cumulative_reward) / (episode + 1), float(cumulative_turns) / (episode + 1)))
-    print("Success rate: %s / %s Avg reward: %.2f Avg turns: %.2f" % (successes,
-                                                                      count, float(cumulative_reward) / count, float(cumulative_turns) / count))
-    status['successes'] += successes
-    status['count'] += count
-
-    if agt == 9 and params['trained_model_path'] == None:
-        save_model(params['write_model_dir'], agt, float(
-            successes) / count, best_model['model'], best_res['epoch'], count)
-        save_performance_records(
-            params['write_model_dir'], agt, performance_records)
