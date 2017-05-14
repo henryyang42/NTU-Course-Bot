@@ -51,3 +51,10 @@ def query_course(constraints):
 
     return courses
 
+
+def query_review(constraints):
+    query = Q()
+    for k, v in constraints.items():
+        query &= expand_title(v)
+
+    return Review.objects.filter(query)
