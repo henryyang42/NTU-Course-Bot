@@ -117,6 +117,7 @@ class Review(models.Model):
     content = models.TextField(blank=True)
     sentiment = models.CharField(max_length=10, default='Neutral')
     probability = models.CharField(max_length=20, blank=True)
+    article_id = models.CharField(max_length=40, blank=True)
 
     def __str__(self):
         return '%s' % (self.title)

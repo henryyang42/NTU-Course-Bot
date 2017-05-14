@@ -59,14 +59,16 @@ def put_review():
             content=course.content[i],
             title=course.article_title[i],
             sentiment=course.sentiment[i],
-            probability=course.probability[i]
+            probability=course.probability[i],
+            article_id=course.article_id[i]
         )
     for i in range(ge.shape[0]):
         Review.objects.update_or_create(
             content=ge.content[i],
             title=ge.article_title[i],
             sentiment=ge.sentiment[i],
-            probability=ge.probability[i]
+            probability=ge.probability[i],
+            article_id=ge.article_id[i]
         )
 
 

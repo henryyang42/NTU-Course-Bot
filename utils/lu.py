@@ -6,7 +6,7 @@ from .tagger import *
 from DiaPol_rule.dia_pol import *
 from LU_LSTM.lstm_predict import *
 from django.conf import settings
-
+from utils.query import *
 
 @run_once
 def multi_turn_lu_setup():
@@ -58,14 +58,18 @@ def multi_turn_lu2(user_id, sentence, reset=False):
     #return d, status, action, get_NL_from_action(action)
 
 
+def reset_status(user_id):
+    user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
+    with open('user_log.p', 'wb') as handle:
+        pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
 def multi_turn_lu3(user_id, sentence, reset=False):
     single_turn_lu_setup_new()
     with open('user_log.p', 'rb') as handle:
         user_log = pickle.load(handle)
     if reset:
-        user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
-        with open('user_log.p', 'wb') as handle:
-            pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        reset_status(user_id)
         return
     status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
     d = single_turn_lu_new(sentence)
@@ -79,8 +83,21 @@ def multi_turn_lu3(user_id, sentence, reset=False):
     for k, v in d['slot'].items():
         if len(v) > 1 or k in ['schedule_str']:
             status['inform_slots'][k] = v
+    # Retrieve reviews
+    if d['intent'] == 'request_review':
+        reset_status(user_id)
+        reviews = query_review(status['inform_slots'])
+        review_resp = []
+        if reviews.count() == 0:
+            review_resp.append('並未搜尋到相關評價QQ')
+        else:
+            review_resp.append('幫您搜尋到%d筆相關評價：<br>' % reviews.count())
+            for review in reviews:
+                '<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title)
+        return d, status, {}, '\n'.join(review_resp)
+
     action = get_action_from_frame(status)
-    # return status, action, agent2nl(action)
+
     if action['diaact'] in ['inform', 'closing']:
         user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
     else:
@@ -88,7 +105,6 @@ def multi_turn_lu3(user_id, sentence, reset=False):
     with open('user_log.p', 'wb') as handle:
         pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return d, status, action, agent2nl(action)
-    #return d, status, action, get_NL_from_action(action)
 
 
 @run_once
