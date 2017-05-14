@@ -116,12 +116,13 @@ def get_action_from_frame(dia_state):
             sys_act["diaact"] = "request"
             sys_act["request_slots"][req_slot] = "?"
 
-    if unique_found:  # find the unique course
+    if unique_found: # find the unique course
         course = courses[0]
         sys_act["diaact"] = "inform"
         inform_slots = {}
         for slot in dia_state["request_slots"]:
-            inform_slots[slot] = course[slot]
+            if slot in course:
+                inform_slots[slot] = course[slot]
         inform_slots["serial_no"] = course["serial_no"] # must provide serial_no to complete the task
         inform_slots["title"] = course["title"] # return course name the ensure the correct course is found
         sys_act["inform_slots"] = inform_slots
@@ -186,13 +187,13 @@ if __name__ == '__main__':
     dia_state["inform_slots"] = {"instructor": "林智星"}
     test_dia_states.append(dia_state)
     
-    # 3. multiple choices
+    # 4. multiple choices
     dia_state = {}
     dia_state["request_slots"] = {"schedule_str": "?"}
     dia_state["inform_slots"] = {"title": "機器學習"}
     test_dia_states.append(dia_state)
     
-    # 4. confirm
+    # 5. confirm
     dia_state = {}
     dia_state["request_slots"] = {"schedule_str": "?"}
     dia_state["inform_slots"] = {"title": "機協", "instructor": "林軒田"}
