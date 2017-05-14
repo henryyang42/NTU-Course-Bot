@@ -58,8 +58,10 @@ def multi_turn_lu2(user_id, sentence, reset=False):
     #return d, status, action, get_NL_from_action(action)
 
 
-def reset_status(user_id):
-    user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
+def set_status(user_id, status={'request_slots': {}, 'inform_slots': {}}):
+    with open('user_log.p', 'rb') as handle:
+        user_log = pickle.load(handle)
+    user_log[user_id] = status
     with open('user_log.p', 'wb') as handle:
         pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -69,7 +71,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
     with open('user_log.p', 'rb') as handle:
         user_log = pickle.load(handle)
     if reset:
-        reset_status(user_id)
+        set_status(user_id)
         return
     status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
     d = single_turn_lu_new(sentence)
@@ -85,7 +87,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
             status['inform_slots'][k] = v
     # Retrieve reviews
     if d['intent'] == 'request_review':
-        reset_status(user_id)
+        set_status(user_id)
         reviews = query_review(status['inform_slots'])
         review_resp = []
         if reviews.count() == 0:
