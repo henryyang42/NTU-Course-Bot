@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 'django_extensions',
+    'haystack',
 ]
 
 MIDDLEWARE = [
@@ -163,3 +164,14 @@ LOGGING = {
         },
     },
 }
+
+# Haystack
+# https://django-haystack.readthedocs.io/en/v2.6.0/settings.html
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+    },
+}
+HAYSTACK_LIMIT_TO_REGISTERED_MODELS = False
