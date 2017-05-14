@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^multi_turn2/', include('multi_turn2.urls')),
 	url(r'', include('multi_turn2.urls')),
     #url(r'', include('single_turn.urls')),
+    url(r'^api/', include('web_api.urls')),
     url(r'user_simulator/', include('user_simulator.urls')),
 ]

@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.magnific-popup/1.0.0/magnific-popup.css">
   <!-- Magnific Popup core JS file -->
   <script src="https://cdn.jsdelivr.net/jquery.magnific-popup/1.0.0/jquery.magnific-popup.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"></link>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </head>
 <style type="text/css">
   .panel-footer {
@@ -207,8 +209,8 @@
     -webkit-transition: all .25s;
     transition: all .25s;
   }
-  .disliked{ color:#1b72f5; }
-  .not-disliked{ color:#888; }
+  .disliked { color:#1b72f5; }
+  .not-disliked { color:#888; }
   .white-popup {
     position: relative;
     background: #FFF;
@@ -216,6 +218,9 @@
     width: auto;
     max-width: 1000px;
     margin: 20px auto;
+  }
+  .red {
+    color: red;
   }
 </style>
 
@@ -229,7 +234,7 @@
           <h3 class="panel-title">
             Course Chatbot
             <a href="#schedule-popup" class="open-popup-link">
-              <img src="https://image.flaticon.com/icons/svg/138/138770.svg" style="height: 70%;margin: 5px;float: right;">
+              <img src="https://image.flaticon.com/icons/svg/138/138775.svg" style="height: 70%; margin: 5px;float: right;">
             </a>
           </h3>
         </div>
@@ -279,10 +284,7 @@
             <tbody>
               <tr ng-repeat="course in added_course" title="{{ course.note}}">
                 <td>{{ course.serial_no }}</td>
-                <td>
-                  {{ course.title }}
-                  <br>{{ course.eng_title }}
-                </td>
+                <td>{{ course.title }}</td>
                 <td>{{ course.instructor }}</td>
                 <td>{{ course.credits }}</td>
                 <td>{{ course.classroom }}</td>
@@ -326,7 +328,7 @@
     chat_box.scrollTop = chat_box.scrollHeight;
   }
   function sucks(id) {
-    $.ajax({ url: "/toggle_rating/" + id, success: function (data) {
+    $.ajax({ url: "/api/toggle_rating/" + id, success: function (data) {
       $('#sucks' + id).toggleClass('not-disliked disliked');
       }
     });
@@ -357,19 +359,24 @@
     $scope.credit = 0;
     $scope.course_ct = 0;
     $scope.added_course = [];
-    $scope.add_course = function(c) {
+    $scope.add_course = function(serial_no) {
       arr = $scope.added_course;
       for (var i in arr) {
         // Check if added before
-        if (c.serial_no == arr[i].serial_no) {
+        if (serial_no == arr[i].serial_no) {
           return;
         }
       }
-      $scope.added_course.push(c);
-      $scope.credit += parseInt(c.credits);
-      $scope.course_ct++;
-      //toastr.success(c.chi_title + ' 已成功加入您的課表。');
-      $scope.$apply();
+      $.ajax({
+        url: "/api/get_course/" + serial_no,
+        success: function (c) {
+          $scope.added_course.push(c);
+          $scope.credit += parseInt(c.credits);
+          $scope.course_ct++;
+          toastr.success(c.title + ' 已成功加入您的課表。');
+          $scope.$apply();
+        }
+      });
     };
     $scope.del_course = function(c) {
       $scope.credit -= parseInt(c.credits);
@@ -381,7 +388,7 @@
           arr.splice(i, 1);
         }
       }
-      //toastr.warning(c.chi_title + ' 已從您的課表移除。');
+      toastr.warning(c.title + ' 已從您的課表移除。');
     };
     // Send message to server
     $scope.send = function (input) {
@@ -400,7 +407,7 @@
             $scope.send($(this).html());
           })
           $('.serial_no').click(function () {
-            course = JSON.parse($(this).attr('data'));
+            course = JSON.parse($(this).html());
             $scope.add_course(course);
           })
         });

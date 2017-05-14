@@ -121,7 +121,7 @@ def agent2nl(sys_act):
         for slot in ["serial_no", "title", "instructor", "classroom", "schedule_str"]:
             if slot in sys_act["inform_slots"]:
                 if slot == "serial_no":
-                    res_str = "流水號%s。"
+                    res_str = "流水號<a href='#' class='serial_no'>%s</a>。"
                 elif slot == "title":
                     res_str = "課名是%s。"
                 elif slot == "instructor":
