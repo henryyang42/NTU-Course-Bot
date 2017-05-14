@@ -14,5 +14,5 @@ six==1.10.0
 # tensorflow==1.1.0
 Theano==0.9.0
 word2vec==0.9.1 # rememver to check the bug -> vim ../site-packages/word2vec/wordvectors.py -> line 171 -> vocab[i] = word.decode(encoding, 'ignore')
-Whoosh
-git+https://github.com/henryyang42/django-haystack.git@chinese-analyzer
+# Whoosh
+# git+https://github.com/henryyang42/django-haystack.git@chinese-analyzer
