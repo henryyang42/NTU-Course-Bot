@@ -9,6 +9,10 @@
     crossorigin="anonymous">
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Magnific Popup core CSS file -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.magnific-popup/1.0.0/magnific-popup.css">
+  <!-- Magnific Popup core JS file -->
+  <script src="https://cdn.jsdelivr.net/jquery.magnific-popup/1.0.0/jquery.magnific-popup.min.js"></script>
 </head>
 <style type="text/css">
   .panel-footer {
@@ -205,19 +209,32 @@
   }
   .disliked{ color:#1b72f5; }
   .not-disliked{ color:#888; }
+  .white-popup {
+    position: relative;
+    background: #FFF;
+    padding: 20px;
+    width: auto;
+    max-width: 1000px;
+    margin: 20px auto;
+  }
 </style>
 
 <body>
-  <div class="container mobile">
+  {% verbatim %}
+  <div class="container mobile" ng-app="chat" ng-controller="chatController">
     <div class="col-md-12 col-lg-12 mobile">
       <div class="panel">
         <!--Heading-->
         <div class="panel-heading" style="height: 7%;">
-          <h3 class="panel-title">Course Chatbot</h3>
+          <h3 class="panel-title">
+            Course Chatbot
+            <a href="#schedule-popup" class="open-popup-link">
+              <img src="https://image.flaticon.com/icons/svg/138/138770.svg" style="height: 70%;margin: 5px;float: right;">
+            </a>
+          </h3>
         </div>
         <!--Widget body-->
-        {% verbatim %}
-        <div id="demo-chat-body" class="collapse in" ng-app="chat" ng-controller="chatController">
+        <div id="demo-chat-body" class="collapse in">
           <div class="nano has-scrollbar" style="height: 83%">
             <div id="chat-box" class="nano-content pad-all" tabindex="0">
               <ul class="list-unstyled media-block" id="chat-box1">
@@ -235,13 +252,53 @@
               <div class="col-xs-3 col-md-3">
                 <button class="btn btn-primary btn-block" ng-click="chat_input && send(chat_input)">Send</button>
               </div>
-
           </div>
         </div>
-        {% endverbatim %}
+        <div id="schedule-popup" class="white-popup mfp-hide">
+          <table class="table table-bordered table-hover" id="selected-table">
+            <thead>
+              <tr>
+                <td colspan="7">
+                  <center>
+                    <h4>
+                      您選了 {{ course_ct }} 門課共 <span ng-class="{true:'red', false:''}[ credit<16||credit>25 ]">{{ credit }}</span> 學分
+                    </h4>
+                  </center>
+                </td>
+              </tr>
+              <tr>
+                <th width="10%">流水號</th>
+                <th width="35%">課程名稱</th>
+                <th width="10%">任課教師</th>
+                <th width="7%">學分</th>
+                <th width="13">教室</th>
+                <th width="15%">課程時間</th>
+                <th width="10%">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="course in added_course" title="{{ course.note}}">
+                <td>{{ course.serial_no }}</td>
+                <td>
+                  {{ course.title }}
+                  <br>{{ course.eng_title }}
+                </td>
+                <td>{{ course.instructor }}</td>
+                <td>{{ course.credits }}</td>
+                <td>{{ course.classroom }}</td>
+                <td>{{ course.schedule_str }}</td>
+                <td>
+                  <a class="btn btn-danger table-btn" ng-click="del_course(course)">退選</a>
+                  <a class="btn btn-info table-btn" target="_blank" href="{{course.syllabus_url}}">大綱</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
+  {% endverbatim %}
 </body>
 
 <script type="text/javascript">
@@ -297,7 +354,36 @@
   // angularjs thing
   var app = angular.module('chat', []);
   app.controller('chatController', function ($scope) {
-    $scope.now = new Date();
+    $scope.credit = 0;
+    $scope.course_ct = 0;
+    $scope.added_course = [];
+    $scope.add_course = function(c) {
+      arr = $scope.added_course;
+      for (var i in arr) {
+        // Check if added before
+        if (c.serial_no == arr[i].serial_no) {
+          return;
+        }
+      }
+      $scope.added_course.push(c);
+      $scope.credit += parseInt(c.credits);
+      $scope.course_ct++;
+      //toastr.success(c.chi_title + ' 已成功加入您的課表。');
+      $scope.$apply();
+    };
+    $scope.del_course = function(c) {
+      $scope.credit -= parseInt(c.credits);
+      $scope.course_ct--;
+      arr = $scope.added_course;
+      for (var i in arr) {
+        // Remove course from array
+        if (c.serial_no == arr[i].serial_no) {
+          arr.splice(i, 1);
+        }
+      }
+      //toastr.warning(c.chi_title + ' 已從您的課表移除。');
+    };
+    // Send message to server
     $scope.send = function (input) {
       $scope.chat_input = "";
       console.log(input);
@@ -309,15 +395,25 @@
           add_message(server_tpl.format(
             '{0}<br><br>{1}<br><i id="sucks{2}" onClick="sucks({2})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, JSON.stringify(data), data.id), now()));
           speak(data.resp_str);
+          // On recieve, bind event to links
           $('.selection').click(function () {
             $scope.send($(this).html());
+          })
+          $('.serial_no').click(function () {
+            course = JSON.parse($(this).attr('data'));
+            $scope.add_course(course);
           })
         });
     }
   });
+
   var scope;
   $(function() {
-    scope = angular.element($("#demo-chat-body")).scope();
+    scope = angular.element($(".container")).scope();
+    $('.open-popup-link').magnificPopup({
+      type:'inline',
+      midClick: true
+    });
   })
 </script>
 
