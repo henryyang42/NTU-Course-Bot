@@ -17,7 +17,7 @@ def multi_turn(request):
         resp = {'resp_str': '我壞掉惹QQ'}
         # resp['resp_str'] = """
         # <a href="#" class="serial_no">78774</a>
-        # <a href="#" class="serial_no">22003</a>
+        # <a href="#" class="serial_no">50241</a>
         # <a href="#" class="serial_no">29478</a>
         # """
         user_input = request.POST['input']

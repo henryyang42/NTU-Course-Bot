@@ -266,7 +266,7 @@
                 <td colspan="7">
                   <center>
                     <h4>
-                      您選了 {{ course_ct }} 門課共 <span ng-class="{true:'red', false:''}[ credit<16||credit>25 ]">{{ credit }}</span> 學分
+                      您選了 {{ added_course.length }} 門課共 <span ng-class="{true:'red', false:''}[ credit<16||credit>25 ]">{{ credit }}</span> 學分
                     </h4>
                   </center>
                 </td>
@@ -282,7 +282,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="course in added_course" title="{{ course.note}}">
+              <tr ng-repeat="course in added_course">
                 <td>{{ course.serial_no }}</td>
                 <td>{{ course.title }}</td>
                 <td>{{ course.instructor }}</td>
@@ -350,15 +350,54 @@
     utter.pitch = 1;
     synthesis.speak(utter);
   }
-  // initial
-  add_message(server_tpl.format('歡迎來到NTUCB！我能幫您做什麼？', now()));
-  speak('歡迎來到NTUCB！我能幫您做什麼？');
+
+  function save_schedule(added_course) {
+    if (typeof(Storage) !== 'undefined') {
+      // Code for localStorage
+      localStorage.setItem('added_course', JSON.stringify(added_course));
+    } else {
+      //Holy shit! No Web Storage support..
+    }
+  }
+  function load_schedule() {
+    try {
+      var added_course = localStorage.getItem('added_course');
+      if (added_course != null) {
+        added_course = JSON.parse(added_course);
+        for (var i in added_course) {
+          c = added_course[i];
+          if (c.no.indexOf(semester) >= 0) {
+            $scope.added_course.push(c);
+
+          }
+        }
+      }
+    } catch (e) {
+      localStorage.setItem(localStorageName, JSON.stringify($scope.added_course));
+    }
+  }
+
   // angularjs thing
   var app = angular.module('chat', []);
   app.controller('chatController', function ($scope) {
-    $scope.credit = 0;
-    $scope.course_ct = 0;
-    $scope.added_course = [];
+    function initial() {
+      add_message(server_tpl.format('歡迎來到NTUCB！我能幫您做什麼？', now()));
+      speak('歡迎來到NTUCB！我能幫您做什麼？');
+      $scope.credit = 0;
+      $scope.added_course = [];
+      try {
+        var added_course = localStorage.getItem('added_course');
+        if (added_course != null) {
+          added_course = JSON.parse(added_course);
+          $scope.added_course = added_course;
+          for (i in added_course)
+            $scope.credit += parseInt(added_course[i].credits);
+        }
+      } catch (e) {
+        //
+      }
+    }
+    initial();
     $scope.add_course = function(serial_no) {
       arr = $scope.added_course;
       for (var i in arr) {
@@ -372,15 +411,14 @@
         success: function (c) {
           $scope.added_course.push(c);
           $scope.credit += parseInt(c.credits);
-          $scope.course_ct++;
           toastr.success(c.title + ' 已成功加入您的課表。');
           $scope.$apply();
+          save_schedule($scope.added_course);
         }
       });
     };
     $scope.del_course = function(c) {
       $scope.credit -= parseInt(c.credits);
-      $scope.course_ct--;
       arr = $scope.added_course;
       for (var i in arr) {
         // Remove course from array
@@ -388,6 +426,7 @@
           arr.splice(i, 1);
         }
       }
+      save_schedule(arr);
       toastr.warning(c.title + ' 已從您的課表移除。');
     };
     // Send message to server
