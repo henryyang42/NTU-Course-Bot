@@ -8,6 +8,22 @@ from LU_LSTM.lstm_predict import *
 from django.conf import settings
 from utils.query import *
 
+def DST_update(old_state, sem_frame):
+    state = old_state.copy()
+    
+    if 'when' in sem_frame['slot']:
+        sem_frame['slot']['schedule_str'] = sem_frame['slot']['when'][-1]
+        sem_frame['slot'].pop('when')
+
+    if sem_frame['intent'].startswith('request'):
+        state['request_slots'][sem_frame['intent'][8:]] = '?'
+
+    for k, v in sem_frame['slot'].items():
+        if len(v) > 1 or k in ['schedule_str']:
+            state['inform_slots'][k] = v
+
+    return state
+
 @run_once
 def multi_turn_lu_setup():
     global understand
@@ -75,6 +91,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         return
     status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
     d = single_turn_lu_new(sentence)
+    '''
     if 'when' in d['slot']:
         d['slot']['schedule_str'] = d['slot']['when'][-1]
         d['slot'].pop('when')
@@ -85,6 +102,8 @@ def multi_turn_lu3(user_id, sentence, reset=False):
     for k, v in d['slot'].items():
         if len(v) > 1 or k in ['schedule_str']:
             status['inform_slots'][k] = v
+    '''
+    status = DST_update(status, d)
     # Retrieve reviews
     if d['intent'] == 'request_review':
         set_status(user_id)
