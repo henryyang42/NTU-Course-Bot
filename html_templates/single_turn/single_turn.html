@@ -403,10 +403,10 @@
             '{0}<br><br>{1}<br><i id="sucks{2}" onClick="sucks({2})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, JSON.stringify(data), data.id), now()));
           speak(data.resp_str);
           // On recieve, bind event to links
-          $('.selection').click(function () {
+          $('.selection').off('click').click(function () {
             $scope.send($(this).html());
           })
-          $('.serial_no').click(function () {
+          $('.serial_no').off('click').click(function () {
             course = JSON.parse($(this).html());
             $scope.add_course(course);
           })

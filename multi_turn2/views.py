@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 def multi_turn(request):
     if request.method == 'POST':
         resp = {'resp_str': '我壞掉惹QQ'}
+        # resp['resp_str'] = """
+        # <a href="#" class="serial_no">78774</a>
+        # <a href="#" class="serial_no">22003</a>
+        # <a href="#" class="serial_no">29478</a>
+        # """
         user_input = request.POST['input']
         uid = request.COOKIES['csrftoken']
         if user_input == 'reset':
