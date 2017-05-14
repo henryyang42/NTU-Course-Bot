@@ -88,7 +88,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
     # Retrieve reviews
     if d['intent'] == 'request_review':
         set_status(user_id)
-        reviews = query_review(status['inform_slots'])[-20:]
+        reviews = query_review(status['inform_slots']).order_by('-id')[:20]
         review_resp = []
         if reviews.count() == 0:
             review_resp.append('並未搜尋到相關評價QQ')
