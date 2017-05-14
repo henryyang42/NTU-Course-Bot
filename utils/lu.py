@@ -95,7 +95,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         else:
             review_resp.append('幫您搜尋到%d筆相關評價：<br>' % reviews.count())
             for review in reviews:
-                '<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title)
+                review_resp.append('<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
         return d, status, {}, '\n'.join(review_resp)
 
     action = get_action_from_frame(status)
