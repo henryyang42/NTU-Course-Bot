@@ -195,22 +195,32 @@ class KBHelper:
             print('\t', "\"%s\":" % c)
         print()
 
-        # here could be replaced with utils.query -> query_course
-        for course_id in self.course_dict.keys():
-            all_slots_match = 1
-            for slot in inform_slots.keys():
-                if inform_slots[slot] == dialog_config.I_DO_NOT_CARE:
-                    continue
+        kb_results['matching_all_constraints'] = len(
+            query_course(inform_slots))
+        for slot, val in inform_slots.items():
+            slot = 'schedule_str' if slot == 'when' else slot
+            query_course_list = query_course({slot: val})
+            if len(query_course_list) == 0:
+                all_slots_match = 0
+            else:
+                kb_results[slot] += len(query_course_list)
 
-                dict_slot = 'schedule_str' if slot == 'when' else slot
-                if dict_slot in self.course_dict[course_id].keys():
-                    if inform_slots[slot].lower() == self.course_dict[course_id][dict_slot].lower():
-                        kb_results[slot] += 1
-                    else:
-                        all_slots_match = 0
-                else:
-                    all_slots_match = 0
-            kb_results['matching_all_constraints'] += all_slots_match
+        # here could be replaced with utils.query -> query_course
+        # for course_id in self.course_dict.keys():
+        #     all_slots_match = 1
+        #     for slot in inform_slots.keys():
+        #         if inform_slots[slot] == dialog_config.I_DO_NOT_CARE:
+        #             continue
+
+        #         dict_slot = 'schedule_str' if slot == 'when' else slot
+        #         if dict_slot in self.course_dict[course_id].keys():
+        #             if inform_slots[slot].lower() == self.course_dict[course_id][dict_slot].lower():
+        #                 kb_results[slot] += 1
+        #             else:
+        #                 all_slots_match = 0
+        #         else:
+        #             all_slots_match = 0
+        #     kb_results['matching_all_constraints'] += all_slots_match
 
         self.cached_kb_slot[query_idx_keys].append(kb_results)
         return kb_results
