@@ -42,6 +42,11 @@ for i in range(N):
         #print("true state:", true_state)
         if resp['status'] == true_state:
             DST_turn_acc += 1
+        else:
+            print("## DST error ##")        
+            print("DST state:", resp['status'])
+            print("true state:", true_state)
+            print("###############")
 
         system_sentence = agent2nl(resp['action'])
         user_action, over = user_sim.next(resp['action'])
@@ -68,7 +73,7 @@ print('Average reward: %f' % (tot_reward / N), file=f)
 print('Accuracy: %f (%d/%d)' % (correct / N, correct, N), file=f)
 print('Average Turn: %f' % (tot_turn / N), file=f)
 
-DST_turn_acc /= tot_turn
+DST_turn_acc /= (tot_turn/2)
 DST_episode_acc /= N
 print('Tracking accuracy [turn]: %f' % (DST_turn_acc), file=f)
 print('Tracking accuracy [episode]: %f' % (DST_episode_acc), file=f)
