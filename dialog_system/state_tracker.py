@@ -151,7 +151,7 @@ class StateTracker:
             if agent_action['act_slot_response']:
                 response = copy.deepcopy(agent_action['act_slot_response'])
 
-                if response['diaact'] == 'multiple_choice':
+                if sys_action['diaact'] == 'multiple_choice':
                     choice_slots = sys_action['choice']
                     # choice_slots = self.kb_helper.fill_choice_slots(self.history_dictionaries[-1], self.current_slots)
 

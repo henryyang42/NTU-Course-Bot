@@ -142,12 +142,16 @@ print("----------DialogManager Setup Done----------\n")
 #   Run num_episodes Conversation Simulations
 ##########################################################################
 status = {'successes': 0, 'count': 0, 'cumulative_reward': 0}
-simulation_epoch_size = 100
-batch_size = 16
+simulation_epoch_size = 20
+batch_size = 20
 warm_start = 1
-warm_start_epochs = 20
-success_rate_threshold = 0.25
+warm_start_epochs = 100
+success_rate_threshold = 0.30
 save_check_point = 10
+agt = 9
+params = {}
+params['write_model_dir'] = './dqn_agent/models/'
+params['trained_model_path'] = None
 print("----------Parameters Setup Done----------\n")
 
 """ Initialization of Best Model and Performance Records """
@@ -169,8 +173,8 @@ def save_model(path, agt, success_rate, agent, best_epoch, cur_epoch):
         agt, best_epoch, cur_epoch, success_rate)
     filepath = os.path.join(path, filename)
     checkpoint = {}
-    if agt == 9:
-        checkpoint['model'] = copy.deepcopy(agent.dqn.model)
+    # if agt == 9:
+    checkpoint['model'] = copy.deepcopy(agent.dqn.model)
     checkpoint['params'] = params
     try:
         pickle.dump(checkpoint, open(filepath, "wb"))
@@ -205,7 +209,7 @@ def simulation_epoch(simulation_epoch_size):
         while not episode_over:
             episode_over, reward = dialog_manager.next_turn()
             reward = user_sim.reward
-            cumulative_reward += reward
+            # cumulative_reward += reward
             if episode_over:
                 if reward > 0:
                     successes += 1
@@ -213,6 +217,8 @@ def simulation_epoch(simulation_epoch_size):
                 else:
                     print("simulation episode %s: Fail" % (episode))
                 cumulative_turns += dialog_manager.state_tracker.turn_count
+
+        cumulative_reward += user_sim.reward
 
     res['success_rate'] = float(successes) / simulation_epoch_size
     res['avg_reward'] = float(cumulative_reward) / simulation_epoch_size
@@ -235,7 +241,7 @@ def warm_start_simulation():
         while not episode_over:
             episode_over, reward = dialog_manager.next_turn()
             reward = user_sim.reward
-            cumulative_reward += reward
+            # cumulative_reward += reward
             if episode_over:
                 if reward > 0:
                     successes += 1
@@ -247,6 +253,8 @@ def warm_start_simulation():
 
         if len(agent.experience_replay_pool) >= agent.experience_replay_pool_size:
             break
+
+        cumulative_reward += user_sim.reward
 
     agent.warm_start = 2  # just a counter to avoid executing warm simulation twice
     res['success_rate'] = float(successes) / simulation_epoch_size
@@ -278,7 +286,7 @@ def run_episodes(count, status):
         while not episode_over:
             episode_over, reward = dialog_manager.next_turn()
             reward = user_sim.reward
-            cumulative_reward += reward
+            # cumulative_reward += reward
             if episode_over:
                 if reward > 0:
                     print("Successful Dialog!")
@@ -288,7 +296,8 @@ def run_episodes(count, status):
 
                 cumulative_turns += dialog_manager.state_tracker.turn_count
 
-        # simulation
+        cumulative_reward += user_sim.reward
+    # simulation
     # if agt == 9 and params['trained_model_path'] == None:
         agent.predict_mode = True
         simulation_res = simulation_epoch(simulation_epoch_size)
@@ -336,4 +345,4 @@ def run_episodes(count, status):
         params['write_model_dir'], agt, performance_records)
 
 
-run_episodes(100, status)
+run_episodes(50, status)

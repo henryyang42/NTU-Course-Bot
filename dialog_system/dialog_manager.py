@@ -47,17 +47,17 @@ class DialogManager:
         self.user_action = self.user.initialize_episode()
         self.state_tracker.update(user_action=self.user_action)
 
-        print("Dialog Manager - initialize_episode -> current_slots:\n\t", self.state_tracker.current_slots, '\n')
+        # print("Dialog Manager - initialize_episode -> current_slots:\n\t", self.state_tracker.current_slots, '\n')
 
         if dialog_config.run_mode < 3:
             print("New episode, user goal:")
             print(json.dumps(self.user.goal, indent=4))
         self.print_function(user_action=self.user_action)
 
-        print("Initial User Action:")
-        for k, v in self.user_action.items():
-            print('\t', "\"%s\":" % k, v)
-        print()
+        # print("Initial User Action:")
+        # for k, v in self.user_action.items():
+        #     print('\t', "\"%s\":" % k, v)
+        # print()
 
         self.agent.initialize_episode()
 
