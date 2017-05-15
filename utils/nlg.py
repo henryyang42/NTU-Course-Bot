@@ -118,7 +118,7 @@ def agent2nl(sys_act):
     res_list = []
     # response in a pre-defined order
     if sys_act["diaact"] == "inform":
-        for slot in ["serial_no", "title", "instructor", "classroom", "schedule_str"]:
+        for slot in ["serial_no", "title", "instructor", "designated_for", "required_elective", "classroom", "schedule_str", "sel_method"]:
             if slot in sys_act["inform_slots"]:
                 if slot == "serial_no":
                     res_str = "流水號<a href='#' class='serial_no'>%s</a>。"
@@ -129,7 +129,13 @@ def agent2nl(sys_act):
                 elif slot == "classroom":
                     res_str = "在%s上課。"
                 elif slot == "schedule_str":
-                    res_str = "%s上課。"
+                    res_str = "上課時間是%s。"
+                elif slot == "designated_for":
+                    res_str = "系所：%s。"
+                elif slot == "required_elective":
+                    res_str = "必選修：%s。"
+                elif slot == "sel_method":
+                    res_str = "加選方式：%s。"
                 res_str = res_str % sys_act["inform_slots"][slot]
                 res_list.append(res_str)
 
