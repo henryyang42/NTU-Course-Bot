@@ -314,7 +314,7 @@ def simulation_epoch(simulation_epoch_size):
 
 
 """ Warm_Start Simulation (by Rule Policy) """
-def warm_start_simulation():
+def warm_start_simulation(warm_start_epochs):
     successes = 0
     cumulative_reward = 0
     cumulative_turns = 0
@@ -341,9 +341,9 @@ def warm_start_simulation():
         cumulative_reward += user_sim.reward
 
     agent.warm_start = 2  # just a counter to avoid executing warm simulation twice
-    res['success_rate'] = float(successes) / simulation_epoch_size
-    res['avg_reward'] = float(cumulative_reward) / simulation_epoch_size
-    res['avg_turns'] = float(cumulative_turns) / simulation_epoch_size
+    res['success_rate'] = float(successes) / warm_start_epochs
+    res['avg_reward'] = float(cumulative_reward) / warm_start_epochs
+    res['avg_turns'] = float(cumulative_turns) / warm_start_epochs
     print("Func - \"warm_start_simulation\":\n\t%s Epochs\n\tSuccess Rate %s\n\tAvg Reward %s\n\tAvg Turns %s" % (
         episode + 1, res['success_rate'], res['avg_reward'], res['avg_turns']))
     print("Current Experience-Replay Buffer Size %s" %
@@ -359,7 +359,7 @@ def run_episodes(count, status):
     # if agt == 9 and params['trained_model_path'] == None and warm_start == 1:
     if warm_start == 1:
         print('Warm_start Starting ...\n')
-        warm_start_simulation()
+        warm_start_simulation(warm_start_epochs)
         print('Warm_start Finished, Start RL Training ...\n')
 
     for episode in range(count):
@@ -428,4 +428,4 @@ def run_episodes(count, status):
     save_model(params['write_model_dir'], agt, float(successes) / count, best_model['model'], best_res['epoch'], count)
     save_performance_records(params['write_model_dir'], agt, performance_records)
 
-run_episodes(50, status)
+run_episodes(20, status)
