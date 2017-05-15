@@ -155,7 +155,7 @@ class DQN:
         caches = cache['caches']
 
         grads = {}
-        for i in xrange(len(caches)):
+        for i in range(len(caches)):
             single_cache = caches[i]
             local_grads = self.bwdPass(dY[i], single_cache)
             # add up the gradients wrt model parameters

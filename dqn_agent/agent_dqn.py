@@ -354,7 +354,7 @@ class AgentDQN():
             self.cur_bellman_err = 0
             for iter in range(len(self.experience_replay_pool) // (batch_size)):
                 batch = [random.choice(self.experience_replay_pool)
-                         for i in xrange(batch_size)]
+                         for i in range(batch_size)]
                 batch_struct = self.dqn.singleBatch(
                     batch, {'gamma': self.gamma}, self.clone_dqn)
                 self.cur_bellman_err += batch_struct['cost']['total_cost']
@@ -389,42 +389,5 @@ class AgentDQN():
         print("trained DQN Parameters:", json.dumps(trained_file['params'], indent=2))
         return model
 
-
-if __name__ == "__main__":
-    all_courses = list(query_course({}).values())
-    np.random.shuffle(all_courses)
-    course_dict = {k: v for k in range(len(all_courses)) for v in all_courses}
-    print(len(course_dict))
-    act_set = text_to_dict("./dqn_agent/dia_acts.txt")
-    slot_set = text_to_dict("./dqn_agent/slot_set.txt")
-    dqn_agent_params = {
-        'epsilon': 0.9, 'gamma': 0.9, 'dqn_hidden_size': 50,
-        'experience_replay_pool_size': 1000, 'trained_model_path': None,
-        'predict_mode': False, 'warm_start': 0, 'max_turn': 4}
-
-    user_sim = RuleSimulator(all_courses)
-    dqn_agent = AgentDQN(course_dict=course_dict,
-                         act_set=act_set, slot_set=slot_set, params=dqn_agent_params)
-
-
-    status = {'successes': 0, 'count': 0, 'cumulative_reward': 0}
-    simulation_epoch_size = params['simulation_epoch_size']
-    batch_size = 16
-    warm_start = 1
-    warm_start_epochs = 100
-    success_rate_threshold = 0.3
-    save_check_point = 10
-
-    """ Initialization of Best Model and Performance Records """
-    best_model = {}
-    best_res = {'success_rate': 0, 'ave_reward': float(
-        '-inf'), 'ave_turns': float('inf'), 'epoch': 0}
-    best_model['model'] = copy.deepcopy(agent)
-    best_res['success_rate'] = 0
-
-    performance_records = {}
-    performance_records['success_rate'] = {}
-    performance_records['avg_turns'] = {}
-    performance_records['avg_reward'] = {}
 
 
