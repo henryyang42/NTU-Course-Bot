@@ -192,7 +192,20 @@ class StateTracker:
                         'inform_slots': inform_slots,
                         'request_slots': response['request_slots'],
                         'turn': self.turn_count})
+                else:
+                    inform_slots = sys_action['inform_slots']
+                    agent_action_values = {
+                        'turn': self.turn_count,
+                        'speaker': "agent",
+                        'diaact': response['diaact'],
+                        'inform_slots': inform_slots,
+                        'request_slots': response['request_slots']}
 
+                    agent_action['act_slot_response'].update({
+                        'diaact': response['diaact'],
+                        'inform_slots': inform_slots,
+                        'request_slots': response['request_slots'],
+                        'turn': self.turn_count})
             elif agent_action['act_slot_value_response']:
                 agent_action_values = copy.deepcopy(agent_action['act_slot_value_response'])
                 # print("Updating state based on act_slot_value action from agent")
