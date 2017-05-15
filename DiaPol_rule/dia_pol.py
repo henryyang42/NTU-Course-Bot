@@ -33,7 +33,7 @@ except:
 ############
 MAX_N_CHOICE = 10
 
-def get_action_from_frame(dia_state):
+def get_action_from_frame(dia_state, verbose=False):
     # filter courses according to dia_state
     '''
     courses = []
@@ -50,14 +50,15 @@ def get_action_from_frame(dia_state):
     courses = courses.values()
 
     #############################################
-    print ("[INFO] current set of courses: %d" % course_ct)
+    if verbose:
+        print ("[INFO] current set of courses: %d" % course_ct)
 
     # required fields
-    sys_act = {} 
+    sys_act = {}
     sys_act["diaact"] = "closing"
     sys_act["inform_slots"] = {}
     sys_act["request_slots"] = {}
-    
+
     # decide action by # courses satisfying the constraints
     unique_found = False
     if course_ct == 0:  # no course satisfying all constraints
@@ -69,7 +70,8 @@ def get_action_from_frame(dia_state):
                 del tmp_inform_slots[slot]
                 #print (tmp_inform_slots)
                 tmp_cnt = query_course(tmp_inform_slots).count()
-                print ("[INFO] try removing slot %s, # courses = %d" % (slot, tmp_cnt))
+                if verbose:
+                    print ("[INFO] try removing slot %s, # courses = %d" % (slot, tmp_cnt))
                 if tmp_cnt > 0:
                     wrong_slot = slot
                     break
@@ -91,7 +93,8 @@ def get_action_from_frame(dia_state):
             # max # different values --> largest diversity
             values_set = set([c[slot] for c in courses if len(c[slot])>0])
             n_values = len(values_set)
-            print ("[INFO] slot %s, # values = %d" % (slot, n_values))
+            if verbose:
+                print ("[INFO] slot %s, # values = %d" % (slot, n_values))
 
             if n_values > req_max_n:
                 if n_values > MAX_N_CHOICE: # not taking `multiple_choice` action
@@ -186,13 +189,13 @@ if __name__ == '__main__':
     dia_state["request_slots"] = {"classroom": "?"}
     dia_state["inform_slots"] = {"instructor": "林智星"}
     test_dia_states.append(dia_state)
-    
+
     # 4. multiple choices
     dia_state = {}
     dia_state["request_slots"] = {"schedule_str": "?"}
     dia_state["inform_slots"] = {"title": "機器學習"}
     test_dia_states.append(dia_state)
-    
+
     # 5. confirm
     dia_state = {}
     dia_state["request_slots"] = {"schedule_str": "?"}
@@ -210,10 +213,10 @@ if __name__ == '__main__':
 
         #NL = get_NL_from_action(sys_act)
         NL = agent2nl(sys_act)
-        
+
         print ("\n== Template-based NLG ==")
         print (NL)
-        
+
 
         print ("----------\n")
 
