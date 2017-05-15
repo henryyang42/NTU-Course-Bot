@@ -9,6 +9,12 @@ state tracker
 from . import KBHelper
 import numpy as np
 import copy
+import os
+import sys
+sys.path.append(os.getcwd())
+sys.path.append(os.path.pardir)
+from utils.query import *
+from DiaPol_rule.dia_pol import *
 
 
 class StateTracker:
@@ -90,6 +96,11 @@ class StateTracker:
     def get_state_for_agent(self):
         """ Get the state representatons to send to agent """
         # state = {'user_action': self.history_dictionaries[-1], 'current_slots': self.current_slots, 'kb_results': self.kb_results_for_state()}
+        # print("State-Tracker - get_state_for_agent -> current_slots:")
+        # for k, v in self.current_slots.items():
+        #     print('\t', "\"%s\":" % k, v)
+        # print()
+
         state = {'user_action': self.history_dictionaries[-1],
                  'current_slots': self.current_slots,
                  # 'kb_results': self.kb_results_for_state(),
@@ -98,10 +109,10 @@ class StateTracker:
                  'agent_action': self.history_dictionaries[-2] if \
                   len(self.history_dictionaries) > 1 else None}
 
-        print("get_state_for_agent -- State:")
-        for k, v in state.items():
-            print('\t', "\"%s\":" % k, v)
-        print()
+        # print("State-Tracker - get_state_for_agent -> state:")
+        # for k, v in state.items():
+        #     print('\t', "\"%s\":" % k, v)
+        # print()
 
         return copy.deepcopy(state)
 
@@ -133,7 +144,7 @@ class StateTracker:
         #   Update state to reflect a new action by the agent.
         ########################################################################
         if agent_action:
-
+            sys_action = get_action_from_frame(self.current_slots)
             ####################################################################
             #   Handles the act_slot response (with values needing to be filled)
             ####################################################################
@@ -141,13 +152,29 @@ class StateTracker:
                 response = copy.deepcopy(agent_action['act_slot_response'])
 
                 if response['diaact'] == 'multiple_choice':
-                    choice_slots = self.kb_helper.fill_inform_slots(
-                        response['inform_slots'], self.current_slots)
+                    choice_slots = sys_action['choice']
+                    # choice_slots = self.kb_helper.fill_choice_slots(self.history_dictionaries[-1], self.current_slots)
+
+                    # print("State-Tracker - update -> choice_slots\n\t", choice_slots, '\n')
+                    agent_action_values = {
+                        'turn': self.turn_count,
+                        'speaker': "agent",
+                        'diaact': response['diaact'],
+                        'choice': choice_slots,
+                        'inform_slots': {},
+                        'request_slots': response['request_slots']}
+
+                    agent_action['act_slot_response'].update({
+                        'diaact': response['diaact'],
+                        'choice': choice_slots,
+                        'inform_slots': {},
+                        'request_slots': response['request_slots'],
+                        'turn': self.turn_count})
 
                 else:
-                    inform_slots = self.kb_helper.fill_inform_slots(response['inform_slots'], self.current_slots)
-                    print("State-Tracker - update -> inform_slots\n\t",
-                        inform_slots, '\n')
+                    inform_slots = sys_action['inform_slots']
+                    # inform_slots = self.kb_helper.fill_inform_slots(response['inform_slots'], self.current_slots)
+                    # print("State-Tracker - update -> inform_slots\n\t", inform_slots, '\n')
 
                     agent_action_values = {
                         'turn': self.turn_count,
@@ -189,18 +216,22 @@ class StateTracker:
         #   Update the state to reflect a new action by the user
         ########################################################################
         elif user_action:
-
+            # print("State-Tracker - update -> user_action:\n\t", user_action, '\n')
             ####################################################################
             #   Update the current slots
             ####################################################################
             for slot in user_action['inform_slots'].keys():
-                self.current_slots['inform_slots'][slot] = user_action['inform_slots'][slot]
-                if slot in self.current_slots['request_slots'].keys():
-                    del self.current_slots['request_slots'][slot]
+                # dict_slot = 'schedule_str' if slot == 'when' else slot
+                dict_slot = slot
+                self.current_slots['inform_slots'][dict_slot] = user_action['inform_slots'][slot]
+                if dict_slot in self.current_slots['request_slots'].keys():
+                    del self.current_slots['request_slots'][dict_slot]
 
             for slot in user_action['request_slots'].keys():
-                if slot not in self.current_slots['request_slots']:
-                    self.current_slots['request_slots'][slot] = "UNK"
+                # dict_slot = 'schedule_str' if slot == 'when' else slot
+                dict_slot = slot
+                if dict_slot not in self.current_slots['request_slots']:
+                    self.current_slots['request_slots'][dict_slot] = "UNK"
 
             self.history_vectors = np.vstack([self.history_vectors, np.zeros((1,self.action_dimension))])
             new_move = {'turn': self.turn_count, 'speaker': "user",

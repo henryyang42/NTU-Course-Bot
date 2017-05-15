@@ -1,13 +1,13 @@
 import argparse, json, random, copy, re
 
 from django.template import Context, Template
-
+from dqn_agent import dialog_config
 from misc_scripts.generate_template import templates, ask, be
 
 
 class RuleSimulator():
     """ A rule-based user simulator for testing dialog policy """
-    
+
     def __init__(self, start_set=None):
         """ Constructor shared by all user simulators """
         self.act_set = ['inform', 'request', 'thanks']
@@ -17,14 +17,14 @@ class RuleSimulator():
         self.inform_set.append('when')
         self.max_turn = 20
         self.start_set = start_set
-        self.request_slot = 'serial_no' # 
+        self.request_slot = 'serial_no' #
         self.reward = 0
         self.accumulated_reward = 0
         self.episodes_num = 0
         self.correct_num = 0
-    
+
     def initialize_episode(self):
-        
+
         self.state = {}
         self.state['history_slots'] = {}
         self.state['history_request_slots'] = {}
@@ -32,18 +32,18 @@ class RuleSimulator():
         self.state['request_slots'] = {}
         self.state['rest_slots'] = []
         self.state['turn'] = 0
-        
+
         self.accumulated_reward = self.accumulated_reward + self.reward
-        self.episodes_num = self.episodes_num + 1        
+        self.episodes_num = self.episodes_num + 1
         self.reward = 0
         self.episode_over = False
-        
+        self.dialog_status = dialog_config.NO_OUTCOME_YET
 
         user_action = self._sample_action()
         user_action['turn'] = self.state['turn']
 
-        return user_action  
-        
+        return user_action
+
     def _sample_action(self):
 
         """ randomly sample a start action based on user goal """
@@ -74,7 +74,7 @@ class RuleSimulator():
         for node in tpl.nodelist:
             if node.token.contents in self.inform_set:
                 sample_action['inform_slots'][node.token.contents] = self.ans[node.token.contents]
-       
+
         self.state['history_slots'].update(sample_action['inform_slots'])
 
         # Sample Goal
@@ -86,18 +86,19 @@ class RuleSimulator():
 
 
         return sample_action
-    
-        
+
+
     def next(self, system_action):
         """ Generate next User Action based on last System Action """
-        
+
         self.state['turn'] += 2
         self.reward = self.reward - 1
         self.episode_over = False
-        
+        self.dialog_status = dialog_config.NO_OUTCOME_YET
         sys_act = system_action['diaact']
-        
+
         if (self.max_turn > 0 and self.state['turn'] > self.max_turn):
+            self.dialog_status = dialog_config.FAILED_DIALOG
             self.episode_over = True
             self.state['diaact'] = "closing"
             self.state['inform_slots'].clear()
@@ -109,7 +110,7 @@ class RuleSimulator():
             if sys_act == "inform":
                 self.response_inform(system_action)
             elif sys_act == "request":
-                self.response_request(system_action) 
+                self.response_request(system_action)
             elif sys_act == "confirm":
                 self.response_confirm(system_action)
             elif sys_act == "multiple_choice":
@@ -133,10 +134,10 @@ class RuleSimulator():
         response_action['request_slots'] = self.state['request_slots']
         response_action['nl'] = self.user2nl()
         response_action['turn'] = self.state['turn']
-        
-        return response_action, self.episode_over
-    
-    
+
+        return response_action, self.episode_over, self.dialog_status
+
+
     def response_confirm(self, system_action):
         """ Response for Confirm_Answer (System Action) """
 
@@ -189,7 +190,7 @@ class RuleSimulator():
 
     def response_request(self, system_action):
         """ Response for Request (System Action) """
-        
+
         self.state['diaact'] = "inform"
         self.state['inform_slots'].clear()
         self.state['request_slots'].clear()
@@ -238,7 +239,7 @@ class RuleSimulator():
             else:
                 self.state['diaact'] = 'deny'
 
-        # System give serial no. 
+        # System give serial no.
         if 'serial_no' in system_action['inform_slots'].keys():
             if self.ans['serial_no'] == system_action['inform_slots']['serial_no']:
                 self.state['diaact'] = 'thanks'
@@ -260,7 +261,7 @@ class RuleSimulator():
 
         # Search suitable template
         for tpl in templates[self.state['diaact']]:
-            
+
             tpl_keys = [node.token.contents for node in tpl.nodelist if node.token.contents in self.inform_set]
             choose = True
             for slot in self.state['inform_slots'].keys():
@@ -276,11 +277,11 @@ class RuleSimulator():
 
     def reward_function(self):
         return self.reward
-                
+
     def episodes_reward(self):
         return self.reward, self.accumulated_reward
 
     def episodes_times(self):
-        return self.episodes_num, self.correct_num 
+        return self.episodes_num, self.correct_num
 
 

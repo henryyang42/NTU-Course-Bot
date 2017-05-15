@@ -88,11 +88,10 @@ class AgentDQN():
         """ DQN: Input state, output action """
         self.representation = self.prepare_state_representation(state)
         self.action = self.run_policy(self.representation, state)
-        print("DQN-Agent - state_to_action -> self.action:\n\t", self.action, '\n')
+        # print("DQN-Agent - state_to_action -> self.action:\n\t", self.action, '\n')
 
         act_slot_response = copy.deepcopy(self.feasible_actions[self.action])
-        print("DQN-Agent - state_to_action -> act_slot_response:\n\t",
-              act_slot_response, '\n')
+        # print("DQN-Agent - state_to_action -> act_slot_response:\n\t", act_slot_response, '\n')
 
         return {'act_slot_response': act_slot_response, 'act_slot_value_response': None}
 
@@ -108,7 +107,7 @@ class AgentDQN():
         ##################################################################
         user_act_rep = np.zeros((1, self.act_cardinality))
         user_act_rep[0, self.act_set[user_action['diaact']]] = 1.0
-        print("user_act_rep:\n\t", user_act_rep, '\n')
+        # print("user_act_rep:\n\t", user_act_rep, '\n')
 
         ##################################################################
         #     Create bag of inform slots representation to represent the
@@ -117,7 +116,7 @@ class AgentDQN():
         user_inform_slots_rep = np.zeros((1, self.slot_cardinality))
         for slot in user_action['inform_slots'].keys():
             user_inform_slots_rep[0, self.slot_set[slot]] = 1.0
-        print("user_inform_slots_rep:\n\t", user_inform_slots_rep, '\n')
+        # print("user_inform_slots_rep:\n\t", user_inform_slots_rep, '\n')
 
         ##################################################################
         #   Create bag of request slots representation to represent the
@@ -126,7 +125,7 @@ class AgentDQN():
         user_request_slots_rep = np.zeros((1, self.slot_cardinality))
         for slot in user_action['request_slots'].keys():
             user_request_slots_rep[0, self.slot_set[slot]] = 1.0
-        print("user_request_slots_rep:\n\t", user_request_slots_rep, '\n')
+        # print("user_request_slots_rep:\n\t", user_request_slots_rep, '\n')
 
         ##################################################################
         #   Creat bag of filled_in slots based on the current_slots
@@ -134,7 +133,7 @@ class AgentDQN():
         current_slots_rep = np.zeros((1, self.slot_cardinality))
         for slot in current_slots['inform_slots']:
             current_slots_rep[0, self.slot_set[slot]] = 1.0
-        print("current_slots_rep:\n\t", current_slots_rep, '\n')
+        # print("current_slots_rep:\n\t", current_slots_rep, '\n')
 
         ##################################################################
         #   Encode last agent act
@@ -142,7 +141,7 @@ class AgentDQN():
         agent_act_rep = np.zeros((1, self.act_cardinality))
         if agent_last:
             agent_act_rep[0, self.act_set[agent_last['diaact']]] = 1.0
-        print("agent_act_rep:\n\t", agent_act_rep, '\n')
+        # print("agent_act_rep:\n\t", agent_act_rep, '\n')
 
         ##################################################################
         #   Encode last agent inform slots
@@ -151,7 +150,7 @@ class AgentDQN():
         if agent_last:
             for slot in agent_last['inform_slots'].keys():
                 agent_inform_slots_rep[0, self.slot_set[slot]] = 1.0
-        print("agent_inform_slots_rep:\n\t", agent_inform_slots_rep, '\n')
+        # print("agent_inform_slots_rep:\n\t", agent_inform_slots_rep, '\n')
 
         ##################################################################
         #   Encode last agent request slots
@@ -162,7 +161,7 @@ class AgentDQN():
                 agent_request_slots_rep[0, self.slot_set[slot]] = 1.0
 
         turn_rep = np.zeros((1, 1)) + state['turn'] / 10.
-        print("agent_request_slots_rep:\n\t", agent_request_slots_rep, '\n')
+        # print("agent_request_slots_rep:\n\t", agent_request_slots_rep, '\n')
         # print("turn_rep:", turn_rep)
 
         ##################################################################
@@ -219,25 +218,53 @@ class AgentDQN():
     def rule_policy(self, state=None):
         """ Rule Policy """
 
+        sys_action = get_action_from_frame(state['current_slots'])
+        # print("DQN-Agent - rule_policy -> sys_action (from get_action_from_frame)")
+        # for k, v in sys_action.items():
+        #     print('\t', "\"%s\":" % k, v)
+        # print()
+
+        ####################################################################
+        #   Old version follows kb_results
+        ####################################################################
         # if the unique course is found
-        if state['kb_results_dict']['matching_all_constraints'] == 1:
+        # if state['kb_results_dict']['matching_all_constraints'] == 1:
+        #     act_slot_response = {}
+        #     act_slot_response['diaact'] = "inform"
+        #     act_slot_response['inform_slots'] = {
+        #         list(state['current_slots']['request_slots'].keys())[0]: "PLACEHOLDER"}
+        #     act_slot_response['request_slots'] = {}
+        #     # print('DQN-Agent - rule_policy -> unique course is found: act_slot_response\n\t', act_slot_response, '\n')
+
+        # # if there are multiple courses are found
+        # elif state['kb_results_dict']['matching_all_constraints'] > 1:
+        #     act_slot_response = {}
+        #     act_slot_response['diaact'] = "multiple_choice"
+        #     act_slot_response['choice'] = []
+        #     act_slot_response['inform_slots'] = {}
+        #     act_slot_response['request_slots'] = {}
+        #     # print('DQN-Agent - rule_policy -> multiple courses are found: act_slot_response\n\t', act_slot_response, '\n')
+
+        ####################################################################
+        #   New version follows get_action_from_frame
+        ####################################################################
+        if sys_action['diaact'] == 'inform':
             act_slot_response = {}
             act_slot_response['diaact'] = "inform"
             act_slot_response['inform_slots'] = {
-                list(state['current_slots']['request_slots'].keys())[0]: "PLACEHOLDER"}
+                    k: "PLACEHOLDER" for k in sys_action['inform_slots'].keys()
+                }
             act_slot_response['request_slots'] = {}
-            print('DQN-Agent - rule_policy -> unique course is found: act_slot_response\n\t',
-                  act_slot_response, '\n')
+            # print('DQN-Agent - rule_policy -> unique course is found: act_slot_response\n\t', act_slot_response, '\n')
 
         # if there are multiple courses are found
-        elif state['kb_results_dict']['matching_all_constraints'] > 1:
+        elif sys_action['diaact'] == 'multiple_choice':
             act_slot_response = {}
             act_slot_response['diaact'] = "multiple_choice"
             act_slot_response['choice'] = []
             act_slot_response['inform_slots'] = {}
             act_slot_response['request_slots'] = {}
-            print('DQN-Agent - rule_policy -> multiple courses are found: act_slot_response\n\t',
-                  act_slot_response, '\n')
+
 
         # if the conditions of the course in not enough
         else:
@@ -248,10 +275,8 @@ class AgentDQN():
                 self.request_set[dict_slot] = 1
 
             filled_in_slots_num = sum(list(self.request_set.values()))
-            print('DQN-Agent - rule_policy -> filled_in_slots_num\n\t',
-                  filled_in_slots_num, '\n')
-            print('DQN-Agent - rule_policy -> len(self.request_set)\n\t',
-                  len(self.request_set), '\n')
+            # print('DQN-Agent - rule_policy -> filled_in_slots_num\n\t', filled_in_slots_num, '\n')
+            # print('DQN-Agent - rule_policy -> len(self.request_set)\n\t', len(self.request_set), '\n')
 
             # necessary slots not all filled in with correct values
             if filled_in_slots_num < len(self.request_set):
@@ -260,17 +285,16 @@ class AgentDQN():
                     if v == 0:
                         slot = k
                         break
-                print('DQN-Agent - rule_policy -> slot\n\t', slot, '\n')
+                # print('DQN-Agent - rule_policy -> slot\n\t', slot, '\n')
 
                 sys_act = get_action_from_frame(state['current_slots'])
-                print('DQN-Agent - rule_policy -> sys_act\n\t', sys_act, '\n')
+                # print('DQN-Agent - rule_policy -> sys_act\n\t', sys_act, '\n')
 
                 act_slot_response = {}
                 act_slot_response['diaact'] = "request"
                 act_slot_response['inform_slots'] = {}
                 act_slot_response['request_slots'] = {slot: "UNK"}
-                print('DQN-Agent - rule_policy -> conditions of the course in not enough: act_slot_response\n\t',
-                      act_slot_response, '\n')
+                # print('DQN-Agent - rule_policy -> conditions of the course in not enough: act_slot_response\n\t', act_slot_response, '\n')
 
             elif self.phase == 0:
                 act_slot_response = {'diaact': "inform",
@@ -291,23 +315,21 @@ class AgentDQN():
         raise Exception("Action Index Not Found")
         return None
 
-    def add_nl_to_action(self, agent_action):
+    def add_nl_to_action(self, agent_action, user_action):
         """ Add NL to Agent Dia_Act """
-        system_sentence = agent2nl(resp['action'])
+
+        # print('DQN-Agent - add_nl_to_action -> agent_action\n\t', agent_action, '\n')
+        # print('DQN-Agent - add_nl_to_action -> user_action\n\t', user_action, '\n')
+
+        # system_sentence = agent2nl(agent_action)
         if agent_action['act_slot_response']:
             agent_action['act_slot_response']['nl'] = ""
-            # self.nlg_model.translate_diaact(agent_action['act_slot_response'])
-            # # NLG
-            user_nlg_sentence = self.nlg_model.convert_diaact_to_nl(
-                agent_action['act_slot_response'], 'agt')
-            agent_action['act_slot_response']['nl'] = user_nlg_sentence
+            # NLG
+            agent_action['act_slot_response']['nl'] = user_action['nl']
         elif agent_action['act_slot_value_response']:
             agent_action['act_slot_value_response']['nl'] = ""
-            # self.nlg_model.translate_diaact(agent_action['act_slot_value_response'])
-            # # NLG
-            user_nlg_sentence = self.nlg_model.convert_diaact_to_nl(
-                agent_action['act_slot_value_response'], 'agt')
-            agent_action['act_slot_response']['nl'] = user_nlg_sentence
+            # # NLG)
+            agent_action['act_slot_response']['nl'] = user_action['nl']
 
     def register_experience_replay_tuple(self, s_t, a_t, reward, s_tplus1, episode_over):
         """ Register feedback from the environment, to be stored as future training data """
@@ -330,7 +352,7 @@ class AgentDQN():
 
         for iter_batch in range(num_batches):
             self.cur_bellman_err = 0
-            for iter in range(len(self.experience_replay_pool) / (batch_size)):
+            for iter in range(len(self.experience_replay_pool) // (batch_size)):
                 batch = [random.choice(self.experience_replay_pool)
                          for i in xrange(batch_size)]
                 batch_struct = self.dqn.singleBatch(

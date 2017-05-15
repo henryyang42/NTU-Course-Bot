@@ -47,6 +47,8 @@ class DialogManager:
         self.user_action = self.user.initialize_episode()
         self.state_tracker.update(user_action=self.user_action)
 
+        print("Dialog Manager - initialize_episode -> current_slots:\n\t", self.state_tracker.current_slots, '\n')
+
         if dialog_config.run_mode < 3:
             print("New episode, user goal:")
             print(json.dumps(self.user.goal, indent=4))
@@ -66,31 +68,38 @@ class DialogManager:
         #   CALL AGENT TO TAKE ITS TURN
         ########################################################################
         self.state = self.state_tracker.get_state_for_agent()
+        # print("Dialog Manager - next_turn -> self.state:\n\t", self.state, '\n')
         self.agent_action = self.agent.state_to_action(self.state)
-        print("Dialog Manager - next_turn -> agent_action:\n\t",
-              self.agent_action, '\n')
 
         ########################################################################
         #   Register AGENT action with the state_tracker
         ########################################################################
         self.state_tracker.update(agent_action=self.agent_action)
+        # print("Dialog Manager - next_turn -> agent_action:\n\t", self.state_tracker.history_dictionaries[-1], '\n')
 
-        self.agent.add_nl_to_action(self.agent_action) # add NL to Agent Dia_Act
-        self.print_function(agent_action = self.agent_action['act_slot_response'])
+        # self.agent.add_nl_to_action(self.state_tracker.history_dictionaries[-1],
+        #                             self.state_tracker.history_dictionaries[-2])
+        self.agent.add_nl_to_action(
+            self.agent_action, self.state_tracker.history_dictionaries[-2])  # add NL to Agent
+        # Dia_Act
+        self.print_function(agent_action=self.agent_action['act_slot_response'])
 
         ########################################################################
         #   CALL USER TO TAKE HIS OR HER TURN
         ########################################################################
         self.sys_action = self.state_tracker.dialog_history_dictionaries()[-1]
         self.user_action, self.episode_over, dialog_status = self.user.next(self.sys_action)
+        # print("Dialog Manager - next_turn -> user_action:\n\t", self.user_action, '\n')
+        # print("Dialog Manager - next_turn -> dialog_status:\n\t",
+        #       dialog_status, '\n')
         self.reward = self.reward_function(dialog_status)
 
         ########################################################################
         #   Update state tracker with latest user action
         ########################################################################
         if self.episode_over != True:
-            self.state_tracker.update(user_action = self.user_action)
-            self.print_function(user_action = self.user_action)
+            self.state_tracker.update(user_action=self.user_action)
+            self.print_function(user_action=self.user_action)
 
         ########################################################################
         #  Inform agent of the outcome for this timestep (s_t, a_t, r, s_{t+1}, episode_over)
@@ -98,15 +107,16 @@ class DialogManager:
         if record_training_data:
             self.agent.register_experience_replay_tuple(self.state, self.agent_action, self.reward, self.state_tracker.get_state_for_agent(), self.episode_over)
 
+        # print("Dialog Manager - next_turn -> current_slots:\n\t", self.state_tracker.current_slots, '\n')
         return (self.episode_over, self.reward)
 
 
     def reward_function(self, dialog_status):
         """ Reward Function 1: a reward function based on the dialog_status """
         if dialog_status == dialog_config.FAILED_DIALOG:
-            reward = -self.user.max_turn #10
+            reward = -self.user.max_turn # 10
         elif dialog_status == dialog_config.SUCCESS_DIALOG:
-            reward = 2 * self.user.max_turn #20
+            reward = 2 * self.user.max_turn # 20
         else:
             reward = -1
         return reward
@@ -136,8 +146,8 @@ class DialogManager:
                 print("Turn %d sys: %s, inform_slots: %s, request slots: %s" % (agent_action['turn'], agent_action['diaact'], agent_action['inform_slots'], agent_action['request_slots']))
                 print ("Turn %d sys: %s" % (agent_action['turn'], agent_action['nl']))
 
-            if dialog_config.auto_suggest == 1:
-                print('(Suggested Values: %s)' % (self.state_tracker.get_suggest_slots_values(agent_action['request_slots'])))
+            # if dialog_config.auto_suggest == 1:
+            #     print('(Suggested Values: %s)' % (self.state_tracker.get_suggest_slots_values(agent_action['request_slots'])))
         elif user_action:
             if dialog_config.run_mode == 0:
                 print ("Turn %d usr: %s" % (user_action['turn'], user_action['nl']))

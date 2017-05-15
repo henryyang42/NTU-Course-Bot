@@ -145,7 +145,7 @@ status = {'successes': 0, 'count': 0, 'cumulative_reward': 0}
 simulation_epoch_size = 100
 batch_size = 16
 warm_start = 1
-warm_start_epochs = 100
+warm_start_epochs = 20
 success_rate_threshold = 0.25
 save_check_point = 10
 print("----------Parameters Setup Done----------\n")
@@ -204,6 +204,7 @@ def simulation_epoch(simulation_epoch_size):
         episode_over = False
         while not episode_over:
             episode_over, reward = dialog_manager.next_turn()
+            reward = user_sim.reward
             cumulative_reward += reward
             if episode_over:
                 if reward > 0:
@@ -233,6 +234,7 @@ def warm_start_simulation():
         episode_over = False
         while not episode_over:
             episode_over, reward = dialog_manager.next_turn()
+            reward = user_sim.reward
             cumulative_reward += reward
             if episode_over:
                 if reward > 0:
@@ -264,9 +266,9 @@ def run_episodes(count, status):
 
     # if agt == 9 and params['trained_model_path'] == None and warm_start == 1:
     if warm_start == 1:
-        print('warm_start starting ...')
+        print('warm_start starting ...\n')
         warm_start_simulation()
-        print('warm_start finished, start RL training ...')
+        print('warm_start finished, start RL training ...\n')
 
     for episode in range(count):
         print("Episode: %s" % (episode))
@@ -275,8 +277,8 @@ def run_episodes(count, status):
 
         while not episode_over:
             episode_over, reward = dialog_manager.next_turn()
+            reward = user_sim.reward
             cumulative_reward += reward
-
             if episode_over:
                 if reward > 0:
                     print("Successful Dialog!")

@@ -39,15 +39,14 @@ class KBHelper:
                                             {slot1: value1, slot2: value2}
                                             for each slot in inform_slots_to_be_filled
         """
-        print('KB-Helper - fill_inform_slots -> inform_slots_to_be_filled: \n\t',
-              inform_slots_to_be_filled, '\n')
-        print('KB-Helper - fill_inform_slots -> current_slots: \n\t',
-              current_slots, '\n')
+        # print('KB-Helper - fill_inform_slots -> inform_slots_to_be_filled: \n\t', inform_slots_to_be_filled, '\n')
+        # print('KB-Helper - fill_inform_slots -> current_slots: \n\t', current_slots, '\n')
 
         kb_results = self.available_results_from_kb(current_slots)
         if dialog_config.auto_suggest == 1:
-            print('Number of courses in KB satisfying current constraints:\n\t', len(
-                kb_results), '\n')
+            print('KB-Helper - fill_inform_slots -> Number of courses in KB satisfying current constraints:\n\t', len(kb_results), '\n')
+
+        # print('KB-Helper - fill_inform_slots -> kb_results: \n\t', kb_results, '\n')
 
         filled_in_slots = {}
         # if 'taskcomplete' in inform_slots_to_be_filled.keys():
@@ -70,23 +69,22 @@ class KBHelper:
             ####################################################################
             #   Grab the value for the slot with the highest count and fill it
             ####################################################################
+            # values_dict = dict(keys: slot_name, vals: count)
             values_dict = self.available_slot_values(slot, kb_results)
 
             values_counts = [(v, values_dict[v]) for v in values_dict.keys()]
             if len(values_counts) > 0:
-                filled_in_slots[slot] = sorted(values_counts, key = lambda x: -x[1])[0][0]
+                filled_in_slots[slot] = sorted(values_counts, key=lambda x: -x[1])[0][0]
             else:
                 filled_in_slots[slot] = dialog_config.NO_VALUE_MATCH # "NO VALUE MATCHES SNAFU!!!"
 
         return filled_in_slots
 
-    def fill_choice_slots(self, choice_slots_to_be_filled, current_slots):
+    def fill_choice_slots(self, user_action, current_slots):
         """ Takes unfilled inform slots and current_slots, returns dictionary of filled informed slots (with values)
         @Arguments:
-            choice_slots_to_be_filled   --  A list of dictionaries of form looks like
-                                            [{title: None}, {title: None}] where
-                                            each element should the agent need
-                                            filled
+            user_action                 --  Last user action
+                                            (determine the keys of choice slot)
             current_slots               --  Contains a record of all filled slots in the
                                             conversation so far - for now,
                                             just use current_slots['inform_slots'] which is a dictionary of the already filled-in slots
@@ -95,26 +93,28 @@ class KBHelper:
                                             [{slot1: value1}, {slot1: value2}]
                                             for each element in choice_slots_to_be_filled
         """
-        print('KB-Helper - fill_inform_slots -> inform_slots_to_be_filled: \n\t',
-              inform_slots_to_be_filled, '\n')
-        print('KB-Helper - fill_inform_slots -> current_slots: \n\t',
-              current_slots, '\n')
+        # print('KB-Helper - fill_inform_slots -> user_action: \n\t', user_action, '\n')
+        # print('KB-Helper - fill_inform_slots -> current_slots: \n\t', current_slots, '\n')
 
         kb_results = self.available_results_from_kb(current_slots)
         if dialog_config.auto_suggest == 1:
-            print('Number of courses in KB satisfying current constraints:\n\t', len(
-                kb_results), '\n')
+            print('KB-Helper - fill_choice_slots -> Number of courses in KB satisfying current constraints:\n\t', len(kb_results), '\n')
 
-        choice_slot = {}
-        for slot in inform_slots_to_be_filled.keys():
+        # print('KB-Helper - fill_choice_slots -> kb_results: \n\t', kb_results, '\n')
+
+        choice_slot = []
+        for slot in user_action['request_slots'].keys():
             values_dict = self.available_slot_values(slot, kb_results)
-
+            # print('KB-Helper - fill_choice_slots -> values_dict: \n\t', values_dict, '\n')
             values_counts = [(v, values_dict[v]) for v in values_dict.keys()]
+            print('KB-Helper - fill_choice_slots -> values_counts: \n\t', values_counts, '\n')
             if len(values_counts) > 0:
-                choice_slot[slot] = sorted(values_counts, key=lambda x: -x[1])[0][0]
+                for val in values_counts:
+                  choice_slot.append({slot: val[0]})
+                # choice_slot.append({slot: sorted(values_counts, key=lambda x: -x[1])[0][0]})
             else:
                 # "NO VALUE MATCHES SNAFU!!!"
-                choice_slot[slot] = dialog_config.NO_VALUE_MATCH
+                choice_slot.append({slot: dialog_config.NO_VALUE_MATCH})
 
         return choice_slot
 
@@ -140,6 +140,7 @@ class KBHelper:
 
         # constrain_keys = filter(lambda k : k != 'closing' , constrain_keys)
         constrain_keys = [k for k in constrain_keys if current_slots[k] != dialog_config.I_DO_NOT_CARE]
+        constrain_keys = [k if k != 'when' else 'schedule_str' for k in constrain_keys]
 
         query_idx_keys = frozenset(current_slots.items())
         cached_kb_ret = self.cached_kb[query_idx_keys]
@@ -153,11 +154,11 @@ class KBHelper:
         # kb_results = copy.deepcopy(self.course_dict)
         for id in self.course_dict.keys():
             kb_keys = self.course_dict[id].keys()
-            if len(set(constrain_keys).union(set(kb_keys)) ^ (set(constrain_keys) ^ set(kb_keys))) == len(
-                    constrain_keys):
+            if len(set(constrain_keys).union(set(kb_keys)) ^ (set(constrain_keys) ^ set(kb_keys))) == len(constrain_keys):
                 match = True
                 for idx, k in enumerate(constrain_keys):
-                    if str(current_slots[k]).lower() == str(self.course_dict[id][k]).lower():
+                    cur_key = 'when' if k == 'schedule_str' else k
+                    if str(current_slots[cur_key]).lower() == str(self.course_dict[id][k]).lower():
                         continue
                     else:
                         match = False
@@ -174,10 +175,10 @@ class KBHelper:
     def available_results_from_kb_for_slots(self, inform_slots):
         """ Return the count statistics for each constraint in inform_slots """
 
-        print("KB-Helper - available_results_from_kb_for_slots -> inform_slots:")
-        for k, v in inform_slots.items():
-            print('\t', "\"%s\":" % k, v)
-        print()
+        # print("KB-Helper - available_results_from_kb_for_slots -> inform_slots:")
+        # for k, v in inform_slots.items():
+        #     print('\t', "\"%s\":" % k, v)
+        # print()
 
         # initialize the database query results
         kb_results = {key: 0 for key in inform_slots.keys()}
@@ -189,38 +190,25 @@ class KBHelper:
         if len(cached_kb_slot_ret) > 0:
             return cached_kb_slot_ret[0]
 
-        query_course_list = query_course(inform_slots)
-        print("KB-Helper - available_results_from_kb_for_slots -> query_course_list:")
-        for c in query_course_list:
-            print('\t', "\"%s\":" % c)
-        print()
+        # print("KB-Helper - available_results_from_kb_for_slots -> inform_slots:")
+        # for k, v in inform_slots.items():
+        #     print('\t', "\"%s\":" % k, v)
+        # print()
 
-        kb_results['matching_all_constraints'] = len(
-            query_course(inform_slots))
+        query_course_list = query_course(inform_slots)
+        # print("KB-Helper - available_results_from_kb_for_slots -> query_course_list:")
+        # for c in query_course_list:
+        #     print('\t', "\"%s\":" % c)
+        # print()
+
+        kb_results['matching_all_constraints'] = len(query_course(inform_slots))
         for slot, val in inform_slots.items():
-            slot = 'schedule_str' if slot == 'when' else slot
+            # slot = 'schedule_str' if slot == 'when' else slot
             query_course_list = query_course({slot: val})
             if len(query_course_list) == 0:
                 all_slots_match = 0
             else:
                 kb_results[slot] += len(query_course_list)
-
-        # here could be replaced with utils.query -> query_course
-        # for course_id in self.course_dict.keys():
-        #     all_slots_match = 1
-        #     for slot in inform_slots.keys():
-        #         if inform_slots[slot] == dialog_config.I_DO_NOT_CARE:
-        #             continue
-
-        #         dict_slot = 'schedule_str' if slot == 'when' else slot
-        #         if dict_slot in self.course_dict[course_id].keys():
-        #             if inform_slots[slot].lower() == self.course_dict[course_id][dict_slot].lower():
-        #                 kb_results[slot] += 1
-        #             else:
-        #                 all_slots_match = 0
-        #         else:
-        #             all_slots_match = 0
-        #     kb_results['matching_all_constraints'] += all_slots_match
 
         self.cached_kb_slot[query_idx_keys].append(kb_results)
         return kb_results
@@ -230,7 +218,6 @@ class KBHelper:
         """ A dictionary of the number of results matching each current constraint. The agent needs this to decide what to do next. """
 
         database_results = {}
-        # {date: 100, distanceconstraints: 60, theater: 30,  matching_all_constraints: 5}
         database_results = self.available_results_from_kb_for_slots(current_slots['inform_slots'])
         return database_results
 
