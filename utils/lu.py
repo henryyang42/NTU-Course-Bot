@@ -10,7 +10,7 @@ from utils.query import *
 
 def DST_update(old_state, sem_frame):
     state = old_state.copy()
-    
+
     if 'when' in sem_frame['slot']:
         sem_frame['slot']['schedule_str'] = sem_frame['slot']['when'][-1]
         sem_frame['slot'].pop('when')
@@ -19,7 +19,7 @@ def DST_update(old_state, sem_frame):
         state['request_slots'][sem_frame['intent'][8:]] = '?'
 
     for k, v in sem_frame['slot'].items():
-        if len(v) > 1 or k in ['schedule_str']:
+        if len(v) > 1 or k in ['schedule_str', 'sel_method']:
             state['inform_slots'][k] = v
 
     return state
