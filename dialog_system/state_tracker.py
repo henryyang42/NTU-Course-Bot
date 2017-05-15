@@ -159,19 +159,21 @@ class StateTracker:
                     agent_action_values = {
                         'turn': self.turn_count,
                         'speaker': "agent",
-                        'diaact': response['diaact'],
+                        'diaact': 'multiple_choice',
+                        # 'diaact': response['diaact'],
                         'choice': choice_slots,
                         'inform_slots': {},
                         'request_slots': response['request_slots']}
 
                     agent_action['act_slot_response'].update({
-                        'diaact': response['diaact'],
+                        'diaact': 'multiple_choice',
+                        # 'diaact': response['diaact'],
                         'choice': choice_slots,
                         'inform_slots': {},
                         'request_slots': response['request_slots'],
                         'turn': self.turn_count})
 
-                else:
+                elif sys_action['diaact'] == 'inform':
                     inform_slots = sys_action['inform_slots']
                     # inform_slots = self.kb_helper.fill_inform_slots(response['inform_slots'], self.current_slots)
                     # print("State-Tracker - update -> inform_slots\n\t", inform_slots, '\n')
@@ -179,12 +181,14 @@ class StateTracker:
                     agent_action_values = {
                         'turn': self.turn_count,
                         'speaker': "agent",
-                        'diaact': response['diaact'],
+                        'diaact': 'inform',
+                        # 'diaact': response['diaact'],
                         'inform_slots': inform_slots,
                         'request_slots': response['request_slots']}
 
                     agent_action['act_slot_response'].update({
-                        'diaact': response['diaact'],
+                        'diaact': 'inform',
+                        # 'diaact': response['diaact'],
                         'inform_slots': inform_slots,
                         'request_slots': response['request_slots'],
                         'turn': self.turn_count})
