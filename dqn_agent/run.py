@@ -80,9 +80,9 @@ if __name__ == "__main__":
 
     # RL agent parameters
     parser.add_argument('--experience_replay_pool_size', dest='experience_replay_pool_size',
-                        type=int, default=1000, help='the size for experience replay')
+                        type=int, default=3000, help='the size for experience replay')
     parser.add_argument('--dqn_hidden_size', dest='dqn_hidden_size',
-                        type=int, default=60, help='the hidden size for DQN')
+                        type=int, default=100, help='the hidden size for DQN')
     parser.add_argument('--batch_size', dest='batch_size',
                         type=int, default=20, help='batch size')
     parser.add_argument('--gamma', dest='gamma', type=float,
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument('--predict_mode', dest='predict_mode',
                         type=bool, default=False, help='predict model for DQN')
     parser.add_argument('--simulation_epoch_size', dest='simulation_epoch_size',
-                        type=int, default=50, help='the size of validation set')
+                        type=int, default=25, help='the size of validation set')
     parser.add_argument('--warm_start', dest='warm_start', type=int,
                         default=1, help='0: no warm start; 1: warm start for training')
     parser.add_argument('--warm_start_epochs', dest='warm_start_epochs',
@@ -273,7 +273,7 @@ def save_performance_records(path, agt, records):
     filename = 'agt_%s_performance_records.json' % (agt)
     filepath = os.path.join(path, filename)
     try:
-        json.dump(records, open(filepath, "wb"))
+        json.dump(records, open(filepath, "w"))
         print('save_performance_records: Model saved in %s' % (filepath, ))
     except Exception as e:
         print('Error! save_performance_records: Writing model fails: %s' % filepath)
