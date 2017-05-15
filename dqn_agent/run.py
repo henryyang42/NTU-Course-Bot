@@ -277,7 +277,7 @@ def save_performance_records(path, agt, records):
         print('saved model in %s' % (filepath, ))
     except Exception as e:
         print('Error: Writing model fails: %s' % filepath)
-        print(e)
+        print('\t', e)
 
 
 """ Run N-Simulation Dialogues """
@@ -297,9 +297,9 @@ def simulation_epoch(simulation_epoch_size):
             if episode_over:
                 if reward > 0:
                     successes += 1
-                    print("simulation episode %s: Success" % (episode))
+                    print("Simulation Episode %s: Success" % (episode))
                 else:
-                    print("simulation episode %s: Fail" % (episode))
+                    print("Simulation Episode %s: Fail" % (episode))
                 cumulative_turns += dialog_manager.state_tracker.turn_count
 
         cumulative_reward += user_sim.reward
@@ -307,9 +307,10 @@ def simulation_epoch(simulation_epoch_size):
     res['success_rate'] = float(successes) / simulation_epoch_size
     res['avg_reward'] = float(cumulative_reward) / simulation_epoch_size
     res['avg_turns'] = float(cumulative_turns) / simulation_epoch_size
-    print("simulation success rate %s, avg reward %s, avg turns %s" %
-          (res['success_rate'], res['avg_reward'], res['avg_turns']))
-    return(res)
+    print("Func - \"simulation_epoch\":\n\tSimulation Success Rate %s\n\tAvg Reward %s\n\tAvg Turns %s" %
+          (res['success_rate'], res['avg_reward'], res['avg_turns']), '\n')
+
+    return res
 
 
 """ Warm_Start Simulation (by Rule Policy) """
@@ -329,10 +330,9 @@ def warm_start_simulation():
             if episode_over:
                 if reward > 0:
                     successes += 1
-                    print("warm_start simulation episode %s: Success" %
-                          (episode))
+                    print("Warm_start Simulation Episode %s: Success" % (episode))
                 else:
-                    print("warm_start simulation episode %s: Fail" % (episode))
+                    print("Warm_start Simulation Episode %s: Fail" % (episode))
                 cumulative_turns += dialog_manager.state_tracker.turn_count
 
         if len(agent.experience_replay_pool) >= agent.experience_replay_pool_size:
@@ -344,10 +344,10 @@ def warm_start_simulation():
     res['success_rate'] = float(successes) / simulation_epoch_size
     res['avg_reward'] = float(cumulative_reward) / simulation_epoch_size
     res['avg_turns'] = float(cumulative_turns) / simulation_epoch_size
-    print("Warm_Start %s epochs, success rate %s, avg reward %s, avg turns %s" % (
+    print("Func - \"warm_start_simulation\":\n\t%s Epochs\n\tSuccess Rate %s\n\tAvg Reward %s\n\tAvg Turns %s" % (
         episode + 1, res['success_rate'], res['avg_reward'], res['avg_turns']))
-    print("Current experience replay buffer size %s" %
-          (len(agent.experience_replay_pool)))
+    print("Current Experience-Replay Buffer Size %s" %
+          (len(agent.experience_replay_pool)), '\n')
 
 
 """ Run Episodes """
@@ -358,9 +358,9 @@ def run_episodes(count, status):
 
     # if agt == 9 and params['trained_model_path'] == None and warm_start == 1:
     if warm_start == 1:
-        print('warm_start starting ...\n')
+        print('Warm_start Starting ...\n')
         warm_start_simulation()
-        print('warm_start finished, start RL training ...\n')
+        print('Warm_start Finished, Start RL Training ...\n')
 
     for episode in range(count):
         print("Episode: %s" % (episode))
@@ -406,8 +406,9 @@ def run_episodes(count, status):
         agent.train(batch_size, 1)
         agent.predict_mode = False
 
-        print("Simulation success rate %s, Ave reward %s, Ave turns %s, Best success rate %s" % (
+        print("Simulation Success Rate %s, Avg Reward %s, Avg Turns %s, Best Success Rate %s" % (
             performance_records['success_rate'][episode], performance_records['avg_reward'][episode], performance_records['avg_turns'][episode], best_res['success_rate']))
+
         # save the model every 10 episodes
         if episode % save_check_point == 0 and params['trained_model_path'] == None:
             save_model(params['write_model_dir'], agt, best_res['success_rate'],
@@ -415,18 +416,16 @@ def run_episodes(count, status):
             save_performance_records(
                 params['write_model_dir'], agt, performance_records)
 
-        print("Progress: %s / %s, Success rate: %s / %s Avg reward: %.2f Avg turns: %.2f" % (episode + 1, count,
-                                                                                             successes, episode + 1, float(cumulative_reward) / (episode + 1), float(cumulative_turns) / (episode + 1)))
-    print("Success rate: %s / %s Avg reward: %.2f Avg turns: %.2f" % (successes,
-                                                                      count, float(cumulative_reward) / count, float(cumulative_turns) / count))
+        print("Progress: %s / %s, Success rate: %s / %s Avg reward: %.3f Avg turns: %.3f\n" %
+                (episode + 1, count, successes, episode + 1, float(cumulative_reward) / (episode + 1), float(cumulative_turns) / (episode + 1)))
+
+    print("Final Success rate: %s / %s Avg reward: %.3f Avg turns: %.3f" %
+                (successes, count, float(cumulative_reward) / count, float(cumulative_turns) / count))
     status['successes'] += successes
     status['count'] += count
 
     # if agt == 9 and params['trained_model_path'] == None:
-    save_model(params['write_model_dir'], agt, float(
-        successes) / count, best_model['model'], best_res['epoch'], count)
-    save_performance_records(
-        params['write_model_dir'], agt, performance_records)
-
+    save_model(params['write_model_dir'], agt, float(successes) / count, best_model['model'], best_res['epoch'], count)
+    save_performance_records(params['write_model_dir'], agt, performance_records)
 
 run_episodes(50, status)
