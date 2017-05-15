@@ -261,12 +261,12 @@ def save_model(path, agt, success_rate, agent, best_epoch, cur_epoch):
         checkpoint['model'] = copy.deepcopy(agent.dqn.model)
     checkpoint['params'] = params
     try:
-        pickle.dump(checkpoint, open(filepath, "wb"))
-        print('saved model in %s' % (filepath, ))
+        with open(filepath, 'wb') as f:
+            pickle.dump(checkpoint, f, protocol=pickle.HIGHEST_PROTOCOL)
+        print('save_model: Model saved in %s' % (filepath, ))
     except Exception as e:
-        print('Error: Writing model fails: %s' % filepath)
+        print('Error! save_model: Writing model fails: %s' % filepath)
         print('\t', e)
-
 
 """ Save Performance Numbers """
 def save_performance_records(path, agt, records):
@@ -274,9 +274,9 @@ def save_performance_records(path, agt, records):
     filepath = os.path.join(path, filename)
     try:
         json.dump(records, open(filepath, "wb"))
-        print('saved model in %s' % (filepath, ))
+        print('save_performance_records: Model saved in %s' % (filepath, ))
     except Exception as e:
-        print('Error: Writing model fails: %s' % filepath)
+        print('Error! save_performance_records: Writing model fails: %s' % filepath)
         print('\t', e)
 
 
