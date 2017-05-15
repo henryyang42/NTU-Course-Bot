@@ -1,3 +1,4 @@
+import argparse
 import json
 import copy
 import os
@@ -27,12 +28,98 @@ Next, it triggers the simulator to run for the specified number of episodes.
 """
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    # parser.add_argument('--dict_path', dest='dict_path', type=str,
+    #                     default='./deep_dialog/data/dicts.v3.p', help='path to the .json dictionary file')
+    # parser.add_argument('--movie_kb_path', dest='movie_kb_path', type=str,
+    #                     default='./deep_dialog/data/movie_kb.1k.p', help='path to the movie kb .json file')
+    parser.add_argument('--act_set', dest='act_set', type=str, default="./dqn_agent/dia_acts.txt",
+                        help='path to dia act set; none for loading from labeled file')
+    parser.add_argument('--slot_set', dest='slot_set', type=str, default="./dqn_agent/slot_set.txt",
+                        help='path to slot set; none for loading from labeled file')
+    # parser.add_argument('--goal_file_path', dest='goal_file_path', type=str,
+    #                     default='./deep_dialog/data/user_goals_first_turn_template.part.movie.v1.p', help='a list of user goals')
+    # parser.add_argument('--diaact_nl_pairs', dest='diaact_nl_pairs', type=str,
+    #                     default='./deep_dialog/data/dia_act_nl_pairs.v6.json', help='path to the pre-defined dia_act&NL pairs')
+
+    parser.add_argument('--max_turn', dest='max_turn', default=20, type=int,
+                        help='maximum length of each dialog (default=20, 0=no maximum length)')
+    parser.add_argument('--episodes', dest='episodes', default=50,
+                        type=int, help='Total number of episodes to run (default=1)')
+    parser.add_argument('--slot_err_prob', dest='slot_err_prob',
+                        default=0.00, type=float, help='the slot err probability')
+    parser.add_argument('--slot_err_mode', dest='slot_err_mode', default=0,
+                        type=int, help='slot_err_mode: 0 for slot_val only; 1 for three errs')
+    parser.add_argument('--intent_err_prob', dest='intent_err_prob',
+                        default=0.00, type=float, help='the intent err probability')
+
+    parser.add_argument('--agt', dest='agt', default=9, type=int,
+                        help='Select an agent: 0 for a command line input, 1-6 for rule based agents')
+    parser.add_argument('--usr', dest='usr', default=0, type=int,
+                        help='Select a user simulator. 0 is a Frozen user simulator.')
+
+    parser.add_argument('--epsilon', dest='epsilon', type=float, default=0,
+                        help='Epsilon to determine stochasticity of epsilon-greedy agent policies')
+
+    # load NLG & NLU model
+    # parser.add_argument('--nlg_model_path', dest='nlg_model_path', type=str,
+    #                     default='./deep_dialog/models/nlg/lstm_tanh_relu_[1468202263.38]_2_0.610.p', help='path to model file')
+    # parser.add_argument('--nlu_model_path', dest='nlu_model_path', type=str,
+    #                     default='./deep_dialog/models/nlu/lstm_[1468447442.91]_39_80_0.921.p', help='path to the NLU model file')
+
+    parser.add_argument('--act_level', dest='act_level', type=int,
+                        default=1, help='0 for dia_act level; 1 for NL level')
+    parser.add_argument('--run_mode', dest='run_mode', type=int, default=3,
+                        help='run_mode: 0 for default NL; 1 for dia_act; 2 for both')
+    parser.add_argument('--auto_suggest', dest='auto_suggest', type=int,
+                        default=1, help='0 for no auto_suggest; 1 for auto_suggest')
+    parser.add_argument('--cmd_input_mode', dest='cmd_input_mode',
+                        type=int, default=0, help='run_mode: 0 for NL; 1 for dia_act')
+
+    # RL agent parameters
+    parser.add_argument('--experience_replay_pool_size', dest='experience_replay_pool_size',
+                        type=int, default=1000, help='the size for experience replay')
+    parser.add_argument('--dqn_hidden_size', dest='dqn_hidden_size',
+                        type=int, default=60, help='the hidden size for DQN')
+    parser.add_argument('--batch_size', dest='batch_size',
+                        type=int, default=20, help='batch size')
+    parser.add_argument('--gamma', dest='gamma', type=float,
+                        default=0.9, help='gamma for DQN')
+    parser.add_argument('--predict_mode', dest='predict_mode',
+                        type=bool, default=False, help='predict model for DQN')
+    parser.add_argument('--simulation_epoch_size', dest='simulation_epoch_size',
+                        type=int, default=50, help='the size of validation set')
+    parser.add_argument('--warm_start', dest='warm_start', type=int,
+                        default=1, help='0: no warm start; 1: warm start for training')
+    parser.add_argument('--warm_start_epochs', dest='warm_start_epochs',
+                        type=int, default=100, help='the number of epochs for warm start')
+
+    parser.add_argument('--trained_model_path', dest='trained_model_path',
+                        type=str, default=None, help='the path for trained model')
+    parser.add_argument('-o', '--write_model_dir', dest='write_model_dir',
+                        type=str, default='./dqn_agent/checkpoints/', help='write model to disk')
+    parser.add_argument('--save_check_point', dest='save_check_point',
+                        type=int, default=10, help='number of epochs for saving model')
+
+    parser.add_argument('--success_rate_threshold', dest='success_rate_threshold',
+                        type=float, default=0.3, help='the threshold for success rate')
+
+    # parser.add_argument('--split_fold', dest='split_fold', default=5,
+    #                     type=int, help='the number of folders to split the user goal')
+    parser.add_argument('--learning_phase', dest='learning_phase',
+                        default='train', type=str, help='train/test/all; default is all')
+
+    args = parser.parse_args()
+    params = vars(args)
+
+
 all_courses = list(query_course({}).values())
 np.random.shuffle(all_courses)
 course_dict = {k: v for k, v in enumerate(all_courses)}
-act_set = text_to_dict("./dqn_agent/dia_acts.txt")
-slot_set = text_to_dict("./dqn_agent/slot_set.txt")
+act_set = text_to_dict(params['act_set'])
+slot_set = text_to_dict(params['slot_set'])
 print("----------Data Pre-processing Done----------\n")
 
 ##########################################################################
@@ -45,8 +132,8 @@ print("----------Data Pre-processing Done----------\n")
 #       0   for no auto_suggest
 #       1   for auto_suggest
 ##########################################################################
-dialog_config.run_mode = 3
-dialog_config.auto_suggest = 1
+dialog_config.run_mode = params['run_mode']
+dialog_config.auto_suggest = params['auto_suggest']
 print("----------Dialog Configurations Setup Done----------\n")
 
 ##########################################################################
@@ -64,19 +151,20 @@ print("----------Dialog Configurations Setup Done----------\n")
 #       0   for NL input
 #       1   for Dia_Act input (this parameter is for AgentCmd only)
 ##########################################################################
+agt = params['agt']
 agent_params = {}
-agent_params['max_turn'] = 20
-agent_params['epsilon'] = 0.01
-agent_params['agent_run_mode'] = 3
-agent_params['agent_act_level'] = 1
-agent_params['experience_replay_pool_size'] = 1000
-agent_params['dqn_hidden_size'] = 60
-agent_params['batch_size'] = 16
-agent_params['gamma'] = 0.9
-agent_params['predict_mode'] = False
-agent_params['trained_model_path'] = None
-agent_params['warm_start'] = 1
-agent_params['cmd_input_mode'] = 0
+agent_params['max_turn'] = params['max_turn']
+agent_params['epsilon'] = params['epsilon']
+agent_params['agent_run_mode'] = params['run_mode']
+agent_params['agent_act_level'] = params['act_level']
+agent_params['experience_replay_pool_size'] = params['experience_replay_pool_size']
+agent_params['dqn_hidden_size'] = params['dqn_hidden_size']
+agent_params['batch_size'] = params['batch_size']
+agent_params['gamma'] = params['gamma']
+agent_params['predict_mode'] = params['predict_mode']
+agent_params['trained_model_path'] = params['trained_model_path']
+agent_params['warm_start'] = params['warm_start']
+agent_params['cmd_input_mode'] = params['cmd_input_mode']
 agent = AgentDQN(course_dict, act_set, slot_set, agent_params)
 print("----------AgentDQN Setup Done----------\n")
 
@@ -98,14 +186,15 @@ print("----------AgentDQN Setup Done----------\n")
 #       'train'   train only
 #       'test'    test only
 ##########################################################################
+usr = params['usr']
 usersim_params = {}
-usersim_params['max_turn'] = 20
-usersim_params['slot_err_probability'] = 0.
-usersim_params['slot_err_mode'] = 0.
-usersim_params['intent_err_probability'] = 0.
-usersim_params['simulator_run_mode'] = 3
-usersim_params['simulator_act_level'] = 1
-usersim_params['learning_phase'] = 'train'
+usersim_params['max_turn'] = params['max_turn']
+usersim_params['slot_err_probability'] = params['slot_err_prob']
+usersim_params['slot_err_mode'] = params['slot_err_mode']
+usersim_params['intent_err_probability'] = params['intent_err_prob']
+usersim_params['simulator_run_mode'] = params['run_mode']
+usersim_params['simulator_act_level'] = params['act_level']
+usersim_params['learning_phase'] = params['learning_phase']
 user_sim = RuleSimulator(all_courses)
 # user_sim = RuleSimulator(course_dict, act_set, slot_set, usersim_params)
 print("----------RuleSimulator Setup Done----------\n")
@@ -142,16 +231,12 @@ print("----------DialogManager Setup Done----------\n")
 #   Run num_episodes Conversation Simulations
 ##########################################################################
 status = {'successes': 0, 'count': 0, 'cumulative_reward': 0}
-simulation_epoch_size = 20
-batch_size = 20
-warm_start = 1
-warm_start_epochs = 100
-success_rate_threshold = 0.30
-save_check_point = 10
-agt = 9
-params = {}
-params['write_model_dir'] = './dqn_agent/models/'
-params['trained_model_path'] = None
+simulation_epoch_size = params['simulation_epoch_size']
+batch_size = params['batch_size']
+warm_start = params['warm_start']
+warm_start_epochs = params['warm_start_epochs']
+success_rate_threshold = params['success_rate_threshold']
+save_check_point = params['save_check_point']
 print("----------Parameters Setup Done----------\n")
 
 """ Initialization of Best Model and Performance Records """
@@ -169,19 +254,18 @@ print("----------Performance Records Setup Done----------\n")
 
 """ Save Model """
 def save_model(path, agt, success_rate, agent, best_epoch, cur_epoch):
-    filename = 'agt_%s_%s_%s_%.5f.p' % (
-        agt, best_epoch, cur_epoch, success_rate)
+    filename = 'agt_%s_%s_%s_%.5f.p' % (agt, best_epoch, cur_epoch, success_rate)
     filepath = os.path.join(path, filename)
     checkpoint = {}
-    # if agt == 9:
-    checkpoint['model'] = copy.deepcopy(agent.dqn.model)
+    if agt == 9:
+        checkpoint['model'] = copy.deepcopy(agent.dqn.model)
     checkpoint['params'] = params
     try:
         pickle.dump(checkpoint, open(filepath, "wb"))
         print('saved model in %s' % (filepath, ))
     except Exception as e:
         print('Error: Writing model fails: %s' % filepath)
-        print(e)
+        print('\t', e)
 
 
 """ Save Performance Numbers """
