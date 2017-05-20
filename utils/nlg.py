@@ -115,6 +115,9 @@ def agent2nl(sys_act):
     if sys_act["diaact"] == "closing" and len(sys_act["inform_slots"]) == 0:
         return "不好意思，沒有找到符合條件的課程。"
 
+    if sys_act["diaact"] == "thanks":
+        return "很高興能為您服務。"
+
     res_list = []
     # response in a pre-defined order
     if sys_act["diaact"] == "inform":

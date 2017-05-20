@@ -117,12 +117,12 @@ def multi_turn_lu3(user_id, sentence, reset=False):
                 review_resp.append('<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
         return d, status, {}, '\n'.join(review_resp)
     if d['intent'] == 'thanks': # reset dialogue state
-        action = {'diaact':'closing'}
+        action = {'diaact':'thanks'}
     else:
         action = get_action_from_frame(status)
 
     #if action['diaact'] in ['inform', 'closing']:
-    if action['diaact'] in ['closing']:
+    if action['diaact'] in ['closing', 'thanks']:
         user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
     else:
         user_log[user_id] = status
