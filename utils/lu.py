@@ -91,23 +91,17 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         return
     status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
     d = single_turn_lu_new(sentence)
-    '''
-    if 'when' in d['slot']:
-        d['slot']['schedule_str'] = d['slot']['when'][-1]
-        d['slot'].pop('when')
-
-    if d['intent'].startswith('request'):
-        status['request_slots'][d['intent'][8:]] = '?'
-
-    for k, v in d['slot'].items():
-        if len(v) > 1 or k in ['schedule_str']:
-            status['inform_slots'][k] = v
-    '''
     status = DST_update(status, d)
     # Retrieve reviews
     if d['intent'] == 'request_review':
         set_status(user_id)
-        reviews = query_review(status['inform_slots']).order_by('-id')[:20]
+        review_constraints = {}
+        for slot in ['title', 'instructor']:
+            if slot in status['inform_slots']:
+                review_constraints[slot] = status['inform_slots'][slot]
+            #FIXME include the slot not informed by yhe user but is knonwn by querying courses
+        reviews = query_review(review_constraints).order_by('-id')[:20]
+        #reviews = query_review(status['inform_slots']).order_by('-id')[:20]
         review_resp = []
         if reviews.count() == 0:
             review_resp.append('並未搜尋到相關評價QQ')
