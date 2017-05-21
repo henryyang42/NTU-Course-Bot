@@ -99,7 +99,6 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         for slot in ['title', 'instructor']:
             if slot in status['inform_slots']:
                 review_constraints[slot] = status['inform_slots'][slot]
-            #FIXME include the slot not informed by yhe user but is knonwn by querying courses
         reviews = query_review(review_constraints).order_by('-id')[:20]
         #reviews = query_review(status['inform_slots']).order_by('-id')[:20]
         review_resp = []
@@ -114,6 +113,15 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         action = {'diaact':'thanks'}
     else:
         action = get_action_from_frame(status)
+
+    # add system retrived information to dialogue state (as if user informed these slots)
+    #FIXME
+    '''
+    if action['diaact'] == 'inform':
+        for slot in ['title', 'instructor']:
+            if slot not in status['inform_slots']:
+                status['inform_slots'][slot] = action['inform_slots'][slot]
+    '''
 
     #if action['diaact'] in ['inform', 'closing']:
     if action['diaact'] in ['closing', 'thanks']:
