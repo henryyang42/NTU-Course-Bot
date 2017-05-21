@@ -94,7 +94,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
     status = DST_update(status, d)
     # Retrieve reviews
     if d['intent'] == 'request_review':
-        set_status(user_id)
+        #set_status(user_id)
         review_constraints = {}
         for slot in ['title', 'instructor']:
             if slot in status['inform_slots']:
