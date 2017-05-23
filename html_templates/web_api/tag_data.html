@@ -1,0 +1,93 @@
+<html>
+<head>
+  <title>Let's Tag Data!!</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<style type="text/css">
+
+</style>
+
+<body style="padding:50px">
+  <h2>Untagged Data: {{ untagged_count }}</h2><br>
+  <h2>Tagged Data: {{ tagged_count }} (<a href="/api/download_log">Download</a>)</h2><br>
+  <hr>
+  {% verbatim %}
+    <div ng-app="tag-data" ng-controller="tagDataController">
+      <h3>Now tagging: {{ sementic.tokens.join('') }}</h3>
+      {{ sementic }}
+      <hr>
+      <h3>Intent</h3>
+      <div class="col-md-2">
+        <select class="selectpicker form-control" id="intent">
+          <option ng-repeat="intent in possible_intents" value="{{ intent }}" ng-selected="{{ intent == sementic.intent }}">{{ intent }}</option>
+        </select>
+      </div>
+      <br>
+      <hr>
+      <h3>BIO</h3>
+      <div class="form-group col-md-2" ng-repeat="(i, tok) in sementic.tokens">
+        <label for={{i}}>{{ tok }}</label>
+        <select class="selectpicker form-control bio" id="{{i}}">
+          <option ng-repeat="slot in possible_slots" value="{{ slot }}" ng-selected="{{ slot == sementic.labels[i] }}">{{ slot }}</option>
+        </select>
+      </div>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <div class="row">
+        <button type="button" class="btn btn-danger col-md-3" ng-click="delete()">Delete</button>
+        <button type="button" class="btn btn-warning col-md-3 col-md-offset-1" onclick="location.reload()">Pass</button>
+        <button type="button" class="btn btn-primary col-md-3 col-md-offset-1" ng-click="submit()">Confirm</button>
+      </div>
+    </div>
+  {% endverbatim %}
+</body>
+
+<script type="text/javascript">
+  // Utils
+  String.prototype.format = function () {
+    var str = this;
+    for (var i = 0; i < arguments.length; i++) {
+      var reg = new RegExp("\\{" + i + "\\}", "gm");
+      str = str.replace(reg, arguments[i]);
+    }
+    return str;
+  }
+
+  var app = angular.module('tag-data', []);
+  app.controller('tagDataController', function ($scope) {
+    $scope.sementic = {{ sementic|safe }};
+    $scope.possible_slots = ['O', 'B_title', 'B_when', 'B_instructor', 'B_classroom', 'B_designated_for', 'B_required_elective', 'B_sel_method'];
+    $scope.possible_intents = ['request_title', 'request_instructor', 'request_schedule_str', 'request_classroom', 'request_review', 'request_designated_for', 'request_required_elective', 'request_sel_method', 'inform', 'inform_unknown', 'thanks', 'deny', 'closing', 'other']
+    $scope.submit = function() {
+      bios = $('.bio');
+      $scope.sementic.slot = {}
+      for(i in $scope.sementic.labels){
+        // I sholud have done two way data binding, I am too stupid...
+        $scope.sementic.labels[i] = bios[i].value;
+      }
+      intent = $('#intent');
+      $scope.sementic.intent = intent[0].value;
+      console.log($scope.sementic)
+      $.post('/api/tag_data',
+        {csrfmiddlewaretoken: '{{ csrf_token }}', tagged_data: JSON.stringify($scope.sementic), id: {{dialogue.id}} },
+        function(){ location.reload(); }
+      );
+    }
+
+    $scope.delete = function () {
+      $.ajax({ url: '/api/delete_dialogue/{{dialogue.id}}',
+        success: function (data) { location.reload(); }
+      })
+    }
+  })
+</script>
+</html>

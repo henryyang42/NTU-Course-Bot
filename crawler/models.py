@@ -129,6 +129,8 @@ class DialogueLog(models.Model):
     time = models.DateTimeField(default=datetime.now, blank=True)
     debug = models.TextField(blank=True)
     rating = models.IntegerField(default=0)
+    tagged = models.BooleanField(default=False)
+    tagged_data = models.TextField(blank=True)
 
     def toggle_rating(self):
         if self.rating == 0:
