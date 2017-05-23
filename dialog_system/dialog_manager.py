@@ -117,8 +117,11 @@ class DialogManager:
             reward = -self.user.max_turn # 10
         elif dialog_status == dialog_config.SUCCESS_DIALOG:
             reward = 2 * self.user.max_turn # 20
+        elif dialog_status == dialog_config.PENALTY_DIALOG:
+            reward = -10
         else:
             reward = -1
+
         return reward
 
     def reward_function_without_penalty(self, dialog_status):
@@ -127,6 +130,8 @@ class DialogManager:
             reward = 0
         elif dialog_status == dialog_config.SUCCESS_DIALOG:
             reward = 2 * self.user.max_turn
+        elif dialog_status == dialog_config.PENALTY_DIALOG:
+            reward = 0
         else:
             reward = 0
         return reward
