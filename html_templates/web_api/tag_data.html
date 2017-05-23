@@ -31,7 +31,7 @@
       <br>
       <hr>
       <h3>BIO</h3>
-      <div class="form-group col-md-2" ng-repeat="(i, tok) in sementic.tokens">
+      <div class="form-group col-md-2" ng-repeat="(i, tok) in sementic.tokens track by $index">
         <label for={{i}}>{{ tok }}</label>
         <select class="selectpicker form-control bio" id="{{i}}">
           <option ng-repeat="slot in possible_slots" value="{{ slot }}" ng-selected="{{ slot == sementic.labels[i] }}">{{ slot }}</option>

@@ -301,7 +301,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="course in added_course">
+              <tr ng-repeat="course in added_course track by $index">
                 <td>{{ course.serial_no }}</td>
                 <td>{{ course.title }}</td>
                 <td>{{ course.instructor }}</td>
