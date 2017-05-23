@@ -38,6 +38,7 @@ ap.add_argument("-n", "--attention", action="store_true", help="use attention")
 ap.add_argument("-a", "--activation", default="relu", type=str, help="activation function")
 ap.add_argument("-iw", "--intent-weight", type=float, default=0.8, help="weight of the loss for intent")
 ap.add_argument("-bn", "--batch-norm", action="store_true", help="use BatchNormalization layer between LSTM")
+ap.add_argument("-bal", "--balanced", action="store_true", help="balance class weights")
 args = ap.parse_args()
 
 # prepare data
@@ -99,6 +100,24 @@ print ("== reading data done ==")
 X = sequence.pad_sequences(X, maxlen=max_seq_len)
 Y = list(sequence.pad_sequences(Y, maxlen=max_seq_len))
 print ("== padding done ==")
+
+# compute class weights
+if args.balanced:
+    slot_cw = {}
+    for y_idx_seq in Y:
+        for idx in y_idx_seq:
+            if idx not in slot_cw:
+                slot_cw[idx] = 0
+            slot_cw[idx] += 1
+    
+    intent_cw = {} 
+    for idx in Y2:
+        if idx not in intent_cw:
+            intent_cw[idx] = 0
+        intent_cw[idx] += 1
+#TODO normalize?
+print (slot_cw)
+print (intent_cw)
 
 # convert BIO labels to one-hot encoding
 #print Y.shape
@@ -181,7 +200,11 @@ intent_weight = args.intent_weight
 model.compile(loss=args.cost, optimizer=optm, loss_weights=[1.0-intent_weight, intent_weight])
 print ("== model compilation done ==")
 
-model.fit(X, [Y, Y2], validation_split=0.1, epochs=args.epoch, callbacks=cb)
+if args.balanced:
+    #model.fit(X, [Y, Y2], validation_split=0.1, epochs=args.epoch, callbacks=cb, class_weight=[slot_cw, intent_cw])
+    model.fit(X, [Y, Y2], validation_split=0.1, epochs=args.epoch, callbacks=cb, class_weight=[None, intent_cw])
+else:
+    model.fit(X, [Y, Y2], validation_split=0.1, epochs=args.epoch, callbacks=cb)
 
 
 model.load_weights(best_weights_filepath)

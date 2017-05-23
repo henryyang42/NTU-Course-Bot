@@ -455,7 +455,7 @@
         function (data) {
           console.log(data)
           add_message(server_tpl.format(
-            '{0}<br><br>{1}<br><i id="sucks{2}" onClick="sucks({2})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, JSON.stringify(data), data.id), now()));
+            '{0}<br>{1}<i id="sucks{2}" onClick="sucks({2})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, ''/*JSON.stringify(data)*/, data.id), now()));
           speak(data.resp_str);
           // On recieve, bind event to links
           $('.selection').off('click').click(function () {

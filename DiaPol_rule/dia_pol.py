@@ -35,16 +35,6 @@ MAX_N_CHOICE = 10
 
 def get_action_from_frame(dia_state, verbose=False):
     # filter courses according to dia_state
-    '''
-    courses = []
-    for c in all_courses:
-        exclude = False
-        for slot in dia_state["inform_slots"]:
-            if dia_state["inform_slots"][slot] != "?" and c[slot] != dia_state["inform_slots"][slot]:
-                exclude = True
-        if not exclude:
-            courses.append(c)
-    '''
     courses = query_course(dia_state["inform_slots"])
     course_ct = courses.count()
     courses = courses.values()
@@ -126,8 +116,13 @@ def get_action_from_frame(dia_state, verbose=False):
         for slot in dia_state["request_slots"]:
             if slot in course:
                 inform_slots[slot] = course[slot]
+        
+        ### slots that must be informed ###
         inform_slots["serial_no"] = course["serial_no"] # must provide serial_no to complete the task
         inform_slots["title"] = course["title"] # return course name the ensure the correct course is found
+        inform_slots["instructor"] = course["instructor"] # for querying review
+        ### ### ###
+        
         sys_act["inform_slots"] = inform_slots
 
     return sys_act
