@@ -11,6 +11,13 @@ def toggle_rating(request, id):
     return HttpResponse("OK")
 
 
+def set_rating(request, group_id, rating):
+    d_group = get_object_or_404(DialogueLogGroup, group_id=group_id)
+    d_group.reward = rating
+    d_group.save()
+    return HttpResponse("OK")
+
+
 def get_course(request, serial_no):
     course = get_object_or_404(Course, semester='105-2', serial_no=serial_no)
     return JsonResponse({k: v for k, v in course.__dict__.items() if not k.startswith('_')})
