@@ -122,6 +122,7 @@ class Review(models.Model):
     def __str__(self):
         return '%s' % (self.title)
 
+
 class DialogueLog(models.Model):
     utterance = models.CharField(max_length=100, blank=True)
     reply = models.CharField(max_length=100, blank=True)
@@ -134,11 +135,25 @@ class DialogueLog(models.Model):
             self.rating = -1
         else:
             self.rating = 0
-
         self.save()
 
     def __str__(self):
         return '%s -> %s' % (self.utterance, self.reply)
+
+
+class DialogueLogGroup(models.Model):
+    user_id = models.CharField(max_length=100, blank=True)
+    group_id = models.CharField(max_length=20, blank=True)
+    status = models.TextField(blank=True)
+    dialogues = models.ManyToManyField(DialogueLog, blank=True)
+    time = models.DateTimeField(default=datetime.now, blank=True)
+    reward = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('user_id', 'group_id')
+
+    def __str__(self):
+        return '%s - %s' % (self.user_id, self.group_id)
 
 
 class User(models.Model):

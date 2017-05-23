@@ -27,6 +27,9 @@ def multi_turn(request):
             logger.debug('%s -> %s\n%s' % (user_input, resp['resp_str'], str(resp)))
             d_log = DialogueLog.objects.create(
                 utterance=user_input, reply=resp['resp_str'], debug=resp)
+            d_group = DialogueLogGroup.objects.get(user_id=uid, group_id=resp['status']['group_id'])
+            d_group.dialogues.add(d_log)
+            d_group.save()
             resp['id'] = d_log.id
         except Exception:
             traceback.print_exc(file=sys.stdout)

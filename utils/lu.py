@@ -1,4 +1,4 @@
-import pickle
+import json
 
 from .decorator import run_once
 from .nlg import *
@@ -7,6 +7,8 @@ from DiaPol_rule.dia_pol import *
 from LU_LSTM.lstm_predict import *
 from django.conf import settings
 from utils.query import *
+from utils.misc import *
+
 
 def DST_update(old_state, sem_frame):
     state = old_state.copy()
@@ -24,6 +26,7 @@ def DST_update(old_state, sem_frame):
 
     return state
 
+
 @run_once
 def multi_turn_lu_setup():
     global understand
@@ -31,76 +34,81 @@ def multi_turn_lu_setup():
     print('[Info] Multi-turn LU model loaded.')
 
 
-def multi_turn_lu(user_id, sentence):
-    multi_turn_lu_setup()
-    status = understand(user_id, sentence)
-    action = get_action_from_frame(status)
-    return status, action, agent2nl(action)
-    #return status, action, get_NL_from_action(action)
+# def multi_turn_lu(user_id, sentence):
+#     multi_turn_lu_setup()
+#     status = understand(user_id, sentence)
+#     action = get_action_from_frame(status)
+#     return status, action, agent2nl(action)
+#     #return status, action, get_NL_from_action(action)
 
 
-def multi_turn_lu2(user_id, sentence, reset=False):
-    single_turn_lu_setup()
-    with open('user_log.p', 'rb') as handle:
-        user_log = pickle.load(handle)
-    if reset:
-        user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
-        with open('user_log.p', 'wb') as handle:
-            pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        return
-    status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
-    d = single_turn_lu(sentence)
-    if 'when' in d['slot']:
-        d['slot']['schedule_str'] = d['slot']['when'][-1]
-        d['slot'].pop('when')
-    if not status['request_slots']:
-        status['request_slots']['schedule_str' if d['intent'] == 'schedule' else d['intent']] = '?'
-    for k, v in d['slot'].items():
-        '''
-        if k not in status['inform_slots']:
-            status['inform_slots'][k] = v
-        '''
-        status['inform_slots'][k] = v # allow updating slots
+# def multi_turn_lu2(user_id, sentence, reset=False):
+#     single_turn_lu_setup()
+#     with open('user_log.p', 'rb') as handle:
+#         user_log = pickle.load(handle)
+#     if reset:
+#         user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
+#         with open('user_log.p', 'wb') as handle:
+#             pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#         return
+#     status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
+#     d = single_turn_lu(sentence)
+#     if 'when' in d['slot']:
+#         d['slot']['schedule_str'] = d['slot']['when'][-1]
+#         d['slot'].pop('when')
+#     if not status['request_slots']:
+#         status['request_slots']['schedule_str' if d['intent'] == 'schedule' else d['intent']] = '?'
+#     for k, v in d['slot'].items():
+#         '''
+#         if k not in status['inform_slots']:
+#             status['inform_slots'][k] = v
+#         '''
+#         status['inform_slots'][k] = v # allow updating slots
 
-    action = get_action_from_frame(status)
-    # return status, action, agent2nl(action)
-    if action['diaact'] in ['inform', 'closing']:
-        user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
-    else:
-        user_log[user_id] = status
-    with open('user_log.p', 'wb') as handle:
-        pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    return d, status, action, agent2nl(action)
-    #return d, status, action, get_NL_from_action(action)
+#     action = get_action_from_frame(status)
+#     # return status, action, agent2nl(action)
+#     if action['diaact'] in ['inform', 'closing']:
+#         user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
+#     else:
+#         user_log[user_id] = status
+#     with open('user_log.p', 'wb') as handle:
+#         pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#     return d, status, action, agent2nl(action)
+#     #return d, status, action, get_NL_from_action(action)
 
 
-def set_status(user_id, status={'request_slots': {}, 'inform_slots': {}}):
-    with open('user_log.p', 'rb') as handle:
-        user_log = pickle.load(handle)
-    user_log[user_id] = status
-    with open('user_log.p', 'wb') as handle:
-        pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
+def set_status(user_id, status=None):
+    if not status:  # Generate an id for new status.
+        status = {'request_slots': {}, 'inform_slots': {}, 'group_id': id_generator()}
+    DialogueLogGroup.objects.update_or_create(
+        user_id=user_id, group_id=status['group_id'],
+        defaults={'status': json.dumps(status, ensure_ascii=False)}
+    )
+    return status
+
+
+def get_status(user_id):
+    d_groups = DialogueLogGroup.objects.filter(user_id=user_id).order_by('-id')
+    if not d_groups:
+        return set_status(user_id)
+    return json.loads(d_groups[0].status)
 
 
 def multi_turn_lu3(user_id, sentence, reset=False):
     single_turn_lu_setup_new()
-    with open('user_log.p', 'rb') as handle:
-        user_log = pickle.load(handle)
     if reset:
         set_status(user_id)
         return
-    status = user_log.get(user_id, {'request_slots': {}, 'inform_slots': {}})
+    status = get_status(user_id)
     d = single_turn_lu_new(sentence)
     status = DST_update(status, d)
     # Retrieve reviews
     if d['intent'] == 'request_review':
-        #set_status(user_id)
         review_constraints = {}
         for slot in ['title', 'instructor']:
             if slot in status['inform_slots']:
                 review_constraints[slot] = status['inform_slots'][slot]
         reviews = query_review(review_constraints).order_by('-id')[:20]
-        #reviews = query_review(status['inform_slots']).order_by('-id')[:20]
         review_resp = []
         if reviews.count() == 0:
             review_resp.append('並未搜尋到相關評價QQ')
@@ -109,8 +117,8 @@ def multi_turn_lu3(user_id, sentence, reset=False):
             for review in reviews:
                 review_resp.append('<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
         return d, status, {}, '\n'.join(review_resp)
-    if d['intent'] == 'thanks': # reset dialogue state
-        action = {'diaact':'thanks'}
+    if d['intent'] == 'thanks':  # Reset dialogue state
+        action = {'diaact': 'thanks'}
     else:
         action = get_action_from_frame(status)
 
@@ -123,13 +131,11 @@ def multi_turn_lu3(user_id, sentence, reset=False):
                 status['inform_slots'][slot] = action['inform_slots'][slot]
     '''
 
-    #if action['diaact'] in ['inform', 'closing']:
     if action['diaact'] in ['closing', 'thanks']:
-        user_log[user_id] = {'request_slots': {}, 'inform_slots': {}}
+        print(action)
+        set_status(user_id)
     else:
-        user_log[user_id] = status
-    with open('user_log.p', 'wb') as handle:
-        pickle.dump(user_log, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        set_status(user_id, status)
     return d, status, action, agent2nl(action)
 
 
@@ -149,8 +155,6 @@ def single_turn_lu_setup():
     lu_model = load_model('%s/LU_LSTM/PY3--re_seg.1K+log_extend_1000--LSTM.model' % settings.BASE_DIR)
     print('[Info] Single-turn LU model loaded.')
 
-    with open('user_log.p', 'wb') as handle:
-        pickle.dump({}, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 @run_once
 def single_turn_lu_setup_new(): # load new LU models (output new intents)
@@ -168,10 +172,6 @@ def single_turn_lu_setup_new(): # load new LU models (output new intents)
     lu_model = load_model('%s/LU_LSTM/PY3--training_template0511--LSTM.model' % settings.BASE_DIR)
     print('[Info] Single-turn LU model loaded.')
 
-    with open('user_log.p', 'wb') as handle:
-        pickle.dump({}, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-
 
 def single_turn_lu(sentence):
     single_turn_lu_setup()
@@ -187,6 +187,7 @@ def single_turn_lu(sentence):
             d['slot'][label[2:]] = token
     #FIXME handle multiple B_xx for same slot (rule-based decision?)
     return d
+
 
 def single_turn_lu_new(sentence):
     single_turn_lu_setup_new()
