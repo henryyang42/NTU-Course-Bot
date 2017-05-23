@@ -80,9 +80,9 @@ if __name__ == "__main__":
 
     # RL agent parameters
     parser.add_argument('--experience_replay_pool_size', dest='experience_replay_pool_size',
-                        type=int, default=3000, help='the size for experience replay')
+                        type=int, default=1000, help='the size for experience replay')
     parser.add_argument('--dqn_hidden_size', dest='dqn_hidden_size',
-                        type=int, default=100, help='the hidden size for DQN')
+                        type=int, default=50, help='the hidden size for DQN')
     parser.add_argument('--batch_size', dest='batch_size',
                         type=int, default=20, help='batch size')
     parser.add_argument('--gamma', dest='gamma', type=float,
@@ -90,11 +90,11 @@ if __name__ == "__main__":
     parser.add_argument('--predict_mode', dest='predict_mode',
                         type=bool, default=False, help='predict model for DQN')
     parser.add_argument('--simulation_epoch_size', dest='simulation_epoch_size',
-                        type=int, default=25, help='the size of validation set')
+                        type=int, default=50, help='the size of validation set')
     parser.add_argument('--warm_start', dest='warm_start', type=int,
                         default=1, help='0: no warm start; 1: warm start for training')
     parser.add_argument('--warm_start_epochs', dest='warm_start_epochs',
-                        type=int, default=100, help='the number of epochs for warm start')
+                        type=int, default=50, help='the number of epochs for warm start')
 
     parser.add_argument('--trained_model_path', dest='trained_model_path',
                         type=str, default=None, help='the path for trained model')
@@ -104,7 +104,7 @@ if __name__ == "__main__":
                         type=int, default=10, help='number of epochs for saving model')
 
     parser.add_argument('--success_rate_threshold', dest='success_rate_threshold',
-                        type=float, default=0.3, help='the threshold for success rate')
+                        type=float, default=0.6, help='the threshold for success rate')
 
     # parser.add_argument('--split_fold', dest='split_fold', default=5,
     #                     type=int, help='the number of folders to split the user goal')
@@ -268,6 +268,7 @@ def save_model(path, agt, success_rate, agent, best_epoch, cur_epoch):
         print('Error! save_model: Writing model fails: %s' % filepath)
         print('\t', e)
 
+
 """ Save Performance Numbers """
 def save_performance_records(path, agt, records):
     filename = 'agt_%s_performance_records.json' % (agt)
@@ -278,6 +279,44 @@ def save_performance_records(path, agt, records):
     except Exception as e:
         print('Error! save_performance_records: Writing model fails: %s' % filepath)
         print('\t', e)
+
+
+""" Warm_Start Simulation (by Rule Policy) """
+def warm_start_simulation(warm_start_epochs):
+    successes = 0
+    cumulative_reward = 0
+    cumulative_turns = 0
+
+    res = {}
+    for episode in range(warm_start_epochs):
+        dialog_manager.initialize_episode()
+        episode_over = False
+        while not episode_over:
+            episode_over, reward = dialog_manager.next_turn()
+            reward = user_sim.reward
+            # cumulative_reward += reward
+            if episode_over:
+                if reward > 0:
+                    successes += 1
+                    print("Warm_start Simulation Episode %s: Success" %
+                          (episode))
+                else:
+                    print("Warm_start Simulation Episode %s: Fail" % (episode))
+                cumulative_turns += dialog_manager.state_tracker.turn_count
+
+        if len(agent.experience_replay_pool) >= agent.experience_replay_pool_size:
+            break
+
+        cumulative_reward += user_sim.reward
+
+    agent.warm_start = 2  # just a counter to avoid executing warm simulation twice
+    res['success_rate'] = float(successes) / warm_start_epochs
+    res['avg_reward'] = float(cumulative_reward) / warm_start_epochs
+    res['avg_turns'] = float(cumulative_turns) / warm_start_epochs
+    print("Func - \"warm_start_simulation\":\n\t%s Epochs\n\tSuccess Rate %s\n\tAvg Reward %s\n\tAvg Turns %s" % (
+        episode + 1, res['success_rate'], res['avg_reward'], res['avg_turns']))
+    print("Current Experience-Replay Buffer Size %s" %
+          (len(agent.experience_replay_pool)), '\n')
 
 
 """ Run N-Simulation Dialogues """
@@ -311,43 +350,6 @@ def simulation_epoch(simulation_epoch_size):
           (res['success_rate'], res['avg_reward'], res['avg_turns']), '\n')
 
     return res
-
-
-""" Warm_Start Simulation (by Rule Policy) """
-def warm_start_simulation(warm_start_epochs):
-    successes = 0
-    cumulative_reward = 0
-    cumulative_turns = 0
-
-    res = {}
-    for episode in range(warm_start_epochs):
-        dialog_manager.initialize_episode()
-        episode_over = False
-        while not episode_over:
-            episode_over, reward = dialog_manager.next_turn()
-            reward = user_sim.reward
-            # cumulative_reward += reward
-            if episode_over:
-                if reward > 0:
-                    successes += 1
-                    print("Warm_start Simulation Episode %s: Success" % (episode))
-                else:
-                    print("Warm_start Simulation Episode %s: Fail" % (episode))
-                cumulative_turns += dialog_manager.state_tracker.turn_count
-
-        if len(agent.experience_replay_pool) >= agent.experience_replay_pool_size:
-            break
-
-        cumulative_reward += user_sim.reward
-
-    agent.warm_start = 2  # just a counter to avoid executing warm simulation twice
-    res['success_rate'] = float(successes) / warm_start_epochs
-    res['avg_reward'] = float(cumulative_reward) / warm_start_epochs
-    res['avg_turns'] = float(cumulative_turns) / warm_start_epochs
-    print("Func - \"warm_start_simulation\":\n\t%s Epochs\n\tSuccess Rate %s\n\tAvg Reward %s\n\tAvg Turns %s" % (
-        episode + 1, res['success_rate'], res['avg_reward'], res['avg_turns']))
-    print("Current Experience-Replay Buffer Size %s" %
-          (len(agent.experience_replay_pool)), '\n')
 
 
 """ Run Episodes """
