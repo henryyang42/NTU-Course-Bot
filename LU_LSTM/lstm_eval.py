@@ -65,13 +65,16 @@ def eval_slot(true_labels_list, pred_labels_list):
 
     stat["precision"] = {}
     stat["recall"] = {}
+    stat["F1"] = {}
     for slot in TP:
         if TP[slot] + FP[slot] == 0 or TP[slot] + FN[slot] == 0:
             continue
         slot_P = TP[slot] / (TP[slot] + FP[slot])
         slot_R = TP[slot] / (TP[slot] + FN[slot])
+        slot_F1 = 2 * slot_P * slot_R / (slot_P + slot_R)
         stat["precision"][slot] = slot_P
         stat["recall"][slot] = slot_R
+        stat["F1"][slot] = slot_F1
 
     return stat
 
@@ -161,3 +164,4 @@ slot_stat = eval_slot(true_labels_list, pred_labels_list)
 for slot in slot_stat["precision"]:
     print ("[slot - %s] Precision:" % slot, slot_stat["precision"][slot])
     print ("[slot - %s] Recall:" % slot, slot_stat["recall"][slot])
+    print ("[slot - %s] F1:" % slot, slot_stat["F1"][slot])
