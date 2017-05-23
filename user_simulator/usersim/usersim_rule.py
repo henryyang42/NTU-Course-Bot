@@ -181,12 +181,14 @@ class RuleSimulator():
 
         self.episode_over = True
         self.state['diaact'] = 'deny'
+        self.dialog_status = dialog_config.FAILED_DIALOG
 
     def response_closing(self, system_action):
         """ Response for Thanks (System Action) """
 
         self.episode_over = True
         self.state['diaact'] = 'deny'
+        self.dialog_status = dialog_config.FAILED_DIALOG
 
     def response_request(self, system_action):
         """ Response for Request (System Action) """
@@ -199,10 +201,12 @@ class RuleSimulator():
 
             # Penalty.  system request the constraints had been informed before.
             if key in self.state['history_slots'].keys():
+                self.dialog_status = dialog_config.PENALTY_DIALOG
                 self.reward = self.reward - 20
 
             # Penalty.  system request the constraints had been informed before.
             if key in self.state['history_request_slots'].keys():
+                self.dialog_status = dialog_config.PENALTY_DIALOG
                 self.reward = self.reward - 20
 
             # System request slot is user constraints
@@ -221,6 +225,7 @@ class RuleSimulator():
     def response_inform(self, system_action):
         """ Response for Inform (System Action) """
 
+        self.dialog_status = dialog_config.SUCCESS_DIALOG
         self.state['diaact'] = 'thanks'
         self.state['inform_slots'].clear()
         self.state['request_slots'].clear()
@@ -231,6 +236,7 @@ class RuleSimulator():
         for key in system_action['inform_slots'].keys():
             if self.ans[key] != system_action['inform_slots'][key]:
                 self.state['diaact'] = 'deny'
+                self.dialog_status = dialog_config.FAILED_DIALOG
 
         # System must inform request slot
         for key in self.goal['request_slots'].keys():
@@ -238,13 +244,16 @@ class RuleSimulator():
                 pass
             else:
                 self.state['diaact'] = 'deny'
+                self.dialog_status = dialog_config.FAILED_DIALOG
 
         # System give serial no.
         if 'serial_no' in system_action['inform_slots'].keys():
             if self.ans['serial_no'] == system_action['inform_slots']['serial_no']:
                 self.state['diaact'] = 'thanks'
+                self.dialog_status = dialog_config.SUCCESS_DIALOG
             else:
                 self.state['diaact'] = 'deny'
+                self.dialog_status = dialog_config.FAILED_DIALOG
 
 
     def user2nl(self):
