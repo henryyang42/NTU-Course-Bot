@@ -25,6 +25,7 @@ start_dia_acts = {
 #########################################################################
 FAILED_DIALOG = -1
 SUCCESS_DIALOG = 1
+PENALTY_DIALOG = -10 # Penalty. (agent request the constraints had been informed before)
 NO_OUTCOME_YET = 0
 
 # Rewards
