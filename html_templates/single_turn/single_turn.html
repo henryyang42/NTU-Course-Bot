@@ -479,7 +479,7 @@
             });
           } else {
             add_message(server_tpl.format(
-              '{0}<br><i id="sucks{2}" onClick="sucks({2})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, data.id), now()));
+              '{0}<br><i id="sucks{1}" onClick="sucks({1})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, data.id), now()));
           }
           speak(data.resp_str);
           // On recieve, bind event to links
