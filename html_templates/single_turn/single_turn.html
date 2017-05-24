@@ -15,6 +15,10 @@
   <script src="https://cdn.jsdelivr.net/jquery.magnific-popup/1.0.0/jquery.magnific-popup.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"></link>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <!-- Latest rateYo compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
+  <!-- Latest rateYo compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
 </head>
 <style type="text/css">
   .panel-footer {
@@ -297,7 +301,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="course in added_course">
+              <tr ng-repeat="course in added_course track by $index">
                 <td>{{ course.serial_no }}</td>
                 <td>{{ course.title }}</td>
                 <td>{{ course.instructor }}</td>
@@ -343,8 +347,9 @@
     chat_box.scrollTop = chat_box.scrollHeight;
   }
   function sucks(id) {
-    $.ajax({ url: "/api/toggle_rating/" + id, success: function (data) {
-      $('#sucks' + id).toggleClass('not-disliked disliked');
+    $.ajax({ url: "/api/toggle_rating/" + id,
+      success: function (data) {
+        $('#sucks' + id).toggleClass('not-disliked disliked');
       }
     });
   }
@@ -380,7 +385,7 @@
       if (added_course != null) {
         added_course = JSON.parse(added_course);
         for (var i in added_course) {
-          c = added_course[i];
+          var c = added_course[i];
           if (c.no.indexOf(semester) >= 0) {
             $scope.added_course.push(c);
 
@@ -415,7 +420,7 @@
     }
     initial();
     $scope.add_course = function(serial_no) {
-      arr = $scope.added_course;
+      var arr = $scope.added_course;
       for (var i in arr) {
         // Check if added before
         if (serial_no == arr[i].serial_no) {
@@ -435,7 +440,7 @@
     };
     $scope.del_course = function(c) {
       $scope.credit -= parseInt(c.credits);
-      arr = $scope.added_course;
+      var arr = $scope.added_course;
       for (var i in arr) {
         // Remove course from array
         if (c.serial_no == arr[i].serial_no) {
@@ -454,15 +459,35 @@
       $.post("", { input: input, csrfmiddlewaretoken: '{{ csrf_token }}' },
         function (data) {
           console.log(data)
-          add_message(server_tpl.format(
-            '{0}<br>{1}<i id="sucks{2}" onClick="sucks({2})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, ''/*JSON.stringify(data)*/, data.id), now()));
+          var diaact = data.action.diaact;
+          if(diaact == 'thanks' || diaact == 'closing') {
+            var group_id = data.status.group_id;
+            add_message(server_tpl.format(
+              '{0}<br><br>請為我們這次的服務評分：<div id="{1}">'.format(data.resp_str, group_id), now()));
+            $("#" + group_id).rateYo({
+              starWidth: '30px',
+              halfStar: true,
+              onSet: function (rating, rateYoInstance) {
+                var group_id = $(this).attr('id');
+                rating = 2 * (rating - 2.5); // Scale to -5~5
+                $.ajax({ url: "/api/set_rating/{0}/{1}".format(group_id, rating),
+                  success: function (data) {
+                    toastr.success('謝謝您的回饋！');
+                  }
+                });
+              }
+            });
+          } else {
+            add_message(server_tpl.format(
+              '{0}<br><i id="sucks{2}" onClick="sucks({2})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, data.id), now()));
+          }
           speak(data.resp_str);
           // On recieve, bind event to links
           $('.selection').off('click').click(function () {
             $scope.send($(this).html());
           })
           $('.serial_no').off('click').click(function () {
-            course = JSON.parse($(this).html());
+            var course = JSON.parse($(this).html());
             $scope.add_course(course);
           })
         });

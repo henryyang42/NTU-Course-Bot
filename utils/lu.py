@@ -132,7 +132,6 @@ def multi_turn_lu3(user_id, sentence, reset=False):
     '''
 
     if action['diaact'] in ['closing', 'thanks']:
-        print(action)
         set_status(user_id)
     else:
         set_status(user_id, status)
