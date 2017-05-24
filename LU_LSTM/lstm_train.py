@@ -15,6 +15,7 @@ from keras.optimizers import *
 from keras.preprocessing import sequence
 from keras.utils import np_utils
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras import regularizers
 from keras import backend as K
 import gensim
 import json
@@ -37,6 +38,7 @@ ap.add_argument("-b", "--bi-direct", action="store_true", help="bidirectional LS
 ap.add_argument("-n", "--attention", action="store_true", help="use attention")
 ap.add_argument("-a", "--activation", default="relu", type=str, help="activation function")
 ap.add_argument("-iw", "--intent-weight", type=float, default=0.8, help="weight of the loss for intent")
+ap.add_argument("-rr", "--recur-reg", type=float, default=None, help="recurrent layer regularizer")
 ap.add_argument("-bn", "--batch-norm", action="store_true", help="use BatchNormalization layer between LSTM")
 ap.add_argument("-bal", "--balanced", action="store_true", help="balance class weights")
 args = ap.parse_args()
@@ -128,6 +130,11 @@ print (Y.shape)
 
 Y2 = np_utils.to_categorical(Y2)
 
+##### regularizer #####
+r_reg = None
+if args.recur_reg is not None:
+    r_reg = regularizers.l2(args.recur_reg)
+
 ##### contruct model #####
 
 # [input layer]
@@ -140,16 +147,16 @@ embedding = Dropout(args.dropout)(embedding)
 
 # [LSTM for slot]
 if args.bi_direct:
-    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True), name='slot LSTM')(embedding)
+    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True), name='slot LSTM', recurrent_regularizer=r_reg)(embedding)
 else:
-    slot_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True, name='slot LSTM')(embedding)
+    slot_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True, name='slot LSTM', recurrent_regularizer=r_reg)(embedding)
 
 if args.batch_norm:
     slot_lstm_out = BatchNormalization()(slot_lstm_out)
 
 # [LSTM for intent]
 if args.attention:
-    intent_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, name='intent LSTM', return_sequences=True)(slot_lstm_out)
+    intent_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, name='intent LSTM', return_sequences=True, recurrent_regularizer=r_reg)(slot_lstm_out)
     attn = TimeDistributed(Dense(1, activation=args.activation))(intent_lstm_out)
     attn = Flatten()(attn)
     attn = Activation('softmax')(attn)
