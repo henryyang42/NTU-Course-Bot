@@ -115,9 +115,8 @@ if args.balanced:
         if idx not in intent_cw:
             intent_cw[idx] = 0
         intent_cw[idx] += 1
-#TODO normalize?
-print (slot_cw)
-print (intent_cw)
+    print (slot_cw)
+    print (intent_cw)
 
 # convert BIO labels to one-hot encoding
 #print Y.shape
