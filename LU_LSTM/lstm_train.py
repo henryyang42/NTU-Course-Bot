@@ -58,7 +58,8 @@ max_seq_len = 0
 pat_split = re.compile(r"\s+")
 with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
     lines = f_in.readlines()
-    print ("# data:", len(lines)/3)
+    n_data = len(lines)/3
+    print ("# data:", n_data)
     for i in range(0, len(lines), 3): 
         # verify data
         intent = lines[i].strip()
@@ -111,12 +112,19 @@ if args.balanced:
             if idx not in slot_cw:
                 slot_cw[idx] = 0
             slot_cw[idx] += 1
+    # weight = N / cnt
+    for idx in slot_cw:
+        slot_cw[idx] = n_data / slot_cw[idx]
     
     intent_cw = {} 
     for idx in Y2:
         if idx not in intent_cw:
             intent_cw[idx] = 0
-        intent_cw[idx] += 1
+        intent_cw[idx] += 1 
+    # weight = N / cnt
+    for idx in intent_cw:
+        intent_cw[idx] = n_data / intent_cw[idx]
+
     print (slot_cw)
     print (intent_cw)
 
