@@ -25,15 +25,17 @@ from LSTM_util import *
 
 #arguments
 ap = argparse.ArgumentParser()
+
 ap.add_argument("sent_label_file", help="example sentences(questions) with BIO slot labels")
 ap.add_argument("emb_size", type=int, help="embedding size")
 ap.add_argument("out_model", type=str, help="")
 ap.add_argument("out_vocab", type=str, help="word, label, intent vocabulary")
+
 ap.add_argument("-i", "--epoch", type=int, default=10, help="# epochs")
 ap.add_argument("-lr", "--learning-rate", type=float, default=0.001, help="")
 ap.add_argument("-dr", "--dropout", type=float, default=0.2, help="")
 ap.add_argument("-c", "--cost", type=str, default="categorical_crossentropy", help="loss (cost) function")
-ap.add_argument("-l", "--log", type=str, help="output prediction result for analysis")
+
 ap.add_argument("-b", "--bi-direct", action="store_true", help="bidirectional LSTM")
 ap.add_argument("-n", "--attention", action="store_true", help="use attention")
 ap.add_argument("-a", "--activation", default="relu", type=str, help="activation function")
@@ -41,6 +43,10 @@ ap.add_argument("-iw", "--intent-weight", type=float, default=0.8, help="weight 
 ap.add_argument("-rr", "--recur-reg", type=float, default=None, help="recurrent layer regularizer")
 ap.add_argument("-bn", "--batch-norm", action="store_true", help="use BatchNormalization layer between LSTM")
 ap.add_argument("-bal", "--balanced", action="store_true", help="balance class weights")
+
+ap.add_argument("-we", "--word-emb", type=str, default=None, help="CWE word embedding")
+ap.add_argument("-ce", "--char-emb", type=str, default=None, help="CWE character embedding")
+
 args = ap.parse_args()
 
 # prepare data
