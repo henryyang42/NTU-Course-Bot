@@ -105,6 +105,7 @@ with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
         Y2.append(intent2idx[intent])
 print ("Vocab. size:", len(idx2word))
 print ("== reading data done ==")
+
 # pad sequences
 X = sequence.pad_sequences(X, maxlen=max_seq_len)
 Y = list(sequence.pad_sequences(Y, maxlen=max_seq_len))
@@ -135,7 +136,6 @@ if args.balanced:
     print (intent_cw)
 
 # convert BIO labels to one-hot encoding
-#print Y.shape
 for i, y in enumerate(Y):
     Y[i] = np_utils.to_categorical(y, len(idx2label))
 
@@ -155,7 +155,19 @@ if args.recur_reg is not None:
 seq_input = Input(shape=(max_seq_len,), dtype='int32')
 
 # [embedding layer]
-init_emb_W = None #TODO pre-trained word embedding?
+init_emb_W = None 
+## pre-trained word embedding ##
+if args.word_emb is not None:
+    # load word embedding
+    word_emb = gensim.models.KeyedVectors.load_word2vec_format(args.word_emb, binary=False)
+    init_emb_W = np.random.rand(len(idx2word), args.emb_size)
+    for i in range(0, len(idx2word)):
+        w = idx2word[i]
+        if w in word_emb:
+            init_emb_W[i] = word_emb[w]
+    init_emb_W = [init_emb_W]
+
+################################
 embedding = Embedding(len(idx2word), args.emb_size, input_length=max_seq_len, weights=init_emb_W, trainable=True)(seq_input)
 embedding = Dropout(args.dropout)(embedding)
 
@@ -177,7 +189,6 @@ if args.attention:
     attn = RepeatVector(args.emb_size)(attn)
     attn = Permute([2, 1])(attn)
     
-    #intent_lstm_out = merge([intent_lstm_out, attn], mode='mul')
     intent_lstm_out = multiply([intent_lstm_out, attn])
     intent_lstm_out = AveragePooling1D(max_seq_len)(intent_lstm_out)
     intent_lstm_out = Flatten()(intent_lstm_out)
