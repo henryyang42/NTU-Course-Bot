@@ -54,8 +54,8 @@ def eval_slot(true_labels_list, pred_labels_list):
                     TP[slot] += 1
                 else:
                     FN[slot] += 1
-            #elif "B" in pred_labels[j] or "I" in pred_labels[j]:
-            elif "B" in pred_labels[j]:
+            #if "B" in pred_labels[j] or "I" in pred_labels[j]:
+            if "B" in pred_labels[j]:
                 slot = pred_labels[j][2:]
                 if slot not in TP:
                     TP[slot] = 0.0
@@ -65,13 +65,22 @@ def eval_slot(true_labels_list, pred_labels_list):
 
     stat["precision"] = {}
     stat["recall"] = {}
+    stat["F1"] = {}
     for slot in TP:
-        if TP[slot] + FP[slot] == 0 or TP[slot] + FN[slot] == 0:
-            continue
-        slot_P = TP[slot] / (TP[slot] + FP[slot])
-        slot_R = TP[slot] / (TP[slot] + FN[slot])
+        slot_P = slot_R = slot_F1 = 0
+
+        if TP[slot] + FP[slot] > 0 :
+            slot_P = TP[slot] / (TP[slot] + FP[slot])
+
+        if TP[slot] + FN[slot] > 0:
+            slot_R = TP[slot] / (TP[slot] + FN[slot])
+
+        if slot_P + slot_R > 0:
+            slot_F1 = 2 * slot_P * slot_R / (slot_P + slot_R)
+
         stat["precision"][slot] = slot_P
         stat["recall"][slot] = slot_R
+        stat["F1"][slot] = slot_F1
 
     return stat
 
@@ -158,6 +167,7 @@ print ("[intent] Accuracy:", intent_stat["accuracy"])
 
 slot_stat = eval_slot(true_labels_list, pred_labels_list)
 #print (slot_stat)
-for slot in slot_stat["precision"]:
+for slot in slot_stat["recall"]:
     print ("[slot - %s] Precision:" % slot, slot_stat["precision"][slot])
     print ("[slot - %s] Recall:" % slot, slot_stat["recall"][slot])
+    print ("[slot - %s] F1:" % slot, slot_stat["F1"][slot])
