@@ -160,11 +160,54 @@ init_emb_W = None
 if args.word_emb is not None:
     # load word embedding
     word_emb = gensim.models.KeyedVectors.load_word2vec_format(args.word_emb, binary=False)
+    # load character embedding
+    if args.char_emb is not None:
+        char_emb = {} # char_emb[(char, pos)] = <vec>
+        with codecs.open(args.char_emb, "r", "utf-8") as f_char:
+            #f_char.next()
+            for line in f_char:
+                parts = line.strip().split(" ")
+                if len(parts) < 3:
+                    continue
+                char = parts[0]
+                vec = np.array(list(map(float, parts[2:])))
+                # ref. https://stackoverflow.com/questions/1303347/getting-a-map-to-return-a-list-in-python-3-x
+                pos = parts[1]
+                key = (char, pos)
+                char_emb[key] = vec
+        #print (char_emb)
+
     init_emb_W = np.random.rand(len(idx2word), args.emb_size)
     for i in range(0, len(idx2word)):
         w = idx2word[i]
         if w in word_emb:
             init_emb_W[i] = word_emb[w]
+        elif args.char_emb is not None:
+            vec = np.zeros_like(word_emb["</s>"])
+            chars = list(w)
+            keys = []
+            for i, c in enumerate(chars):
+                if i == 0:
+                    p = 's'
+                elif i == len(chars)-1:
+                    p = 'e'
+                else:
+                    p = 'm'
+                keys.append( (c, p) )
+
+            found = False
+            for k in keys:
+                if k in char_emb:
+                    found = True
+                    #print (vec, char_emb[k])
+                    vec += char_emb[k]
+            if found:
+                init_emb_W[i] = vec
+            else:
+                print ("[OOV]", w)
+        else:
+            print ("[OOV]", w)
+    #TODO normalize?
     init_emb_W = [init_emb_W]
 
 ################################
