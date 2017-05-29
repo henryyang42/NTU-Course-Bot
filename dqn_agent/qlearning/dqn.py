@@ -342,6 +342,6 @@ class DQN:
 
         return sum(model.train_on_batch(inputs, q_targets))
 
-    def keras_perdict(self, batch, model):
+    def keras_predict(self, batch, model):
         pred_action = np.argmax(model.predict(batch))
         return pred_action

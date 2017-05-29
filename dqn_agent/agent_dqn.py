@@ -224,7 +224,7 @@ class AgentDQN():
                     self.model = build_model(self.experience_replay_pool[0]) # pick a batch to initialize model
                 # print("Agent-DQN - run_policy -> type(representation), shape(representation):\n\t",
                 #       type(self.representation), np.shape(representation), '\n')
-                return self.dqn.keras_perdict(representation, self.model)
+                return self.dqn.keras_predict(representation, self.model)
                 # return self.dqn.predict(representation, {}, predict_model=True)
 
     def rule_policy(self, state=None):
