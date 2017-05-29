@@ -4,14 +4,16 @@ Created on May 11, 2017
 @author: haley
 """
 
+
+import math
+import json
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 ##########################################################################
 #   Some helper functions
 ##########################################################################
-
-
 def text_to_dict(path):
     """ Read in a text file as a dictionary where keys are text and values are indices (line numbers)
         Input:
@@ -43,3 +45,72 @@ def contains(unique, candidate_state):
         else:
             pass
     return False
+
+
+def plot_sr(res):
+    rate = res['success_rate']
+    x, y = [], []
+    for k, v in rate.items():
+        x += [int(k) + 1]
+        y += [v]
+    sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
+    sx = list(sx)
+    x_axis = range(1, 21)
+    y_axis = np.arange(0, 1, dtype=float)
+
+    plt.plot(sx, sy)
+
+    plt.xlabel('Simulation Epoch')
+    plt.ylabel('Success Rate')
+
+    plt.xticks(x_axis)
+    plt.yticks(y_axis)
+
+    plt.savefig('./dqn_agent/checkpoints/success_rate.png')
+    plt.close()
+
+
+def plot_ar(res):
+    rate = res['avg_reward']
+    x, y = [], []
+    for k, v in rate.items():
+        x += [int(k) + 1]
+        y += [v]
+    sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
+    sx = list(sx)
+    x_axis = range(1, 21)
+    y_axis = range(0, math.ceil(max(sy)) + 1, 100)
+
+    plt.plot(sx, sy)
+
+    plt.xlabel('Simulation Epoch')
+    plt.ylabel('Average Reward')
+
+    plt.xticks(x_axis)
+    plt.yticks(y_axis)
+
+    plt.savefig('./dqn_agent/checkpoints/avg_reward.png')
+    plt.close()
+
+
+def plot_at(res):
+    rate = res['avg_turns']
+    x, y = [], []
+    for k, v in rate.items():
+        x += [int(k) + 1]
+        y += [v]
+    sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
+    sx = list(sx)
+    x_axis = range(1, 21)
+    y_axis = range(0, math.ceil(max(sy)) + 1, 1)
+
+    plt.plot(sx, sy)
+
+    plt.xlabel('Simulation Epoch')
+    plt.ylabel('Average Turns')
+
+    plt.xticks(x_axis)
+    plt.yticks(y_axis)
+
+    plt.savefig('./dqn_agent/checkpoints/avg_turns.png')
+    plt.close()
