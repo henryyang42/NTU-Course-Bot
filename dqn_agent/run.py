@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # RL agent parameters
     parser.add_argument('--experience_replay_pool_size', dest='experience_replay_pool_size',
-                        type=int, default=300, help='the size for experience replay')
+                        type=int, default=1000, help='the size for experience replay')
     parser.add_argument('--dqn_hidden_size', dest='dqn_hidden_size',
                         type=int, default=50, help='the hidden size for DQN')
     parser.add_argument('--batch_size', dest='batch_size',
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     parser.add_argument('--warm_start', dest='warm_start', type=int,
                         default=1, help='0: no warm start; 1: warm start for training')
     parser.add_argument('--warm_start_epochs', dest='warm_start_epochs',
-                        type=int, default=50, help='the number of epochs for warm start')
+                        type=int, default=100, help='the number of epochs for warm start')
 
     parser.add_argument('--trained_model_path', dest='trained_model_path',
                         type=str, default=None, help='the path for trained model')
@@ -243,7 +243,7 @@ print("----------Parameters Setup Done----------\n")
 best_model = {}
 best_res = {'avg_reward': float('-inf'), 'epoch': 0,
             'avg_turns': float('inf'),   'success_rate': 0}
-best_model['model'] = copy.deepcopy(agent)
+# best_model['model'] = copy.deepcopy(agent)
 best_res['success_rate'] = 0
 performance_records = {}
 performance_records['success_rate'] = {}
@@ -268,6 +268,20 @@ def save_model(path, agt, success_rate, agent, best_epoch, cur_epoch):
         print('Error! save_model: Writing model fails: %s' % filepath)
         print('\t', e)
 
+""" Save Keras Model """
+def save_keras_model(path, agt, success_rate, best_epoch, cur_epoch):
+    filename = 'agt_%s_%s_%s_%.5f' % (agt, best_epoch, cur_epoch, success_rate)
+    filepath = os.path.join(path, filename)
+    checkpoint = {}
+    checkpoint['params'] = params
+    try:
+        with open(filepath + '.p', 'wb') as f:
+            pickle.dump(checkpoint, f, protocol=pickle.HIGHEST_PROTOCOL)
+        dialog_manager.agent.model.save(filepath + '.h5')
+        print('save_keras_model: Model saved in %s' % (filepath, ))
+    except Exception as e:
+        print('Error! save_keras_model: Writing model fails: %s' % filepath)
+        print('\t', e)
 
 """ Save Performance Numbers """
 def save_performance_records(path, agt, records):
@@ -401,12 +415,12 @@ def run_episodes(count, status):
 
         if simulation_res['success_rate'] >= best_res['success_rate']:
             if simulation_res['success_rate'] >= success_rate_threshold:  # threshold = 0.30
-                # agent.experience_replay_pool = [] # clear the exp-pool by better dialogues
-                print("simulation_res['success_rate'] >= best_res['success_rate']")
+                agent.experience_replay_pool = [] # clear the exp-pool by better dialogues
+                # print("simulation_res['success_rate'] >= best_res['success_rate']")
                 simulation_epoch(simulation_epoch_size)
 
         if simulation_res['success_rate'] > best_res['success_rate']:
-            best_model['model'] = copy.deepcopy(agent)
+            # best_model['model'] = copy.deepcopy(agent)
             best_res['success_rate'] = simulation_res['success_rate']
             best_res['avg_reward'] = simulation_res['avg_reward']
             best_res['avg_turns'] = simulation_res['avg_turns']
@@ -421,8 +435,10 @@ def run_episodes(count, status):
 
         # save the model every 10 episodes
         if episode % save_check_point == 0 and params['trained_model_path'] == None:
-            save_model(params['write_model_dir'], agt, best_res['success_rate'],
-                       best_model['model'], best_res['epoch'], episode)
+            # save_model(params['write_model_dir'], agt, best_res['success_rate'],
+            #            best_model['model'], best_res['epoch'], episode)
+            save_keras_model(params['write_model_dir'], agt, best_res['success_rate'],
+                             best_res['epoch'], episode)
             save_performance_records(
                 params['write_model_dir'], agt, performance_records)
 
@@ -435,7 +451,17 @@ def run_episodes(count, status):
     status['count'] += count
 
     # if agt == 9 and params['trained_model_path'] == None:
-    save_model(params['write_model_dir'], agt, float(successes) / count, best_model['model'], best_res['epoch'], count)
+    # save_model(params['write_model_dir'], agt, float(successes) / count, best_model['model'], best_res['epoch'], count)
+    save_keras_model(params['write_model_dir'], agt, float(successes) / count, best_res['epoch'], count)
     save_performance_records(params['write_model_dir'], agt, performance_records)
 
-run_episodes(20, status)
+
+run_episodes(1000, status)
+
+res = None
+with open('./dqn_agent/checkpoints/agt_9_performance_records.json', 'r') as f:
+    res = json.loads(f.readline())
+
+plot_sr(res)
+plot_ar(res)
+plot_at(res)
