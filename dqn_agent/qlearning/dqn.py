@@ -5,12 +5,17 @@ Created on Jun 18, 2016
 '''
 
 from .utils import *
-
+from dqn_agent.dialog_config import *
 
 class DQN:
 
     def __init__(self, input_size, hidden_size, output_size):
         self.model = {}
+
+        # input_size: 124
+        # hidden_size: 50
+        # output_size: 515
+
         # input<->hidden
         self.model['Wxh'] = initWeight(input_size, hidden_size)
         self.model['bxh'] = np.zeros((1, hidden_size))
@@ -28,7 +33,6 @@ class DQN:
         return {'model': self.model, 'update': self.update, 'regularize': self.regularize}
 
     """Activation Function: Sigmoid, or tanh, or ReLu"""
-
     def fwdPass(self, Xs, params, **kwargs):
         predict_mode = kwargs.get('predict_mode', False)
         active_func = params.get('activation_func', 'relu')
@@ -70,6 +74,9 @@ class DQN:
 
             cache['Y'] = Y
 
+        # print("DQN - fwdPass -> Y.shape:\n\t", np.shape(Y), '\n')
+
+        # Y.shape: (1, #actions)
         return Y, cache
 
     def bwdPass(self, dY, cache):
@@ -110,7 +117,6 @@ class DQN:
         return {'Wd': dWd, 'bd': dbd, 'Wxh': dWxh, 'bxh': dbxh}
 
     """batch Forward & Backward Pass"""
-
     def batchForward(self, batch, params, predict_mode=False):
         caches = []
         Ys = []
@@ -164,12 +170,11 @@ class DQN:
         return grads
 
     """ cost function, returns cost and gradients for model """
-
     def costFunc(self, batch, params, clone_dqn):
         regc = params.get('reg_cost', 1e-3)
         gamma = params.get('gamma', 0.9)
 
-        # batch forward
+        # batch forward -> Ys, tYs = shape(batch_id, #actions)
         Ys, caches, tYs = self.batchDoubleForward(
             batch, params, clone_dqn, predict_mode=False)
 
@@ -231,7 +236,6 @@ class DQN:
         return out
 
     """ A single batch """
-
     def singleBatch(self, batch, params, clone_dqn):
         learning_rate = params.get('learning_rate', 0.001)
         decay_rate = params.get('decay_rate', 0.999)
@@ -241,14 +245,14 @@ class DQN:
         sdg_type = params.get('sdgtype', 'rmsprop')
         activation_func = params.get('activation_func', 'relu')
 
-        for u in self.update:
-            if not u in self.step_cache:
+        for u in self.update:  # self.update = ['Wxh', 'bxh', 'Wd', 'bd']
+            if not u in self.step_cache:  # self.step_cache = {}
                 self.step_cache[u] = np.zeros(self.model[u].shape)
 
         cg = self.costFunc(batch, params, clone_dqn)
 
-        cost = cg['cost']
-        grads = cg['grads']
+        cost = cg['cost']  # {'reg_cost': reg_cost, 'loss_cost': loss_cost, 'total_cost': loss_cost + reg_cost}
+        grads = cg['grads'] # float
 
         # clip gradients if needed
         if activation_func.lower() == 'relu':
@@ -284,10 +288,60 @@ class DQN:
         out['cost'] = cost
         return out
 
-    """ prediction """
 
+    """ prediction """
     def predict(self, Xs, params, **kwargs):
         Ys, caches = self.fwdPass(Xs, params, predict_model=True)
         pred_action = np.argmax(Ys)
+        return pred_action
 
+
+    def keras_train(self, batches, model, params=None):
+
+        # batch_size, 1, 124
+        inputs = np.zeros((len(batches), np.shape(batches[0][0])[1]))
+        q_targets = np.zeros((inputs.shape[0], ACTIONS))
+        ##########################################################################
+        #   Each batch:
+        #      batch[0] = state_t_rep       (type: <numpy.ndarray>, shape: (1, 124))
+        #      batch[1] = action_index      (type: <int>)
+        #      batch[2] = reward            (type: <int>)
+        #      batch[3] = state_tplus1_rep  (type: <numpy.ndarray>, shape: (1, 124))
+        #      batch[4] = episode_over      (type: <bool>)
+        #   Format: (s_t, a_t, r, s_{t+1}, episode_over)
+        #            [0], [1], [2], [3], [4]
+        ##########################################################################
+        for i, v in enumerate(batches):
+            state_t = v[0]
+            action_t = v[1]  # This is action index
+            reward_t = v[2]
+            state_t1 = v[3]
+            terminal = v[4]
+            # if terminated, only equals reward
+
+            # for fitting Keras format (1, 124)
+            state_t = state_t.reshape(1, state_t.shape[1])
+            state_t1 = state_t1.reshape(1, state_t1.shape[1])
+            # print("DQN - keras_train -> state_t:\n\t", state_t.shape, '\n')
+            # print("DQN - keras_train -> state_t1:\n\t", state_t1.shape, '\n')
+
+            # for fitting Keras format (1, 1, 124)
+            # state_t = state_t.reshape(1, state_t.shape[0], state_t.shape[1])
+            # state_t1 = state_t1.reshape(1, state_t1.shape[0], state_t1.shape[1])
+
+            inputs[i:i + 1] = state_t  # I saved down s_t
+
+            # Hitting each buttom probability
+            q_targets[i] = model.predict(state_t)
+            Q_sa = model.predict(state_t1)
+
+            if terminal:
+                q_targets[i, action_t] = reward_t
+            else:
+                q_targets[i, action_t] = reward_t + GAMMA * np.max(Q_sa)
+
+        return sum(model.train_on_batch(inputs, q_targets))
+
+    def keras_perdict(self, batch, model):
+        pred_action = np.argmax(model.predict(batch))
         return pred_action
