@@ -413,11 +413,15 @@ def run_episodes(count, status):
         performance_records['avg_turns'][episode] = simulation_res['avg_turns']
         performance_records['avg_reward'][episode] = simulation_res['avg_reward']
 
-        if simulation_res['success_rate'] >= best_res['success_rate']:
-            if simulation_res['success_rate'] >= success_rate_threshold:  # threshold = 0.30
+        if simulation_res['success_rate'] >= success_rate_threshold:  # threshold = 0.50
+            if simulation_res['success_rate'] >= best_res['success_rate']:
                 agent.experience_replay_pool = [] # clear the exp-pool by better dialogues
                 # print("simulation_res['success_rate'] >= best_res['success_rate']")
                 simulation_epoch(simulation_epoch_size)
+            else:
+                if random.random() < agent.epsilon:
+                    agent.experience_replay_pool = []  # clear the exp-pool by better dialogues
+                    simulation_epoch(simulation_epoch_size)
 
         if simulation_res['success_rate'] > best_res['success_rate']:
             # best_model['model'] = copy.deepcopy(agent)
