@@ -24,6 +24,7 @@ from dialog_config import *
 from qlearning import DQN
 
 from util import *
+from dqn_agent.qlearning.utils import *
 sys.path.append(os.getcwd())
 sys.path.append(os.path.pardir)
 from misc_scripts.access_django import *
@@ -61,12 +62,14 @@ class AgentDQN():
                                7 * self.slot_cardinality + \
                                3 + \
                                self.max_turn
-
+        # print("Agent-DQN - __init__ -> state_dimension:\n\t", self.state_dimension, '\n')
         self.dqn = DQN(self.state_dimension,
                        self.hidden_size, self.num_actions)
         self.clone_dqn = copy.deepcopy(self.dqn)
 
         self.cur_bellman_err = 0
+
+        self.model = None
 
         # Prediction Mode: load trained DQN model (in our case, default = False)
         if params['trained_model_path'] != None:
@@ -81,8 +84,12 @@ class AgentDQN():
             This function is called every time a new episode is run.
         """
         # self.request_slot_name = 'title'
+        self.current_slot_id = 0
         self.phase = 0
-        self.request_set = {'title': 0, 'instructor': 0, 'schedule_str': 0}
+        self.request_set = ['required_elective', 'sel_method', 'designated_for',
+                            'schedule_str', 'classroom', 'instructor',
+                            'title', 'serial_no']
+        # self.request_set = {'title': 0, 'instructor': 0, 'schedule_str': 0}
 
     def state_to_action(self, state):
         """ DQN: Input state, output action """
@@ -213,21 +220,45 @@ class AgentDQN():
                     self.warm_start = 2
                 return self.rule_policy(state)
             else:
-                return self.dqn.predict(representation, {}, predict_model=True)
+                if self.model == None:  # Build Keras DQN Model at first time
+                    self.model = build_model(self.experience_replay_pool[0]) # pick a batch to initialize model
+                # print("Agent-DQN - run_policy -> type(representation), shape(representation):\n\t",
+                #       type(self.representation), np.shape(representation), '\n')
+                return self.dqn.keras_perdict(representation, self.model)
+                # return self.dqn.predict(representation, {}, predict_model=True)
 
     def rule_policy(self, state=None):
         """ Rule Policy """
 
-        sys_action = get_action_from_frame(state['current_slots'])
+        # sys_action = get_action_from_frame(state['current_slots'])
         # print("DQN-Agent - rule_policy -> sys_action (from get_action_from_frame)")
         # for k, v in sys_action.items():
         #     print('\t', "\"%s\":" % k, v)
         # print()
 
         ####################################################################
+        #   Idiot Rule Policy
+        ####################################################################
+        if self.current_slot_id < len(self.request_set):
+            slot = self.request_set[self.current_slot_id]
+            self.current_slot_id += 1
+
+            act_slot_response = {}
+            act_slot_response['diaact'] = "request"
+            act_slot_response['inform_slots'] = {}
+            act_slot_response['request_slots'] = {slot: "UNK"}
+        elif self.phase == 0:
+            act_slot_response = {'diaact': "inform",
+                                'inform_slots': {},
+                                'request_slots': {}}
+            self.phase += 1
+        elif self.phase == 1:
+            act_slot_response = {'diaact': "closing", 'inform_slots': {},
+                                'request_slots': {}}
+        ####################################################################
         #   Old version follows kb_results
         ####################################################################
-        # if the unique course is found
+        # # if the unique course is found
         # if state['kb_results_dict']['matching_all_constraints'] == 1:
         #     act_slot_response = {}
         #     act_slot_response['diaact'] = "inform"
@@ -245,65 +276,71 @@ class AgentDQN():
         #     act_slot_response['request_slots'] = {}
         #     # print('DQN-Agent - rule_policy -> multiple courses are found: act_slot_response\n\t', act_slot_response, '\n')
 
+        # elif self.phase == 0:
+        #     act_slot_response = {'diaact': "inform",
+        #                         'inform_slots': {},
+        #                         'request_slots': {}}
+        #     self.phase += 1
+        # elif self.phase == 1:
+        #     act_slot_response = {'diaact': "closing", 'inform_slots': {},
+        #                          'request_slots': {}}
         ####################################################################
         #   New version follows get_action_from_frame
         ####################################################################
-        if sys_action['diaact'] == 'inform':
-            act_slot_response = {}
-            act_slot_response['diaact'] = "inform"
-            act_slot_response['inform_slots'] = {
-                    k: "PLACEHOLDER" for k in sys_action['inform_slots'].keys()
-                }
-            act_slot_response['request_slots'] = {}
-            # print('DQN-Agent - rule_policy -> unique course is found: act_slot_response\n\t', act_slot_response, '\n')
+        # if sys_action['diaact'] == 'inform':
+        #     act_slot_response = {}
+        #     act_slot_response['diaact'] = "inform"
+        #     act_slot_response['inform_slots'] = {
+        #             k: "PLACEHOLDER" for k in sys_action['inform_slots'].keys()
+        #         }
+        #     act_slot_response['request_slots'] = {}
+        #     # print('DQN-Agent - rule_policy -> unique course is found: act_slot_response\n\t', act_slot_response, '\n')
 
-        # if there are multiple courses are found
-        elif sys_action['diaact'] == 'multiple_choice':
-            act_slot_response = {}
-            act_slot_response['diaact'] = "multiple_choice"
-            act_slot_response['choice'] = []
-            act_slot_response['inform_slots'] = {}
-            act_slot_response['request_slots'] = {}
+        # # if there are multiple courses are found
+        # elif sys_action['diaact'] == 'multiple_choice':
+        #     act_slot_response = {}
+        #     act_slot_response['diaact'] = "multiple_choice"
+        #     act_slot_response['choice'] = []
+        #     act_slot_response['inform_slots'] = {}
+        #     act_slot_response['request_slots'] = {}
 
+        # # if the conditions of the course in not enough
+        # else:
+        #     # fill in the informed slot to agent's request set
+        #     for slot in state['current_slots']['inform_slots'].keys():
+        #         dict_slot = 'schedule_str' if slot == 'when' else slot
+        #         self.request_set[dict_slot] = 1
 
-        # if the conditions of the course in not enough
-        else:
+        #     filled_in_slots_num = sum(list(self.request_set.values()))
+        #     # print('DQN-Agent - rule_policy -> filled_in_slots_num\n\t', filled_in_slots_num, '\n')
+        #     # print('DQN-Agent - rule_policy -> len(self.request_set)\n\t', len(self.request_set), '\n')
 
-            # fill in the informed slot to agent's request set
-            for slot in state['current_slots']['inform_slots'].keys():
-                dict_slot = 'schedule_str' if slot == 'when' else slot
-                self.request_set[dict_slot] = 1
+        #     # necessary slots not all filled in with correct values
+        #     if filled_in_slots_num < len(self.request_set):
+        #         slot = 'title'
+        #         for k, v in self.request_set.items():
+        #             if v == 0:
+        #                 slot = k
+        #                 break
+        #         # print('DQN-Agent - rule_policy -> slot\n\t', slot, '\n')
 
-            filled_in_slots_num = sum(list(self.request_set.values()))
-            # print('DQN-Agent - rule_policy -> filled_in_slots_num\n\t', filled_in_slots_num, '\n')
-            # print('DQN-Agent - rule_policy -> len(self.request_set)\n\t', len(self.request_set), '\n')
+        #         sys_act = get_action_from_frame(state['current_slots'])
+        #         # print('DQN-Agent - rule_policy -> sys_act\n\t', sys_act, '\n')
 
-            # necessary slots not all filled in with correct values
-            if filled_in_slots_num < len(self.request_set):
-                slot = 'title'
-                for k, v in self.request_set.items():
-                    if v == 0:
-                        slot = k
-                        break
-                # print('DQN-Agent - rule_policy -> slot\n\t', slot, '\n')
+        #         act_slot_response = {}
+        #         act_slot_response['diaact'] = "request"
+        #         act_slot_response['inform_slots'] = {}
+        #         act_slot_response['request_slots'] = {slot: "UNK"}
+        #         # print('DQN-Agent - rule_policy -> conditions of the course in not enough: act_slot_response\n\t', act_slot_response, '\n')
 
-                sys_act = get_action_from_frame(state['current_slots'])
-                # print('DQN-Agent - rule_policy -> sys_act\n\t', sys_act, '\n')
-
-                act_slot_response = {}
-                act_slot_response['diaact'] = "request"
-                act_slot_response['inform_slots'] = {}
-                act_slot_response['request_slots'] = {slot: "UNK"}
-                # print('DQN-Agent - rule_policy -> conditions of the course in not enough: act_slot_response\n\t', act_slot_response, '\n')
-
-            elif self.phase == 0:
-                act_slot_response = {'diaact': "inform",
-                                    'inform_slots': {},
-                                    'request_slots': {}}
-                self.phase += 1
-            elif self.phase == 1:
-                act_slot_response = {'diaact': "closing", 'inform_slots': {},
-                                    'request_slots': {}}
+        #     elif self.phase == 0:
+        #         act_slot_response = {'diaact': "inform",
+        #                             'inform_slots': {},
+        #                             'request_slots': {}}
+        #         self.phase += 1
+        #     elif self.phase == 1:
+        #         act_slot_response = {'diaact': "closing", 'inform_slots': {},
+        #                             'request_slots': {}}
 
         return self.action_index(act_slot_response)
 
@@ -349,13 +386,24 @@ class AgentDQN():
 
     def train(self, batch_size=1, num_batches=100):
         """ Train DQN with experience replay """
+        # if self.model == None:  # Build Keras DQN Model at first time
+        #     self.model = build_model(self.experience_replay_pool[0]) # pick a batch to initialize model
 
         for iter_batch in range(num_batches):
             self.cur_bellman_err = 0
             for iter in range(len(self.experience_replay_pool) // (batch_size)):
-                batch = [random.choice(self.experience_replay_pool) for _ in range(batch_size)]
-                batch_struct = self.dqn.singleBatch(batch, {'gamma': self.gamma}, self.clone_dqn)
-                self.cur_bellman_err += batch_struct['cost']['total_cost']
+                batches = [random.choice(self.experience_replay_pool) for _ in range(batch_size)]
+                # print("Agent-DQN - train -> shape(batch[0]):\n\t", np.shape(batches[0]), '\n')
+
+                # batch_struct = {'cost': {'reg_cost': reg_cost, 'loss_cost': loss_cost, 'total_cost': loss_cost + reg_cost}
+                #                 'grads': grads(float)}
+                # batch_struct = self.dqn.singleBatch(batches, {'gamma': self.gamma}, self.clone_dqn)
+                # print("Agent-DQN - train -> batch[0]:\n\t", batches[0], '\n')
+
+                # self.cur_bellman_err += batch_struct['cost']['total_cost']
+
+                self.cur_bellman_err += self.dqn.keras_train(batches, self.model)
+                # print("Agent-DQN - train -> loss:\n\t", loss, '\n')
 
             print("Current Bellman Error %.4f, Experience-Replay Pool %s" %
                   (float(self.cur_bellman_err) / len(self.experience_replay_pool), len(self.experience_replay_pool)))
