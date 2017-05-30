@@ -84,7 +84,7 @@ def build_model(batch, params={}):
 
     model_in = Input(shape=f_vector.shape, name='model_in')
 
-    model_out = Dense(50, name='Dense_1')(model_in)
+    model_out = Dense(25, name='Dense_1')(model_in)
 
     model_out = Activation(activation_func, name='relu_1')(model_out)
 
