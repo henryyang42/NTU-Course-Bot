@@ -380,11 +380,11 @@ class AgentDQN():
 
         if self.predict_mode == False:  # Training Mode
             if self.warm_start == 1:
-                if len(self.experience_replay_pool) < self.experience_replay_pool_size:
-                    self.experience_replay_pool.append(training_example)
-        else:  # Prediction Mode
-            if len(self.experience_replay_pool) < self.experience_replay_pool_size:
+                # if len(self.experience_replay_pool) < self.experience_replay_pool_size:
                 self.experience_replay_pool.append(training_example)
+        else:  # Prediction Mode
+            # if len(self.experience_replay_pool) < self.experience_replay_pool_size:
+            self.experience_replay_pool.append(training_example)
 
     def train(self, batch_size=1, num_batches=100):
         """ Train DQN with experience replay """
