@@ -47,7 +47,7 @@ def contains(unique, candidate_state):
     return False
 
 
-def plot_sr(res):
+def plot_sr(res, step_size):
     rate = res['success_rate']
     x, y = [], []
     for k, v in rate.items():
@@ -55,7 +55,7 @@ def plot_sr(res):
         y += [v]
     sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
     sx = list(sx)
-    x_axis = range(1, 21)
+    x_axis = range(0, max(sx) + 1, step_size)
     y_axis = np.arange(0, 1, dtype=float)
 
     plt.plot(sx, sy)
@@ -70,7 +70,7 @@ def plot_sr(res):
     plt.close()
 
 
-def plot_ar(res):
+def plot_ar(res, step_size):
     rate = res['avg_reward']
     x, y = [], []
     for k, v in rate.items():
@@ -78,7 +78,7 @@ def plot_ar(res):
         y += [v]
     sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
     sx = list(sx)
-    x_axis = range(1, 21)
+    x_axis = range(0, max(sx) + 1, step_size)
     y_axis = range(0, math.ceil(max(sy)) + 1, 100)
 
     plt.plot(sx, sy)
@@ -93,7 +93,7 @@ def plot_ar(res):
     plt.close()
 
 
-def plot_at(res):
+def plot_at(res, step_size):
     rate = res['avg_turns']
     x, y = [], []
     for k, v in rate.items():
@@ -101,7 +101,7 @@ def plot_at(res):
         y += [v]
     sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
     sx = list(sx)
-    x_axis = range(1, 21)
+    x_axis = range(0, max(sx) + 1, step_size)
     y_axis = range(0, math.ceil(max(sy)) + 1, 1)
 
     plt.plot(sx, sy)
