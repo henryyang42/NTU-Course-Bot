@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # RL agent parameters
     parser.add_argument('--experience_replay_pool_size', dest='experience_replay_pool_size',
-                        type=int, default=1000, help='the size for experience replay')
+                        type=int, default=500, help='the size for experience replay')
     parser.add_argument('--dqn_hidden_size', dest='dqn_hidden_size',
                         type=int, default=50, help='the hidden size for DQN')
     parser.add_argument('--batch_size', dest='batch_size',
@@ -416,7 +416,6 @@ def run_episodes(count, status):
         if simulation_res['success_rate'] >= success_rate_threshold:  # threshold = 0.50
             if simulation_res['success_rate'] >= best_res['success_rate']:
                 agent.experience_replay_pool = [] # clear the exp-pool by better dialogues
-                # print("simulation_res['success_rate'] >= best_res['success_rate']")
                 simulation_epoch(simulation_epoch_size)
             else:
                 if random.random() < agent.epsilon:
@@ -430,7 +429,7 @@ def run_episodes(count, status):
             best_res['avg_turns'] = simulation_res['avg_turns']
             best_res['epoch'] = episode
 
-        agent.clone_dqn = copy.deepcopy(agent.dqn)
+        # agent.clone_dqn = copy.deepcopy(agent.dqn)
         agent.train(batch_size, 1)
         agent.predict_mode = False
 
@@ -460,12 +459,4 @@ def run_episodes(count, status):
     save_performance_records(params['write_model_dir'], agt, performance_records)
 
 
-run_episodes(1000, status)
-
-res = None
-with open('./dqn_agent/checkpoints/agt_9_performance_records.json', 'r') as f:
-    res = json.loads(f.readline())
-
-plot_sr(res)
-plot_ar(res)
-plot_at(res)
+run_episodes(100, status)
