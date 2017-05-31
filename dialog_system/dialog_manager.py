@@ -115,14 +115,14 @@ class DialogManager:
         """ Reward Function 1: a reward function based on the dialog_status """
         if dialog_status == dialog_config.FAILED_DIALOG:
             # reward = -500
-            reward = -self.user.max_turn * 3 # 10 (origin)
+            reward = -self.user.max_turn * 3 / 100 # 10 (origin)
         elif dialog_status == dialog_config.SUCCESS_DIALOG:
             # reward = 1000
-            reward = 5 * self.user.max_turn # 20 (origin)
+            reward = 5 * self.user.max_turn / 100 # 20 (origin)
         elif dialog_status == dialog_config.PENALTY_DIALOG:
-            reward = -25
+            reward = -50 / 100
         else:
-            reward = - 20
+            reward = - 30 / 100
 
         return reward
 

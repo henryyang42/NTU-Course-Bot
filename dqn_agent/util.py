@@ -56,7 +56,7 @@ def plot_sr(res, step_size):
     sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
     sx = list(sx)
     x_axis = range(0, max(sx) + 1, step_size)
-    y_axis = np.arange(0, 1, dtype=float)
+    y_axis = np.arange(0, 1.1, 0.1)
 
     plt.plot(sx, sy)
 
@@ -70,7 +70,7 @@ def plot_sr(res, step_size):
     plt.close()
 
 
-def plot_ar(res, step_size):
+def plot_ar(res, x_step_size, y_step_size):
     rate = res['avg_reward']
     x, y = [], []
     for k, v in rate.items():
@@ -78,8 +78,8 @@ def plot_ar(res, step_size):
         y += [v]
     sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
     sx = list(sx)
-    x_axis = range(0, max(sx) + 1, step_size)
-    y_axis = range(0, math.ceil(max(sy)) + 1, 100)
+    x_axis = range(0, max(sx) + 1, x_step_size)
+    y_axis = np.arange(0, math.ceil(max(sy)) + y_step_size, y_step_size)
 
     plt.plot(sx, sy)
 
@@ -102,7 +102,7 @@ def plot_at(res, step_size):
     sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
     sx = list(sx)
     x_axis = range(0, max(sx) + 1, step_size)
-    y_axis = range(0, math.ceil(max(sy)) + 1, 1)
+    y_axis = np.arange(0, math.ceil(max(sy)), 0.25)
 
     plt.plot(sx, sy)
 

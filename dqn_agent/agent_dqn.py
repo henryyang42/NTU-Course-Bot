@@ -244,17 +244,19 @@ class AgentDQN():
             self.current_slot_id += 1
 
             act_slot_response = {}
+            act_slot_response['choice'] = []
             act_slot_response['diaact'] = "request"
             act_slot_response['inform_slots'] = {}
             act_slot_response['request_slots'] = {slot: "UNK"}
         elif self.phase == 0:
             act_slot_response = {'diaact': "inform",
                                 'inform_slots': {},
-                                'request_slots': {}}
+                                'request_slots': {},
+                                'choice': []}
             self.phase += 1
         elif self.phase == 1:
             act_slot_response = {'diaact': "closing", 'inform_slots': {},
-                                'request_slots': {}}
+                                'request_slots': {}, 'choice': []}
         ####################################################################
         #   Old version follows kb_results
         ####################################################################

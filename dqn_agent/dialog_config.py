@@ -82,12 +82,12 @@ feasible_actions = [
     #####################################################################
     #   inform action
     #####################################################################
-    {'diaact': "inform", 'inform_slots': {}, 'request_slots': {}},
+    {'diaact': "inform", 'inform_slots': {}, 'request_slots': {}, 'choice': []},
 
     #####################################################################
     #   close action
     #####################################################################
-    {'diaact': "closing", 'inform_slots': {}, 'request_slots': {}},
+    {'diaact': "closing", 'inform_slots': {}, 'request_slots': {}, 'choice': []},
 ]
 
 #########################################################################
@@ -101,12 +101,13 @@ for r in range(1, len(sys_inform_slots) + 1):
 #     feasible_actions.append({'diaact': 'inform', 'inform_slots': {slot: "PLACEHOLDER"}, 'request_slots': {}})
 
 #########################################################################
-#   Adding all the possible request actions
+#   Adding all the possible request actions (including 'choice')
 #########################################################################
 for r in range(1, len(sys_request_slots) + 1):
     for c in itertools.combinations(sys_request_slots, r):
         feasible_actions.append({'diaact': 'request',
                                  'inform_slots': {},
-                                 'request_slots': {slot: "UNK" for slot in c}})
+                                 'request_slots': {slot: "UNK" for slot in c},
+                                 'choice': []})
 # for slot in sys_request_slots:
 #     feasible_actions.append({'diaact': 'request', 'inform_slots': {}, 'request_slots': {slot: "UNK"}})

@@ -79,12 +79,12 @@ def build_model(batch, params={}):
     grad_clip = params.get('grad_clip', -1e-3)
     smooth_eps = params.get('smooth_eps', 1e-8)
     opt = params.get('opt', 'adam')
-    dp = params.get('dropout_rate', 0.1)
+    dp = params.get('dropout_rate', 0.2)
     activation_func = params.get('activation_func', 'relu')
 
     model_in = Input(shape=f_vector.shape, name='model_in')
 
-    model_out = Dense(25, name='Dense_1')(model_in)
+    model_out = Dense(10, name='Dense_1')(model_in)
 
     model_out = Activation(activation_func, name='relu_1')(model_out)
 

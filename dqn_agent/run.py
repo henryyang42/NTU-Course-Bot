@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # RL agent parameters
     parser.add_argument('--experience_replay_pool_size', dest='experience_replay_pool_size',
-                        type=int, default=500, help='the size for experience replay')
+                        type=int, default=200, help='the size for experience replay')
     parser.add_argument('--dqn_hidden_size', dest='dqn_hidden_size',
                         type=int, default=50, help='the hidden size for DQN')
     parser.add_argument('--batch_size', dest='batch_size',
@@ -90,11 +90,11 @@ if __name__ == "__main__":
     parser.add_argument('--predict_mode', dest='predict_mode',
                         type=bool, default=False, help='predict model for DQN')
     parser.add_argument('--simulation_epoch_size', dest='simulation_epoch_size',
-                        type=int, default=50, help='the size of validation set')
+                        type=int, default=100, help='the size of validation set')
     parser.add_argument('--warm_start', dest='warm_start', type=int,
                         default=1, help='0: no warm start; 1: warm start for training')
     parser.add_argument('--warm_start_epochs', dest='warm_start_epochs',
-                        type=int, default=100, help='the number of epochs for warm start')
+                        type=int, default=1, help='the number of epochs for warm start')
 
     parser.add_argument('--trained_model_path', dest='trained_model_path',
                         type=str, default=None, help='the path for trained model')
@@ -104,7 +104,7 @@ if __name__ == "__main__":
                         type=int, default=10, help='number of epochs for saving model')
 
     parser.add_argument('--success_rate_threshold', dest='success_rate_threshold',
-                        type=float, default=0.5, help='the threshold for success rate')
+                        type=float, default=0.9, help='the threshold for success rate')
 
     # parser.add_argument('--split_fold', dest='split_fold', default=5,
     #                     type=int, help='the number of folders to split the user goal')
@@ -459,4 +459,4 @@ def run_episodes(count, status):
     save_performance_records(params['write_model_dir'], agt, performance_records)
 
 
-run_episodes(100, status)
+run_episodes(25, status)
