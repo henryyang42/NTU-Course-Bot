@@ -297,10 +297,6 @@ class DQN:
 
 
     def keras_train(self, batches, model, params=None):
-
-        # batch_size, 1, 124
-        inputs = np.zeros((len(batches), np.shape(batches[0][0])[1]))
-        q_targets = np.zeros((inputs.shape[0], ACTIONS))
         ##########################################################################
         #   Each batch:
         #      batch[0] = state_t_rep       (type: <numpy.ndarray>, shape: (1, 124))
@@ -311,31 +307,30 @@ class DQN:
         #   Format: (s_t, a_t, r, s_{t+1}, episode_over)
         #            [0], [1], [2], [3], [4]
         ##########################################################################
-        for i, v in enumerate(batches):
-            state_t = v[0]
-            action_t = v[1]  # This is action index
-            reward_t = v[2]
-            state_t1 = v[3]
-            terminal = v[4]
-            # if terminated, only equals reward
 
-            # for fitting Keras format (1, 124)
+        # inputs: training input to the network (shape: (batch_size, dim-state))
+        # q_targets: target q-values (i.e. y-labels, shape: (batch_size, #action)
+        inputs = np.zeros((len(batches), np.shape(batches[0][0])[1]))
+        q_targets = np.zeros((inputs.shape[0], ACTIONS))
+
+        for i, v in enumerate(batches):
+            state_t  = v[0] # current state
+            action_t = v[1] # action index
+            reward_t = v[2] # current reward
+            state_t1 = v[3] # next state (after taking the action)
+            terminal = v[4] # signal of episode over or not
+
+            # fitting Keras format (1, 124)
             state_t = state_t.reshape(1, state_t.shape[1])
             state_t1 = state_t1.reshape(1, state_t1.shape[1])
-            # print("DQN - keras_train -> state_t:\n\t", state_t.shape, '\n')
-            # print("DQN - keras_train -> state_t1:\n\t", state_t1.shape, '\n')
 
-            # for fitting Keras format (1, 1, 124)
-            # state_t = state_t.reshape(1, state_t.shape[0], state_t.shape[1])
-            # state_t1 = state_t1.reshape(1, state_t1.shape[0], state_t1.shape[1])
+            inputs[i] = state_t # save "s_t"
 
-            inputs[i:i + 1] = state_t  # I saved down s_t
-
-            # Hitting each buttom probability
+            # hitting each buttom probability
             q_targets[i] = model.predict(state_t)
             Q_sa = model.predict(state_t1)
 
-            if terminal:
+            if terminal: # episode end
                 q_targets[i, action_t] = reward_t
             else:
                 q_targets[i, action_t] = reward_t + GAMMA * np.max(Q_sa)
