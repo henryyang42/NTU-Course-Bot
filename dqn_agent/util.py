@@ -47,70 +47,91 @@ def contains(unique, candidate_state):
     return False
 
 
-def plot_sr(res, step_size):
+def plot_sr(res, x_steps, sample_size):
     rate = res['success_rate']
     x, y = [], []
     for k, v in rate.items():
         x += [int(k) + 1]
         y += [v]
-    sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
-    sx = list(sx)
-    x_axis = range(0, max(sx) + 1, step_size)
-    y_axis = np.arange(0, 1.1, 0.1)
 
-    plt.plot(sx, sy)
+    vx, vy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
+    vx = np.array(vx[:sample_size])
+    vy = np.array(vy[:sample_size])
+    x_axis = np.arange(0, max(vx) + 1, sample_size / x_steps)
+    y_axis = np.arange(0, 1.3, 0.1)
 
-    plt.xlabel('Simulation Epoch')
-    plt.ylabel('Success Rate')
+    plt.figure(figsize=(20, 10))
+    plt.xlim(0, max(vx))
+    plt.ylim(0, 1.2)
 
-    plt.xticks(x_axis)
-    plt.yticks(y_axis)
+    plt.fill_between(vx, vy - np.std(vy), vy + np.std(vy), color="#D1E8FF")
+    plt.plot(vx, vy, color="#108EFF")
+
+    plt.xlabel('Simulation Epoch', fontsize=16)
+    plt.ylabel('Success Rate', fontsize=16)
+
+    plt.xticks(x_axis, fontsize=14)
+    plt.yticks(y_axis, fontsize=14)
 
     plt.savefig('./dqn_agent/checkpoints/success_rate.png')
     plt.close()
 
 
-def plot_ar(res, x_step_size, y_step_size):
+def plot_ar(res, x_steps, y_steps, sample_size, max_reward):
     rate = res['avg_reward']
     x, y = [], []
     for k, v in rate.items():
         x += [int(k) + 1]
         y += [v]
-    sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
-    sx = list(sx)
-    x_axis = range(0, max(sx) + 1, x_step_size)
-    y_axis = np.arange(0, math.ceil(max(sy)) + y_step_size, y_step_size)
 
-    plt.plot(sx, sy)
+    vx, vy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
+    vx = np.array(vx[:sample_size])
+    vy = np.array(vy[:sample_size])
+    x_axis = np.arange(0, max(vx) + 1, sample_size / x_steps)
+    y_axis = np.arange(0, max_reward + (max_reward / y_steps), max_reward / y_steps)
 
-    plt.xlabel('Simulation Epoch')
-    plt.ylabel('Average Reward')
+    plt.figure(figsize=(20, 10))
+    plt.xlim(0, max(vx))
+    plt.ylim(0, max_reward)
 
-    plt.xticks(x_axis)
-    plt.yticks(y_axis)
+    plt.fill_between(vx, vy - np.std(vy), vy + np.std(vy), color="#FFEDCA")
+    plt.plot(vx, vy, color="#FFAB00")
+
+    plt.xlabel('Simulation Epoch', fontsize=16)
+    plt.ylabel('Average Reward', fontsize=16)
+
+    plt.xticks(x_axis, fontsize=14)
+    plt.yticks(y_axis, fontsize=14)
 
     plt.savefig('./dqn_agent/checkpoints/avg_reward.png')
     plt.close()
 
 
-def plot_at(res, step_size):
+def plot_at(res, x_steps, y_steps, sample_size, max_turn):
     rate = res['avg_turns']
     x, y = [], []
     for k, v in rate.items():
         x += [int(k) + 1]
         y += [v]
-    sx, sy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
-    sx = list(sx)
-    x_axis = range(0, max(sx) + 1, step_size)
-    y_axis = np.arange(0, math.ceil(max(sy)), 0.25)
 
-    plt.plot(sx, sy)
+    vx, vy = zip(*sorted(zip(x, y), key=lambda x: int(x[0])))
+    vx = np.array(vx[:sample_size])
+    vy = np.array(vy[:sample_size])
+    x_axis = np.arange(0, max(vx) + 1, sample_size / x_steps)
+    y_axis = np.arange(0, max_turn + (max_turn / y_steps), max_turn / y_steps)
 
-    plt.xlabel('Simulation Epoch')
-    plt.ylabel('Average Turns')
+    plt.figure(figsize=(20, 10))
+    plt.xlim(0, max(vx))
+    plt.ylim(0, max_turn)
 
-    plt.xticks(x_axis)
-    plt.yticks(y_axis)
+    plt.fill_between(vx, vy - np.std(vy), vy + np.std(vy), color="#CBE6CB")
+    plt.plot(vx, vy, color="#008300")
+
+    plt.xlabel('Simulation Epoch', fontsize=16)
+    plt.ylabel('Average Turns', fontsize=16)
+
+    plt.xticks(x_axis, fontsize=14)
+    plt.yticks(y_axis, fontsize=14)
 
     plt.savefig('./dqn_agent/checkpoints/avg_turns.png')
     plt.close()
