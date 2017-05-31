@@ -1,7 +1,7 @@
 """
-Created on May 17, 2016
+Created on May 17, 2017
 
-@author: xiul, t-zalipt
+@author: Haley
 """
 
 import json
@@ -38,6 +38,7 @@ class DialogManager:
         self.reward = 0
         self.episode_over = False
 
+
     def initialize_episode(self):
         """ Refresh state for new dialog """
 
@@ -63,9 +64,8 @@ class DialogManager:
 
     def next_turn(self, record_training_data=True):
         """ This function initiates each subsequent exchange between agent and user (agent first) """
-
         ########################################################################
-        #   CALL AGENT TO TAKE ITS TURN
+        #   Call agent to take its turn
         ########################################################################
         self.state = self.state_tracker.get_state_for_agent()
         # print("Dialog Manager - next_turn -> self.state:\n\t", self.state, '\n')
@@ -79,9 +79,8 @@ class DialogManager:
 
         # self.agent.add_nl_to_action(self.state_tracker.history_dictionaries[-1],
         #                             self.state_tracker.history_dictionaries[-2])
-        self.agent.add_nl_to_action(
-            self.agent_action, self.state_tracker.history_dictionaries[-2])  # add NL to Agent
-        # Dia_Act
+        self.agent.add_nl_to_action(self.agent_action, self.state_tracker.history_dictionaries[-2])  # add NL to Agent
+
         self.print_function(agent_action=self.agent_action['act_slot_response'])
 
         ########################################################################
@@ -90,8 +89,7 @@ class DialogManager:
         self.sys_action = self.state_tracker.dialog_history_dictionaries()[-1]
         self.user_action, self.episode_over, dialog_status = self.user.next(self.sys_action)
         # print("Dialog Manager - next_turn -> user_action:\n\t", self.user_action, '\n')
-        # print("Dialog Manager - next_turn -> dialog_status:\n\t",
-        #       dialog_status, '\n')
+        # print("Dialog Manager - next_turn -> dialog_status:\n\t", dialog_status, '\n')
         self.reward = self.reward_function(dialog_status)
 
         ########################################################################
@@ -114,10 +112,8 @@ class DialogManager:
     def reward_function(self, dialog_status):
         """ Reward Function 1: a reward function based on the dialog_status """
         if dialog_status == dialog_config.FAILED_DIALOG:
-            # reward = -500
             reward = -self.user.max_turn * 3 / 100 # 10 (origin)
         elif dialog_status == dialog_config.SUCCESS_DIALOG:
-            # reward = 1000
             reward = 5 * self.user.max_turn / 100 # 20 (origin)
         elif dialog_status == dialog_config.PENALTY_DIALOG:
             reward = -50 / 100
