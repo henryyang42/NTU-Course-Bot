@@ -64,7 +64,6 @@ class AgentDQN():
                                self.max_turn
         # print("Agent-DQN - __init__ -> state_dimension:\n\t", self.state_dimension, '\n')
         self.dqn = DQN(self.state_dimension, self.hidden_size, self.num_actions)
-
         self.cur_bellman_err = 0
         self.model = build_model(self.state_dimension, params['model_params'])
 
