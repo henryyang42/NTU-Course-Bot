@@ -10,6 +10,9 @@ test-1.txt
 agt_9_performance_records.json
 plot.py
 
+# Checkpoints folder for RL-Model
+dqn_agent/checkpoints/
+
 # Static files
 static
 html
