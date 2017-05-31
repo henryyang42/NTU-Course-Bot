@@ -63,13 +63,10 @@ class AgentDQN():
                                3 + \
                                self.max_turn
         # print("Agent-DQN - __init__ -> state_dimension:\n\t", self.state_dimension, '\n')
-        self.dqn = DQN(self.state_dimension,
-                       self.hidden_size, self.num_actions)
-        self.clone_dqn = copy.deepcopy(self.dqn)
+        self.dqn = DQN(self.state_dimension, self.hidden_size, self.num_actions)
 
         self.cur_bellman_err = 0
-
-        self.model = None
+        self.model = build_model(self.state_dimension, params['model_params'])
 
         # Prediction Mode: load trained DQN model (in our case, default = False)
         if params['trained_model_path'] != None:
@@ -83,13 +80,11 @@ class AgentDQN():
         """ Initialize a new episode.
             This function is called every time a new episode is run.
         """
-        # self.request_slot_name = 'title'
         self.current_slot_id = 0
         self.phase = 0
         self.request_set = ['required_elective', 'sel_method', 'designated_for',
                             'schedule_str', 'classroom', 'instructor',
                             'title', 'serial_no']
-        # self.request_set = {'title': 0, 'instructor': 0, 'schedule_str': 0}
 
     def state_to_action(self, state):
         """ DQN: Input state, output action """
@@ -211,7 +206,6 @@ class AgentDQN():
 
     def run_policy(self, representation, state=None):
         """ epsilon-greedy policy """
-
         if random.random() < self.epsilon:
             return random.randint(0, self.num_actions - 1)
         else:
@@ -220,12 +214,8 @@ class AgentDQN():
                     self.warm_start = 2
                 return self.rule_policy(state)
             else:
-                if self.model == None:  # Build Keras DQN Model at first time
-                    self.model = build_model(self.experience_replay_pool[0]) # pick a batch to initialize model
-                # print("Agent-DQN - run_policy -> type(representation), shape(representation):\n\t",
-                #       type(self.representation), np.shape(representation), '\n')
                 return self.dqn.keras_predict(representation, self.model)
-                # return self.dqn.predict(representation, {}, predict_model=True)
+
 
     def rule_policy(self, state=None):
         """ Rule Policy """
@@ -382,17 +372,12 @@ class AgentDQN():
 
         if self.predict_mode == False:  # Training Mode
             if self.warm_start == 1:
-                # if len(self.experience_replay_pool) < self.experience_replay_pool_size:
                 self.experience_replay_pool.append(training_example)
         else:  # Prediction Mode
-            # if len(self.experience_replay_pool) < self.experience_replay_pool_size:
             self.experience_replay_pool.append(training_example)
 
     def train(self, batch_size=1, num_batches=100):
         """ Train DQN with experience replay """
-        # if self.model == None:  # Build Keras DQN Model at first time
-        #     self.model = build_model(self.experience_replay_pool[0]) # pick a batch to initialize model
-
         for iter_batch in range(num_batches):
             self.cur_bellman_err = 0
             for iter in range(len(self.experience_replay_pool) // (batch_size)):
@@ -409,7 +394,7 @@ class AgentDQN():
                 self.cur_bellman_err += self.dqn.keras_train(batches, self.model)
                 # print("Agent-DQN - train -> loss:\n\t", loss, '\n')
 
-            print("Current Bellman Error %.4f, Experience-Replay Pool %s" %
+            print("Current Bellman Error: %.4f, Experience-Replay Pool Size: %s" %
                   (float(self.cur_bellman_err) / len(self.experience_replay_pool), len(self.experience_replay_pool)))
 
     ######################################################################
