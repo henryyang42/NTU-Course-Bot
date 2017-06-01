@@ -58,6 +58,8 @@ class AgentDQN():
         self.warm_start = params.get('warm_start', 0)
 
         self.max_turn = params['max_turn'] + 4
+
+        # act_cardinality: 17 * 2 + 7 * 9 + 3 + 1 = 34 + 63 + 3 + 20 + 4 = 120
         self.state_dimension = 2 * self.act_cardinality + \
                                7 * self.slot_cardinality + \
                                3 + \
@@ -95,6 +97,7 @@ class AgentDQN():
         # print("DQN-Agent - state_to_action -> act_slot_response:\n\t", act_slot_response, '\n')
 
         return {'act_slot_response': act_slot_response, 'act_slot_value_response': None}
+
 
     def prepare_state_representation(self, state):
         """ Create the representation for each state """
