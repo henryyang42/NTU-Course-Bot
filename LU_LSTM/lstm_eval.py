@@ -89,6 +89,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("test_dataset", help="segmented test dataset, with intent & label")
 ap.add_argument("model", type=str, help="Keras model to load")
 ap.add_argument("vocab", type=str, help="idx2word table for word, slot, intent (in JSON format)")
+ap.add_argument("-l", "--log", type=str, help="write prediction result to log file")
 args = ap.parse_args()
 
 # load vocab
@@ -138,6 +139,8 @@ with codecs.open(args.test_dataset, "r", "utf-8") as f_test:
 pred_label_vec_list, pred_intent_vec_list = model.predict(np.array(seq_list))
 
 # convert result
+if args.log is not None:
+    f_log = open(args.log, "w")
 pred_intent_list = []
 pred_labels_list = []
 for i in range(0, n_data):
@@ -155,12 +158,15 @@ for i in range(0, n_data):
 
     pred_labels_list.append(pred_labels)
 
-    # show error
-    if pred_intent != true_intent_list[i]:
-        print (" ".join(tokens_list[i]))
-        print ("Pred:", pred_intent, pred_labels)
-        print ("True:", true_intent_list[i], true_labels_list[i])
-    
+    # write log
+    if args.log is not None:
+        print (" ".join(tokens_list[i]), file=f_log)
+        print ("Pred:", pred_intent, pred_labels, file=f_log)
+        print ("True:", true_intent_list[i], true_labels_list[i], file=f_log)
+
+if args.log is not None:
+    f_log.close()
+   
 
 intent_stat = eval_intent(true_intent_list, pred_intent_list)
 print ("[intent] Accuracy:", intent_stat["accuracy"])

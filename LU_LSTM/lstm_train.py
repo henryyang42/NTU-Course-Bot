@@ -46,6 +46,7 @@ ap.add_argument("-bal", "--balanced", action="store_true", help="balance class w
 
 ap.add_argument("-we", "--word-emb", type=str, default=None, help="CWE word embedding")
 ap.add_argument("-ce", "--char-emb", type=str, default=None, help="CWE character embedding")
+ap.add_argument("-s", "--static-emb", action="store_true", help="do not train the embedding layer")
 
 args = ap.parse_args()
 
@@ -211,7 +212,10 @@ if args.word_emb is not None:
     init_emb_W = [init_emb_W]
 
 ################################
-embedding = Embedding(len(idx2word), args.emb_size, input_length=max_seq_len, weights=init_emb_W, trainable=True)(seq_input)
+is_trainable = True
+if args.static_emb:
+    is_trainable = False
+embedding = Embedding(len(idx2word), args.emb_size, input_length=max_seq_len, weights=init_emb_W, trainable=is_trainable)(seq_input)
 embedding = Dropout(args.dropout)(embedding)
 
 # [LSTM for slot]
