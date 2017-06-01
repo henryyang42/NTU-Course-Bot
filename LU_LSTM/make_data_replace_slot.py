@@ -43,14 +43,17 @@ with codecs.open(args.dataset, "r", "utf-8") as f_in:
                 t = tokens[j]
                 if "B" in labels[j]:
                     slot = labels[j][2:]
+                    if slot in course: # "when" is not a field of course
+                        t = course[slot]
                     if slot == "title":
-                        t = course["title"]
                         if " " in t:
                             t = t.split(" ")[0]
                     elif slot == "instructor":
-                        t = course["instructor"]
                         if " " in t:
                             t = t.replace(" ", "")
+                    elif slot == "when":
+                        t = random.choice(['星期', '禮拜', '週']) + course['schedule_str'][0]
+
 
                 new_tokens.append(t)
                 new_labels.append(labels[j])
