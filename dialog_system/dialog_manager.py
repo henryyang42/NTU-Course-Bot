@@ -79,17 +79,15 @@ class DialogManager:
 
         # self.agent.add_nl_to_action(self.state_tracker.history_dictionaries[-1],
         #                             self.state_tracker.history_dictionaries[-2])
-        self.agent.add_nl_to_action(self.agent_action, self.state_tracker.history_dictionaries[-2])  # add NL to Agent
-
-        self.print_function(agent_action=self.agent_action['act_slot_response'])
-
+        self.agent.add_nl_to_action(
+            self.agent_action, self.state_tracker.history_dictionaries[-2], self.state)  # add NL to Agent
+        print("User:\t", self.state_tracker.history_dictionaries[-2]['nl'])
+        print("Agent:\t", self.agent_action['act_slot_response']['nl'])
         ########################################################################
         #   CALL USER TO TAKE HIS OR HER TURN
         ########################################################################
         self.sys_action = self.state_tracker.dialog_history_dictionaries()[-1]
         self.user_action, self.episode_over, dialog_status = self.user.next(self.sys_action)
-        # print("Dialog Manager - next_turn -> user_action:\n\t", self.user_action, '\n')
-        # print("Dialog Manager - next_turn -> dialog_status:\n\t", dialog_status, '\n')
         self.reward = self.reward_function(dialog_status)
 
         ########################################################################
@@ -97,7 +95,6 @@ class DialogManager:
         ########################################################################
         if self.episode_over != True:
             self.state_tracker.update(user_action=self.user_action)
-            self.print_function(user_action=self.user_action)
 
         ########################################################################
         #  Inform agent of the outcome for this timestep (s_t, a_t, r, s_{t+1}, episode_over)
@@ -105,7 +102,6 @@ class DialogManager:
         if record_training_data:
             self.agent.register_experience_replay_tuple(self.state, self.agent_action, self.reward, self.state_tracker.get_state_for_agent(), self.episode_over)
 
-        # print("Dialog Manager - next_turn -> current_slots:\n\t", self.state_tracker.current_slots, '\n')
         return (self.episode_over, self.reward)
 
 

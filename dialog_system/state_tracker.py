@@ -9,6 +9,7 @@ state tracker
 from . import KBHelper
 import numpy as np
 import copy
+import re
 import os
 import sys
 sys.path.append(os.getcwd())
@@ -82,53 +83,23 @@ class StateTracker:
         return self.history_dictionaries
 
 
-    def kb_results_for_state(self):
-        """ Return the information about the database results based on the currently informed slots """
-        ########################################################################
-        # TODO Calculate results based on current informed slots
-        ########################################################################
-        kb_results = self.kb_helper.database_results_for_agent(self.current_slots) # replace this with something less ridiculous
-        # TODO turn results into vector (from dictionary)
-        results = np.zeros((0, self.kb_result_dimension))
-        return results
-
-
     def get_state_for_agent(self):
         """ Get the state representatons to send to agent """
-        # state = {'user_action': self.history_dictionaries[-1], 'current_slots': self.current_slots, 'kb_results': self.kb_results_for_state()}
-        # print("State-Tracker - get_state_for_agent -> current_slots:")
-        # for k, v in self.current_slots.items():
-        #     print('\t', "\"%s\":" % k, v)
-        # print()
-
         state = {'user_action': self.history_dictionaries[-1],
                  'current_slots': self.current_slots,
-                 # 'kb_results': self.kb_results_for_state(),
-                 'kb_results_dict': self.kb_helper.database_results_for_agent(self.current_slots),
-                 'turn': self.turn_count, 'history': self.history_dictionaries,
+                 'turn': self.turn_count,
                  'agent_action': self.history_dictionaries[-2] if \
                   len(self.history_dictionaries) > 1 else None}
-
-        # print("State-Tracker - get_state_for_agent -> state:")
-        # for k, v in state.items():
-        #     print('\t', "\"%s\":" % k, v)
-        # print()
-
         return copy.deepcopy(state)
+
 
     def get_suggest_slots_values(self, request_slots):
         """ Get the suggested values for request slots """
-
         suggest_slot_vals = {}
         if len(request_slots) > 0:
             suggest_slot_vals = self.kb_helper.suggest_slot_values(request_slots, self.current_slots)
 
         return suggest_slot_vals
-
-    def get_current_kb_results(self):
-        """ get the kb_results for current state """
-        kb_results = self.kb_helper.available_results_from_kb(self.current_slots)
-        return kb_results
 
 
     def update(self, agent_action=None, user_action=None):
@@ -145,72 +116,86 @@ class StateTracker:
         ########################################################################
         if agent_action:
             sys_action = get_action_from_frame(self.current_slots)
+            inform_slots = sys_action.get('inform_slots', {})
+            request_slots = sys_action.get('request_slots', {})
+            choice_slots = sys_action.get('choice', [])
+
             ####################################################################
             #   Handles the act_slot response (with values needing to be filled)
             ####################################################################
             if agent_action['act_slot_response']:
                 response = copy.deepcopy(agent_action['act_slot_response'])
 
-                if sys_action['diaact'] == 'multiple_choice':
-                    choice_slots = sys_action['choice']
-                    # choice_slots = self.kb_helper.fill_choice_slots(self.history_dictionaries[-1], self.current_slots)
-
-                    # print("State-Tracker - update -> choice_slots\n\t", choice_slots, '\n')
+                if response['diaact'] == 'multiple_choice':
                     agent_action_values = {
-                        'turn': self.turn_count,
-                        'speaker': "agent",
                         'diaact': 'multiple_choice',
-                        # 'diaact': response['diaact'],
                         'choice': choice_slots,
                         'inform_slots': {},
-                        'request_slots': response['request_slots']}
-
+                        'request_slots': {},
+                        'turn': self.turn_count,
+                        'speaker': "agent"}
                     agent_action['act_slot_response'].update({
                         'diaact': 'multiple_choice',
-                        # 'diaact': response['diaact'],
                         'choice': choice_slots,
                         'inform_slots': {},
-                        'request_slots': response['request_slots'],
+                        'request_slots': {},
                         'turn': self.turn_count})
-
-                elif sys_action['diaact'] == 'inform':
-                    inform_slots = sys_action['inform_slots']
-                    # inform_slots = self.kb_helper.fill_inform_slots(response['inform_slots'], self.current_slots)
-                    # print("State-Tracker - update -> inform_slots\n\t", inform_slots, '\n')
-
+                elif response['diaact'] == 'inform':
                     agent_action_values = {
-                        'turn': self.turn_count,
-                        'speaker': "agent",
                         'diaact': 'inform',
-                        # 'diaact': response['diaact'],
+                        'choice': [],
                         'inform_slots': inform_slots,
-                        'request_slots': response['request_slots']}
-
+                        'request_slots': {},
+                        'turn': self.turn_count,
+                        'speaker': "agent"}
                     agent_action['act_slot_response'].update({
                         'diaact': 'inform',
-                        # 'diaact': response['diaact'],
+                        'choice': [],
                         'inform_slots': inform_slots,
-                        'request_slots': response['request_slots'],
+                        'request_slots': {},
+                        'turn': self.turn_count})
+                elif re.compile(r'request').search(response['diaact']):
+                    agent_action_values = {
+                        'diaact': 'request',
+                        'choice': [],
+                        'inform_slots': {},
+                        'request_slots': request_slots,
+                        'turn': self.turn_count,
+                        'speaker': "agent"}
+                    agent_action['act_slot_response'].update({
+                        'diaact': 'request',
+                        'choice': [],
+                        'inform_slots': {},
+                        'request_slots': request_slots,
+                        'turn': self.turn_count})
+                elif response['diaact'] == 'confirm':
+                    agent_action_values = {
+                        'diaact': 'confirm',
+                        'choice': [],
+                        'inform_slots': inform_slots,
+                        'request_slots': {},
+                        'turn': self.turn_count,
+                        'speaker': "agent"}
+                    agent_action['act_slot_response'].update({
+                        'diaact': 'confirm',
+                        'choice': [],
+                        'inform_slots': inform_slots,
+                        'request_slots': {},
                         'turn': self.turn_count})
                 else:
-                    inform_slots = sys_action['inform_slots']
                     agent_action_values = {
+                        'diaact': sys_action['diaact'],
+                        'choice': choice_slots,
+                        'inform_slots': inform_slots,
+                        'request_slots': request_slots,
                         'turn': self.turn_count,
-                        'speaker': "agent",
-                        'diaact': response['diaact'],
-                        'inform_slots': inform_slots,
-                        'request_slots': response['request_slots']}
-
+                        'speaker': "agent"}
                     agent_action['act_slot_response'].update({
-                        'diaact': response['diaact'],
+                        'diaact': sys_action['diaact'],
+                        'choice': choice_slots,
                         'inform_slots': inform_slots,
-                        'request_slots': response['request_slots'],
+                        'request_slots': request_slots,
                         'turn': self.turn_count})
-            elif agent_action['act_slot_value_response']:
-                agent_action_values = copy.deepcopy(agent_action['act_slot_value_response'])
-                # print("Updating state based on act_slot_value action from agent")
-                agent_action_values['turn'] = self.turn_count
-                agent_action_values['speaker'] = "agent"
 
             ####################################################################
             #   This code should execute regardless of which kind of agent produced action
@@ -233,19 +218,16 @@ class StateTracker:
         #   Update the state to reflect a new action by the user
         ########################################################################
         elif user_action:
-            # print("State-Tracker - update -> user_action:\n\t", user_action, '\n')
             ####################################################################
             #   Update the current slots
             ####################################################################
             for slot in user_action['inform_slots'].keys():
-                # dict_slot = 'schedule_str' if slot == 'when' else slot
                 dict_slot = slot
                 self.current_slots['inform_slots'][dict_slot] = user_action['inform_slots'][slot]
                 if dict_slot in self.current_slots['request_slots'].keys():
                     del self.current_slots['request_slots'][dict_slot]
 
             for slot in user_action['request_slots'].keys():
-                # dict_slot = 'schedule_str' if slot == 'when' else slot
                 dict_slot = slot
                 if dict_slot not in self.current_slots['request_slots']:
                     self.current_slots['request_slots'][dict_slot] = "UNK"

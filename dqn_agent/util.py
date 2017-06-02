@@ -88,11 +88,11 @@ def plot_ar(res, x_steps, y_steps, sample_size, max_reward):
     vx = np.array(vx[:sample_size])
     vy = np.array(vy[:sample_size])
     x_axis = np.arange(0, max(vx) + 1, sample_size / x_steps)
-    y_axis = np.arange(0, max_reward + (max_reward / y_steps), max_reward / y_steps)
+    y_axis = np.arange(-max_reward, max_reward + (max_reward / y_steps), 2 * max_reward / y_steps)
 
     plt.figure(figsize=(20, 10))
     plt.xlim(0, max(vx))
-    plt.ylim(0, max_reward)
+    plt.ylim(-max_reward, max_reward)
 
     plt.fill_between(vx, vy - np.std(vy), vy + np.std(vy), color="#FFEDCA")
     plt.plot(vx, vy, color="#FFAB00")

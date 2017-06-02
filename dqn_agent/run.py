@@ -53,7 +53,7 @@ if __name__ == "__main__":
     parser.add_argument('--usr', dest='usr',
                         default=0, type=int, help='Select a user simulator. 0 is a Frozen user simulator.')
     parser.add_argument('--epsilon', dest='epsilon',
-                        default=0, type=float, help='Epsilon to determine stochasticity of epsilon-greedy agent policies')
+                        default=0.1, type=float, help='Epsilon to determine stochasticity of epsilon-greedy agent policies')
     parser.add_argument('--act_level', dest='act_level',
                         default=1,  type=int, help='0 for dia_act level; 1 for NL level')
     parser.add_argument('--run_mode', dest='run_mode',
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     # RL-Agent Parameters
     parser.add_argument('--experience_replay_pool_size', dest='experience_replay_pool_size',
-                        default=200, type=int, help='the size for experience replay')
+                        default=500, type=int, help='the size for experience replay')
     parser.add_argument('--batch_size', dest='batch_size',
                         default=20, type=int, help='batch size')
     parser.add_argument('--gamma', dest='gamma',
@@ -79,11 +79,11 @@ if __name__ == "__main__":
     parser.add_argument('--predict_mode', dest='predict_mode',
                         default=False, type=bool, help='predict model for DQN')
     parser.add_argument('--simulation_epoch_size', dest='simulation_epoch_size',
-                        default=100, type=int, help='the size of validation set')
+                        default=50, type=int, help='the size of validation set')
     parser.add_argument('--warm_start', dest='warm_start',
                         default=1, type=int, help='0: no warm start; 1: warm start for training')
     parser.add_argument('--warm_start_epochs', dest='warm_start_epochs',
-                        default=1, type=int, help='the number of epochs for warm start')
+                        default=50, type=int, help='the number of epochs for warm start')
     parser.add_argument('--trained_model_path', dest='trained_model_path',
                         default=None, type=str, help='the path for trained model')
     parser.add_argument('-o', '--write_model_dir', dest='write_model_dir',
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument('--save_check_point', dest='save_check_point',
                         default=10, type=int, help='number of epochs for saving model')
     parser.add_argument('--success_rate_threshold', dest='success_rate_threshold',
-                        default=0.9, type=float, help='the threshold for success rate')
+                        default=0.5, type=float, help='the threshold for success rate')
     # parser.add_argument('--split_fold', dest='split_fold',
                         #   default=5, type=int, help='the number of folders to split the user goal')
     parser.add_argument('--learning_phase', dest='learning_phase',
@@ -310,6 +310,7 @@ def warm_start_simulation(warm_start_epochs):
 
     res = {}
     for episode in range(warm_start_epochs):
+        print("================Episode %3d Start================" % episode)
         dialog_manager.initialize_episode()
         episode_over = False
         per_episode_reward = 0
@@ -320,15 +321,17 @@ def warm_start_simulation(warm_start_epochs):
             if episode_over:
                 if reward > 0:
                     successes += 1
-                    print("Warm Start Simulation Episode %s: Success (Reward: %s)"/
-                          % (episode, per_episode_reward))
+                    print("Warm Start Simulation Episode %3d: Success\t(Reward: %+.5f, #Turns: %2d)"
+                          % (episode, per_episode_reward, dialog_manager.state_tracker.turn_count))
                 else:
-                    print("Warm Start Simulation Episode %s: Fail (Reward: %s)" /
-                          % (episode, per_episode_reward))
+                    print("Warm Start Simulation Episode %3d: Fail\t\t(Reward: %+.5f, #Turns: %2d)"
+                          % (episode, per_episode_reward, dialog_manager.state_tracker.turn_count))
                 cumulative_turns += dialog_manager.state_tracker.turn_count
 
         if len(agent.experience_replay_pool) >= agent.experience_replay_pool_size:
             break
+
+        print("================Episode %3d Over!================\n" % episode)
 
     agent.warm_start = 2  # just a counter to avoid executing warm simulation twice
     res['success_rate'] = float(successes) / warm_start_epochs
@@ -351,6 +354,7 @@ def simulation_epoch(simulation_epoch_size):
 
     res = {}
     for episode in range(simulation_epoch_size):
+        print("================Episode %3d Start================" % episode)
         dialog_manager.initialize_episode()
         episode_over = False
         per_episode_reward = 0
@@ -361,10 +365,14 @@ def simulation_epoch(simulation_epoch_size):
             if episode_over:
                 if reward > 0:
                     successes += 1
-                    print("Simulation Episode %s: Success" % (episode))
+                    print("Simulation Episode %3d: Success\t(Reward: %+.5f, #Turns: %2d)"
+                          % (episode, per_episode_reward, dialog_manager.state_tracker.turn_count))
                 else:
-                    print("Simulation Episode %s: Fail" % (episode))
+                    print("Simulation Episode %3d: Fail\t(Reward: %+.5f, #Turns: %2d)"
+                          % (episode, per_episode_reward, dialog_manager.state_tracker.turn_count))
                 cumulative_turns += dialog_manager.state_tracker.turn_count
+
+        print("================Episode %3d Over!================\n" % episode)
 
     res['success_rate'] = float(successes) / simulation_epoch_size
     res['avg_reward'] = float(cumulative_reward) / simulation_epoch_size
@@ -462,4 +470,4 @@ def run_episodes(count, status):
     save_performance_records(params['write_model_dir'], agt, performance_records)
 
 
-run_episodes(1000, status)
+run_episodes(500, status)

@@ -8,7 +8,8 @@ from LU_LSTM.lstm_predict import *
 from django.conf import settings
 from utils.query import *
 from utils.misc import *
-
+from dqn_agent.agent_dqn import *
+from dqn_agent.dialog_config import *
 
 def DST_update(old_state, sem_frame):
     state = old_state.copy()
@@ -79,7 +80,7 @@ def multi_turn_lu_setup():
 
 def set_status(user_id, status=None):
     if not status:  # Generate an id for new status.
-        status = {'request_slots': {}, 'inform_slots': {}, 'group_id': id_generator()}
+        status = {'current_slots': {}, 'request_slots': {}, 'inform_slots': {}, 'group_id': id_generator(), 'user_action': None, 'agent_action': None, 'turn': 0}
     DialogueLogGroup.objects.update_or_create(
         user_id=user_id, group_id=status['group_id'],
         defaults={'status': json.dumps(status, ensure_ascii=False)}
@@ -137,6 +138,97 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         set_status(user_id, status)
     return d, status, action, agent2nl(action)
 
+
+def multi_turn_rl(user_id, sentence, reset=False):
+    single_turn_lu_setup_new()
+    all_courses = list(query_course({}).values())
+    np.random.shuffle(all_courses)
+    course_dict = {k: v for k, v in enumerate(all_courses)}
+    act_set = text_to_dict('%s/dqn_agent/dia_acts.txt' % settings.BASE_DIR)
+    slot_set = text_to_dict('%s/dqn_agent/slot_set.txt' % settings.BASE_DIR)
+    agent_params = {}
+    agent_params['max_turn'] = 20
+    agent_params['epsilon'] = 0.1
+    agent_params['agent_run_mode'] = 3
+    agent_params['agent_act_level'] = 1
+    agent_params['experience_replay_pool_size'] = 200
+    agent_params['batch_size'] = 20
+    agent_params['gamma'] = 0.9
+    agent_params['predict_mode'] = True
+    agent_params['trained_model_path'] = '%s/dqn_agent/rl-model.h5' % settings.BASE_DIR
+    agent_params['warm_start'] = 2
+    agent_params['cmd_input_mode'] = None
+    agent_params['model_params'] = {}
+    agent = AgentDQN(course_dict, act_set, slot_set, agent_params)
+
+    if reset:
+        set_status(user_id)
+        return
+
+    status = get_status(user_id)
+    semantic_frame = single_turn_lu_new(sentence)
+
+    semantic_frame['diaact'] = semantic_frame['intent']
+    semantic_frame['inform_slots'] = semantic_frame['slot']
+
+    status = DST_update(status, semantic_frame)
+    status['turn'] += 1 # turn added by user action
+
+    semantic_frame['request_slots'] = status['request_slots']
+
+
+
+    status['current_slots'] = {}
+    status['current_slots']['inform_slots'] = status['inform_slots']
+    status['current_slots']['request_slots'] = status['request_slots']
+    status['user_action'] = semantic_frame
+
+    print("lu - Semantic_frame:\n\t", semantic_frame, '\n')
+    print("lu - Status:\n\t", status, '\n')
+
+    # Retrieve reviews
+    if semantic_frame['intent'] == 'request_review':
+        review_constraints = {}
+        for slot in ['title', 'instructor']:
+            if slot in status['inform_slots']:
+                review_constraints[slot] = status['inform_slots'][slot]
+        reviews = query_review(review_constraints).order_by('-id')[:20]
+        review_resp = []
+        if reviews.count() == 0:
+            review_resp.append('並未搜尋到相關評價QQ')
+        else:
+            review_resp.append('幫您搜尋到%d筆相關評價：<br>' % reviews.count())
+            for review in reviews:
+                review_resp.append(
+                    '<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
+        return semantic_frame, status, {}, '\n'.join(review_resp)
+    if semantic_frame['intent'] == 'thanks':  # Reset dialogue state
+        action = {'diaact': 'thanks'}
+    else:
+        act_slot_response = agent.feasible_actions[np.argmax(agent.model.predict(
+            agent.prepare_state_representation(status)))]
+        print("lu - act_slot_response:\n\t", act_slot_response, '\n')
+        action = AgentDQN.refine_action(act_slot_response, status)
+        print("lu - action:\n\t", action, '\n')
+
+
+    status['agent_action'] = action
+
+    # add system retrived information to dialogue state (as if user informed these slots)
+    #FIXME
+    '''
+    if action['diaact'] == 'inform':
+        for slot in ['title', 'instructor']:
+            if slot not in status['inform_slots']:
+                status['inform_slots'][slot] = action['inform_slots'][slot]
+    '''
+
+    status['turn'] += 1 # turn added by agent action
+    if action['diaact'] in ['closing', 'thanks']:
+        set_status(user_id)
+    else:
+        set_status(user_id, status)
+    return semantic_frame, status, action, agent2nl(action)
 
 @run_once
 def single_turn_lu_setup():
