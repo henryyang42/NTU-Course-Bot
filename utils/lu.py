@@ -12,6 +12,7 @@ from dqn.agent_dqn import *
 from dqn.dialog_config import *
 from datetime import datetime
 
+
 def DST_update(old_state, sem_frame):
     state = old_state.copy()
 
@@ -174,11 +175,9 @@ def multi_turn_rl(user_id, sentence, reset=False):
     semantic_frame['inform_slots'] = semantic_frame['slot']
 
     status = DST_update(status, semantic_frame)
-    status['turn'] += 1 # turn added by user action
+    status['turn'] += 1  # turn added by user action
 
     semantic_frame['request_slots'] = status['request_slots']
-
-
 
     status['current_slots'] = {}
     status['current_slots']['inform_slots'] = status['inform_slots']
@@ -213,11 +212,10 @@ def multi_turn_rl(user_id, sentence, reset=False):
         action = AgentDQN.refine_action(act_slot_response, status)
         print("lu - action:\n\t", action, '\n')
 
-
     status['agent_action'] = action
 
     # add system retrived information to dialogue state (as if user informed these slots)
-    #FIXME
+    # FIXME
     '''
     if action['diaact'] == 'inform':
         for slot in ['title', 'instructor']:
@@ -225,12 +223,13 @@ def multi_turn_rl(user_id, sentence, reset=False):
                 status['inform_slots'][slot] = action['inform_slots'][slot]
     '''
 
-    status['turn'] += 1 # turn added by agent action
+    status['turn'] += 1  # turn added by agent action
     if action['diaact'] in ['closing', 'thanks']:
         set_status(user_id)
     else:
         set_status(user_id, status)
     return semantic_frame, status, action, agent2nl(action)
+
 
 @run_once
 def single_turn_lu_setup():
@@ -250,7 +249,7 @@ def single_turn_lu_setup():
 
 
 @run_once
-def single_turn_lu_setup_new(): # load new LU models (output new intents)
+def single_turn_lu_setup_new():  # load new LU models (output new intents)
     global lu_model, idx2label, idx2intent, word2idx
 
     # load vocab
@@ -278,7 +277,7 @@ def single_turn_lu(sentence):
     for label, token in zip(labels, tokens):
         if label != 'O':
             d['slot'][label[2:]] = token
-    #FIXME handle multiple B_xx for same slot (rule-based decision?)
+    # FIXME handle multiple B_xx for same slot (rule-based decision?)
     return d
 
 
@@ -298,8 +297,8 @@ def single_turn_lu_new(sentence):
             slot, value = label[2:], token
             if slot not in slot_value_list:
                 slot_value_list[slot] = []
-            slot_value_list[slot].append( value )
-    for slot in slot_value_list: # Comparison rule: (1)longer first (2)left first
+            slot_value_list[slot].append(value)
+    for slot in slot_value_list:  # Comparison rule: (1)longer first (2)left first
         max_n_char = 0
         best_value = None
         for value in slot_value_list[slot]:
