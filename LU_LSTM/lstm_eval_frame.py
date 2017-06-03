@@ -71,6 +71,7 @@ pred_label_vec_list, pred_intent_vec_list = model.predict(np.array(seq_list))
 
 # compare result & answer
 acc = 0.0
+slot_acc = 0.0
 for i in range(0, n_data):
     intent_idx = pred_intent_vec_list[i].argmax()
     pred_intent = idx2intent[intent_idx]
@@ -82,8 +83,12 @@ for i in range(0, n_data):
             pred_labels[j] = 'O'
     assert len(pred_labels) == len(true_labels_list[i])
 
-    if pred_intent == true_intent_list[i] and pred_labels == true_labels_list[i]:
-        acc += 1
+    if pred_labels == true_labels_list[i]:
+        slot_acc += 1
+        if pred_intent == true_intent_list[i]:
+            acc += 1
     
 acc /= n_data
+slot_acc /= n_data
 print ("Frame Accuracy:", acc)
+print ("Frame Accuracy except intent:", slot_acc)

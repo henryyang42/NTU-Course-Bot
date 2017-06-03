@@ -15,6 +15,7 @@ from keras.optimizers import *
 from keras.preprocessing import sequence
 from keras.utils import np_utils
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras import regularizers
 from keras import backend as K
 import gensim
 import json
@@ -24,21 +25,29 @@ from LSTM_util import *
 
 #arguments
 ap = argparse.ArgumentParser()
+
 ap.add_argument("sent_label_file", help="example sentences(questions) with BIO slot labels")
 ap.add_argument("emb_size", type=int, help="embedding size")
 ap.add_argument("out_model", type=str, help="")
 ap.add_argument("out_vocab", type=str, help="word, label, intent vocabulary")
+
 ap.add_argument("-i", "--epoch", type=int, default=10, help="# epochs")
 ap.add_argument("-lr", "--learning-rate", type=float, default=0.001, help="")
 ap.add_argument("-dr", "--dropout", type=float, default=0.2, help="")
 ap.add_argument("-c", "--cost", type=str, default="categorical_crossentropy", help="loss (cost) function")
-ap.add_argument("-l", "--log", type=str, help="output prediction result for analysis")
+
 ap.add_argument("-b", "--bi-direct", action="store_true", help="bidirectional LSTM")
 ap.add_argument("-n", "--attention", action="store_true", help="use attention")
 ap.add_argument("-a", "--activation", default="relu", type=str, help="activation function")
 ap.add_argument("-iw", "--intent-weight", type=float, default=0.8, help="weight of the loss for intent")
+ap.add_argument("-rr", "--recur-reg", type=float, default=None, help="recurrent layer regularizer")
 ap.add_argument("-bn", "--batch-norm", action="store_true", help="use BatchNormalization layer between LSTM")
 ap.add_argument("-bal", "--balanced", action="store_true", help="balance class weights")
+
+ap.add_argument("-we", "--word-emb", type=str, default=None, help="CWE word embedding")
+ap.add_argument("-ce", "--char-emb", type=str, default=None, help="CWE character embedding")
+ap.add_argument("-s", "--static-emb", action="store_true", help="do not train the embedding layer")
+
 args = ap.parse_args()
 
 # prepare data
@@ -56,7 +65,8 @@ max_seq_len = 0
 pat_split = re.compile(r"\s+")
 with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
     lines = f_in.readlines()
-    print ("# data:", len(lines)/3)
+    n_data = len(lines)/3
+    print ("# data:", n_data)
     for i in range(0, len(lines), 3): 
         # verify data
         intent = lines[i].strip()
@@ -96,6 +106,7 @@ with codecs.open(args.sent_label_file, "r", "utf-8") as f_in:
         Y2.append(intent2idx[intent])
 print ("Vocab. size:", len(idx2word))
 print ("== reading data done ==")
+
 # pad sequences
 X = sequence.pad_sequences(X, maxlen=max_seq_len)
 Y = list(sequence.pad_sequences(Y, maxlen=max_seq_len))
@@ -109,18 +120,23 @@ if args.balanced:
             if idx not in slot_cw:
                 slot_cw[idx] = 0
             slot_cw[idx] += 1
+    # weight = N / cnt
+    for idx in slot_cw:
+        slot_cw[idx] = n_data / slot_cw[idx]
     
     intent_cw = {} 
     for idx in Y2:
         if idx not in intent_cw:
             intent_cw[idx] = 0
-        intent_cw[idx] += 1
-#TODO normalize?
-print (slot_cw)
-print (intent_cw)
+        intent_cw[idx] += 1 
+    # weight = N / cnt
+    for idx in intent_cw:
+        intent_cw[idx] = n_data / intent_cw[idx]
+
+    print (slot_cw)
+    print (intent_cw)
 
 # convert BIO labels to one-hot encoding
-#print Y.shape
 for i, y in enumerate(Y):
     Y[i] = np_utils.to_categorical(y, len(idx2label))
 
@@ -129,35 +145,97 @@ print (Y.shape)
 
 Y2 = np_utils.to_categorical(Y2)
 
+##### regularizer #####
+r_reg = None
+if args.recur_reg is not None:
+    r_reg = regularizers.l2(args.recur_reg)
+
 ##### contruct model #####
 
 # [input layer]
 seq_input = Input(shape=(max_seq_len,), dtype='int32')
 
 # [embedding layer]
-init_emb_W = None #TODO pre-trained word embedding?
-embedding = Embedding(len(idx2word), args.emb_size, input_length=max_seq_len, weights=init_emb_W, trainable=True)(seq_input)
+init_emb_W = None 
+## pre-trained word embedding ##
+if args.word_emb is not None:
+    # load word embedding
+    word_emb = gensim.models.KeyedVectors.load_word2vec_format(args.word_emb, binary=False)
+    # load character embedding
+    if args.char_emb is not None:
+        char_emb = {} # char_emb[(char, pos)] = <vec>
+        with codecs.open(args.char_emb, "r", "utf-8") as f_char:
+            #f_char.next()
+            for line in f_char:
+                parts = line.strip().split(" ")
+                if len(parts) < 3:
+                    continue
+                char = parts[0]
+                vec = np.array(list(map(float, parts[2:])))
+                # ref. https://stackoverflow.com/questions/1303347/getting-a-map-to-return-a-list-in-python-3-x
+                pos = parts[1]
+                key = (char, pos)
+                char_emb[key] = vec
+        #print (char_emb)
+
+    init_emb_W = np.random.rand(len(idx2word), args.emb_size)
+    for i in range(0, len(idx2word)):
+        w = idx2word[i]
+        if w in word_emb:
+            init_emb_W[i] = word_emb[w]
+        elif args.char_emb is not None:
+            vec = np.zeros_like(word_emb["</s>"])
+            chars = list(w)
+            keys = []
+            for i, c in enumerate(chars):
+                if i == 0:
+                    p = 's'
+                elif i == len(chars)-1:
+                    p = 'e'
+                else:
+                    p = 'm'
+                keys.append( (c, p) )
+
+            found = False
+            for k in keys:
+                if k in char_emb:
+                    found = True
+                    #print (vec, char_emb[k])
+                    vec += char_emb[k]
+            if found:
+                init_emb_W[i] = vec
+            else:
+                print ("[OOV]", w)
+        else:
+            print ("[OOV]", w)
+    #TODO normalize?
+    init_emb_W = [init_emb_W]
+
+################################
+is_trainable = True
+if args.static_emb:
+    is_trainable = False
+embedding = Embedding(len(idx2word), args.emb_size, input_length=max_seq_len, weights=init_emb_W, trainable=is_trainable)(seq_input)
 embedding = Dropout(args.dropout)(embedding)
 
 # [LSTM for slot]
 if args.bi_direct:
-    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True), name='slot LSTM')(embedding)
+    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True), name='slot LSTM', recurrent_regularizer=r_reg)(embedding)
 else:
-    slot_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True, name='slot LSTM')(embedding)
+    slot_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True, name='slot LSTM', recurrent_regularizer=r_reg)(embedding)
 
 if args.batch_norm:
     slot_lstm_out = BatchNormalization()(slot_lstm_out)
 
 # [LSTM for intent]
 if args.attention:
-    intent_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, name='intent LSTM', return_sequences=True)(slot_lstm_out)
+    intent_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, name='intent LSTM', return_sequences=True, recurrent_regularizer=r_reg)(slot_lstm_out)
     attn = TimeDistributed(Dense(1, activation=args.activation))(intent_lstm_out)
     attn = Flatten()(attn)
     attn = Activation('softmax')(attn)
     attn = RepeatVector(args.emb_size)(attn)
     attn = Permute([2, 1])(attn)
     
-    #intent_lstm_out = merge([intent_lstm_out, attn], mode='mul')
     intent_lstm_out = multiply([intent_lstm_out, attn])
     intent_lstm_out = AveragePooling1D(max_seq_len)(intent_lstm_out)
     intent_lstm_out = Flatten()(intent_lstm_out)

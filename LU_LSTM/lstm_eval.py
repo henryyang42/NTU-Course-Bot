@@ -54,8 +54,8 @@ def eval_slot(true_labels_list, pred_labels_list):
                     TP[slot] += 1
                 else:
                     FN[slot] += 1
-            #elif "B" in pred_labels[j] or "I" in pred_labels[j]:
-            elif "B" in pred_labels[j]:
+            #if "B" in pred_labels[j] or "I" in pred_labels[j]:
+            if "B" in pred_labels[j]:
                 slot = pred_labels[j][2:]
                 if slot not in TP:
                     TP[slot] = 0.0
@@ -67,11 +67,17 @@ def eval_slot(true_labels_list, pred_labels_list):
     stat["recall"] = {}
     stat["F1"] = {}
     for slot in TP:
-        if TP[slot] + FP[slot] == 0 or TP[slot] + FN[slot] == 0:
-            continue
-        slot_P = TP[slot] / (TP[slot] + FP[slot])
-        slot_R = TP[slot] / (TP[slot] + FN[slot])
-        slot_F1 = 2 * slot_P * slot_R / (slot_P + slot_R)
+        slot_P = slot_R = slot_F1 = 0
+
+        if TP[slot] + FP[slot] > 0 :
+            slot_P = TP[slot] / (TP[slot] + FP[slot])
+
+        if TP[slot] + FN[slot] > 0:
+            slot_R = TP[slot] / (TP[slot] + FN[slot])
+
+        if slot_P + slot_R > 0:
+            slot_F1 = 2 * slot_P * slot_R / (slot_P + slot_R)
+
         stat["precision"][slot] = slot_P
         stat["recall"][slot] = slot_R
         stat["F1"][slot] = slot_F1
@@ -83,6 +89,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("test_dataset", help="segmented test dataset, with intent & label")
 ap.add_argument("model", type=str, help="Keras model to load")
 ap.add_argument("vocab", type=str, help="idx2word table for word, slot, intent (in JSON format)")
+ap.add_argument("-l", "--log", type=str, help="write prediction result to log file")
 args = ap.parse_args()
 
 # load vocab
@@ -132,6 +139,8 @@ with codecs.open(args.test_dataset, "r", "utf-8") as f_test:
 pred_label_vec_list, pred_intent_vec_list = model.predict(np.array(seq_list))
 
 # convert result
+if args.log is not None:
+    f_log = open(args.log, "w")
 pred_intent_list = []
 pred_labels_list = []
 for i in range(0, n_data):
@@ -149,19 +158,22 @@ for i in range(0, n_data):
 
     pred_labels_list.append(pred_labels)
 
-    # show error
-    if pred_intent != true_intent_list[i]:
-        print (" ".join(tokens_list[i]))
-        print ("Pred:", pred_intent, pred_labels)
-        print ("True:", true_intent_list[i], true_labels_list[i])
-    
+    # write log
+    if args.log is not None:
+        print (" ".join(tokens_list[i]), file=f_log)
+        print ("Pred:", pred_intent, pred_labels, file=f_log)
+        print ("True:", true_intent_list[i], true_labels_list[i], file=f_log)
+
+if args.log is not None:
+    f_log.close()
+   
 
 intent_stat = eval_intent(true_intent_list, pred_intent_list)
 print ("[intent] Accuracy:", intent_stat["accuracy"])
 
 slot_stat = eval_slot(true_labels_list, pred_labels_list)
 #print (slot_stat)
-for slot in slot_stat["precision"]:
+for slot in slot_stat["recall"]:
     print ("[slot - %s] Precision:" % slot, slot_stat["precision"][slot])
     print ("[slot - %s] Recall:" % slot, slot_stat["recall"][slot])
     print ("[slot - %s] F1:" % slot, slot_stat["F1"][slot])
