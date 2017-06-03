@@ -1,0 +1,9 @@
+serial_no
+title
+instructor
+classroom
+schedule_str
+designated_for
+required_elective
+sel_method
+when
