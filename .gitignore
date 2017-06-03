@@ -5,6 +5,14 @@ word2vec_corpus
 word2vec_corpus_phrases
 whoosh_index
 
+# RL-Agent Test log files
+test-1.txt
+agt_9_performance_records.json
+plot.py
+
+# Checkpoints folder for RL-Model
+dqn/checkpoints/
+
 # Static files
 static
 html
