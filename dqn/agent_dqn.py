@@ -21,10 +21,10 @@ from keras.models import load_model
 sys.path.append(os.getcwd())
 sys.path.append(os.path.pardir)
 
-from dqn_agent.util import *
-from dqn_agent.qlearning.utils import *
-from dqn_agent.dialog_config import *
-from dqn_agent.qlearning import DQN
+from dqn.util import *
+from dqn.qlearning.utils import *
+from dqn.dialog_config import *
+from dqn.qlearning import DQN
 from misc_scripts.access_django import *
 from user_simulator.usersim.usersim_rule import *
 from django.db.models import Q

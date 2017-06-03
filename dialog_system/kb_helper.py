@@ -8,7 +8,7 @@ import copy
 import os
 import sys
 from collections import defaultdict
-from dqn_agent import dialog_config
+from dqn import dialog_config
 sys.path.append(os.getcwd())
 sys.path.append(os.path.pardir)
 from utils.query import *

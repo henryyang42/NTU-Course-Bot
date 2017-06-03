@@ -19,7 +19,7 @@ from django.db.models import Q
 from crawler.models import *
 from utils.query import *
 from dialog_system import DialogManager
-from dqn_agent import dialog_config
+from dqn import dialog_config
 
 """
 Launch a dialog simulation per the comm dand line arguments
@@ -32,9 +32,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Basic Environment Setup
-    parser.add_argument('--act_set', dest='act_set', default="./dqn_agent/dia_acts.txt", type=str,
+    parser.add_argument('--act_set', dest='act_set', default="./dqn/dia_acts.txt", type=str,
                         help='path to dia act set; none for loading from labeled file')
-    parser.add_argument('--slot_set', dest='slot_set', default="./dqn_agent/slot_set.txt", type=str,
+    parser.add_argument('--slot_set', dest='slot_set', default="./dqn/slot_set.txt", type=str,
                         help='path to slot set; none for loading from labeled file')
 
     # Basic Parameters Setup
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     parser.add_argument('--trained_model_path', dest='trained_model_path',
                         default=None, type=str, help='the path for trained model')
     parser.add_argument('-o', '--write_model_dir', dest='write_model_dir',
-                        default='./dqn_agent/checkpoints/', type=str, help='write model to disk')
+                        default='./dqn/checkpoints/', type=str, help='write model to disk')
     parser.add_argument('--save_check_point', dest='save_check_point',
                         default=10, type=int, help='number of epochs for saving model')
     parser.add_argument('--success_rate_threshold', dest='success_rate_threshold',

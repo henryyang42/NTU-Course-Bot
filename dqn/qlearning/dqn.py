@@ -5,7 +5,7 @@ Created on May 18, 2017
 '''
 
 from .utils import *
-from dqn_agent.dialog_config import *
+from dqn.dialog_config import *
 
 class DQN:
 

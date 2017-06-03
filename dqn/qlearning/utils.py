@@ -10,7 +10,7 @@ import sys
 sys.path.append(os.getcwd())
 sys.path.append(os.path.pardir)
 import numpy as np
-from dqn_agent.dialog_config import *
+from dqn.dialog_config import *
 from utils.decorator import run_once
 from keras.models import Model, Sequential
 from keras.layers import Input, Activation

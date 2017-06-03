@@ -73,7 +73,7 @@ def plot_sr(res, x_steps, sample_size):
     plt.xticks(x_axis, fontsize=14)
     plt.yticks(y_axis, fontsize=14)
 
-    plt.savefig('./dqn_agent/checkpoints/success_rate.png')
+    plt.savefig('./dqn/checkpoints/success_rate.png')
     plt.close()
 
 
@@ -103,7 +103,7 @@ def plot_ar(res, x_steps, y_steps, sample_size, max_reward):
     plt.xticks(x_axis, fontsize=14)
     plt.yticks(y_axis, fontsize=14)
 
-    plt.savefig('./dqn_agent/checkpoints/avg_reward.png')
+    plt.savefig('./dqn/checkpoints/avg_reward.png')
     plt.close()
 
 
@@ -133,5 +133,5 @@ def plot_at(res, x_steps, y_steps, sample_size, max_turn):
     plt.xticks(x_axis, fontsize=14)
     plt.yticks(y_axis, fontsize=14)
 
-    plt.savefig('./dqn_agent/checkpoints/avg_turns.png')
+    plt.savefig('./dqn/checkpoints/avg_turns.png')
     plt.close()

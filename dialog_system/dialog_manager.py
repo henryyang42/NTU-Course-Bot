@@ -10,7 +10,7 @@ import sys
 sys.path.append(os.getcwd())
 sys.path.append(os.path.pardir)
 from . import StateTracker
-from dqn_agent import dialog_config
+from dqn import dialog_config
 
 
 class DialogManager:

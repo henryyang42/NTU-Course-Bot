@@ -8,8 +8,8 @@ from LU_LSTM.lstm_predict import *
 from django.conf import settings
 from utils.query import *
 from utils.misc import *
-from dqn_agent.agent_dqn import *
-from dqn_agent.dialog_config import *
+from dqn.agent_dqn import *
+from dqn.dialog_config import *
 
 def DST_update(old_state, sem_frame):
     state = old_state.copy()
@@ -144,8 +144,8 @@ def multi_turn_rl(user_id, sentence, reset=False):
     all_courses = list(query_course({}).values())
     np.random.shuffle(all_courses)
     course_dict = {k: v for k, v in enumerate(all_courses)}
-    act_set = text_to_dict('%s/dqn_agent/dia_acts.txt' % settings.BASE_DIR)
-    slot_set = text_to_dict('%s/dqn_agent/slot_set.txt' % settings.BASE_DIR)
+    act_set = text_to_dict('%s/dqn/dia_acts.txt' % settings.BASE_DIR)
+    slot_set = text_to_dict('%s/dqn/slot_set.txt' % settings.BASE_DIR)
     agent_params = {}
     agent_params['max_turn'] = 20
     agent_params['epsilon'] = 0.1
@@ -155,7 +155,7 @@ def multi_turn_rl(user_id, sentence, reset=False):
     agent_params['batch_size'] = 20
     agent_params['gamma'] = 0.9
     agent_params['predict_mode'] = True
-    agent_params['trained_model_path'] = '%s/dqn_agent/rl-model.h5' % settings.BASE_DIR
+    agent_params['trained_model_path'] = '%s/dqn/rl-model.h5' % settings.BASE_DIR
     agent_params['warm_start'] = 2
     agent_params['cmd_input_mode'] = None
     agent_params['model_params'] = {}
