@@ -10,6 +10,7 @@ from utils.query import *
 from utils.misc import *
 from dqn.agent_dqn import *
 from dqn.dialog_config import *
+from datetime import datetime
 
 def DST_update(old_state, sem_frame):
     state = old_state.copy()
@@ -90,7 +91,8 @@ def set_status(user_id, status=None):
 
 def get_status(user_id):
     d_groups = DialogueLogGroup.objects.filter(user_id=user_id).order_by('-id')
-    if not d_groups:
+    # Session live time is 10min
+    if not d_groups or (datetime.now() - d_groups.time).total_seconds() > 600:
         return set_status(user_id)
     return json.loads(d_groups[0].status)
 
