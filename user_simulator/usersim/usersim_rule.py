@@ -1,7 +1,7 @@
 import argparse, json, random, copy, re
 
 from django.template import Context, Template
-from dqn_agent import dialog_config
+from dqn import dialog_config
 from misc_scripts.generate_template import templates, ask, be
 
 
