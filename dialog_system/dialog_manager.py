@@ -81,8 +81,8 @@ class DialogManager:
         #                             self.state_tracker.history_dictionaries[-2])
         self.agent.add_nl_to_action(
             self.agent_action, self.state_tracker.history_dictionaries[-2], self.state)  # add NL to Agent
-        print("User:\t", self.state_tracker.history_dictionaries[-2]['nl'])
-        print("Agent:\t", self.agent_action['act_slot_response']['nl'])
+        # print("User:\t", self.state_tracker.history_dictionaries[-2]['nl'])
+        # print("Agent:\t", self.agent_action['act_slot_response']['nl'])
         ########################################################################
         #   CALL USER TO TAKE HIS OR HER TURN
         ########################################################################

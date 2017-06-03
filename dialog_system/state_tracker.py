@@ -1,9 +1,9 @@
 """
-Created on May 20, 2016
+Created on May 18, 2017
 
 state tracker
 
-@author: xiul, t-zalipt
+@author: Haley
 """
 
 from . import KBHelper
