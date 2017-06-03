@@ -1,7 +1,7 @@
 """
-Created on May 25, 2016
+Created on May 18, 2017
 
-@author: xiul, t-zalipt
+@author: Haley
 """
 
 import numpy as np
