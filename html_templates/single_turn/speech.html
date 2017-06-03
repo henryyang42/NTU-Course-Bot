@@ -174,12 +174,13 @@
         }
       }
       final_transcript = capitalize(final_transcript);
-      //final_span.innerHTML = linebreak(final_transcript);
-      //interim_span.innerHTML = linebreak(interim_transcript);
-      //chat_input.value = linebreak(interim_transcript);
-      if (final_transcript)
-          chat_input.value = linebreak(final_transcript);
-
+      scope.chat_input = linebreak(interim_transcript);
+      scope.$apply();
+      if (final_transcript) {
+          scope.chat_input = linebreak(final_transcript);
+          scope.$apply();
+          final_transcript = "";
+      }
       if (final_transcript || interim_transcript) {
       }
     };
@@ -210,8 +211,6 @@
     recognition.lang = 'cmn-Hant-TW' //select_dialect.value;
     recognition.start();
     ignore_onend = false;
-    //final_span.innerHTML = '';
-    //interim_span.innerHTML = '';
     start_img.src = 'https://www.google.com/intl/en/chrome/assets/common/images/content/mic-slash.gif';
     showInfo('info_allow');
     start_timestamp = event.timeStamp;
