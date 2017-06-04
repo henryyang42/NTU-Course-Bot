@@ -15,14 +15,25 @@ from datetime import datetime
 
 def DST_update(old_state, sem_frame):
     state = old_state.copy()
-
+    
+    # process 'when'
     if 'when' in sem_frame['slot']:
         sem_frame['slot']['schedule_str'] = sem_frame['slot']['when'][-1]
         sem_frame['slot'].pop('when')
 
+    '''
+    # handle inform_unknown
+    # FIXME need to pass prev_action to this function
+    if sem_frame['intent'] == 'inform_unknown':
+        for slot in prev_action['request_slots']:
+            state['request_slots'][slot] = '?'
+    '''
+
+    # user-requested slots
     if sem_frame['intent'].startswith('request'):
         state['request_slots'][sem_frame['intent'][8:]] = '?'
 
+    # user-informed slots
     for k, v in sem_frame['slot'].items():
         if len(v) > 1 or k in ['schedule_str', 'sel_method']:
             state['inform_slots'][k] = v
