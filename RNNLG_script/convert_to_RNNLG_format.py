@@ -34,7 +34,7 @@ with codecs.open(args.in_file, "r", "utf-8") as f_in:
         elif "inform_" in intent:
             if len(slot_val.keys()) == 0:
                 continue
-            api_str = "inform(%s)" % (";".join([ s+"="+v for s,v in slot_val.items()]))
+            api_str = "inform(%s)" % (";".join([ s+"='"+v+"'" for s,v in slot_val.items()]))
         else:
             api_str = "%s()" % intent
         print (api_str)
