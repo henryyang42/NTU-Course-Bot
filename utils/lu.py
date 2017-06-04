@@ -21,13 +21,10 @@ def DST_update(old_state, sem_frame):
         sem_frame['slot']['schedule_str'] = sem_frame['slot']['when'][-1]
         sem_frame['slot'].pop('when')
 
-    '''
     # handle inform_unknown
-    # FIXME need to pass prev_action to this function
-    if sem_frame['intent'] == 'inform_unknown':
-        for slot in prev_action['request_slots']:
+    if sem_frame['intent'] == 'inform_unknown' and 'agent_action' in old_state:
+        for slot in old_state['agent_action']['request_slots']:
             state['request_slots'][slot] = '?'
-    '''
 
     # user-requested slots
     if sem_frame['intent'].startswith('request'):
