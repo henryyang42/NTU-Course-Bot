@@ -261,7 +261,7 @@ def single_turn_lu_setup_new():  # load new LU models (output new intents)
         word2idx[w] = i
 
     # load model
-    lu_model = load_model('%s/LU_LSTM/PY3--training_template0511--LSTM.model' % settings.BASE_DIR)
+    lu_model = load_model('%s/LU_LSTM/PY3--training_template0511--NTUCourse.CWE--LSTM.model' % settings.BASE_DIR)
     print('[Info] Single-turn LU model loaded.')
 
 
@@ -277,7 +277,6 @@ def single_turn_lu(sentence):
     for label, token in zip(labels, tokens):
         if label != 'O':
             d['slot'][label[2:]] = token
-    # FIXME handle multiple B_xx for same slot (rule-based decision?)
     return d
 
 

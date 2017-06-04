@@ -53,6 +53,10 @@ templates = {
         Template('開課的系所是{{designated_for}}。'),
         Template('這門課是{{designated_for}}開的課。'),
     ],
+    'inform_required_elective': [
+        Template('是是一門{{required_elective}}。'),
+        Template('這門課是{{required_elective}}課。'),
+    ],
     'inform_sel_method':[ 
         Template('要加簽的話方法是{{sel_method}}。'),
         Template('這門課是{{sel_method}}類加選。'),
