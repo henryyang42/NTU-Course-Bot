@@ -359,6 +359,13 @@
   }
   function speak(utterance) {
     utterance = utterance.replace(/(<([^>]+)>)/ig, '');
+
+
+	// convert numbers to Chinese characters
+	ch_num_chars = ["零","一","二","三","四","五","六","七","八","九"];
+    for(d=0; d<=9; ++d)
+		utterance = utterance.replace(d, ch_num_chars[d]);
+
     const synthesis = window.speechSynthesis;
     const utter = new SpeechSynthesisUtterance(utterance);
     // the list of all available voices
