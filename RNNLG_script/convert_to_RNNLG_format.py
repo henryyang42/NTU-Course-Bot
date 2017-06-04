@@ -26,8 +26,11 @@ with codecs.open(args.in_file, "r", "utf-8") as f_in:
 
         obj = []
         if "request_" in intent:
+            '''
             req_slot = intent.replace("request_", "")
             api_str = "request(%s)" % (req_slot)
+            '''
+            api_str = "%s()" % intent
         elif "inform_" in intent:
             if len(slot_val.keys()) == 0:
                 continue
