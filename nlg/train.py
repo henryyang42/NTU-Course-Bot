@@ -1,8 +1,16 @@
+import os
 import json
 from random import shuffle
-
 import pandas as pd
 import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+from torch.autograd import Variable
+from evaluate import evaluate_model
+from model import Seq2Seq, Seq2SeqAttention
+from data_utils import get_minibatch
 
 raw_train = json.load(open('data/train.json','r'))
 # raw_valid = json.load(open('data/valid.json','r'))
@@ -84,16 +92,6 @@ trg_train = {'data':trg_data_train, 'word2id':trg_word2id, 'id2word':trg_id2word
 src_test = {'data':src_data_test, 'word2id':src_word2id, 'id2word':src_id2word}
 trg_test = {'data':trg_data_test, 'word2id':trg_word2id, 'id2word':trg_id2word}
 
-
-import os
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.autograd import Variable
-from evaluate import evaluate_model
-from model import Seq2Seq, Seq2SeqAttention
-from data_utils import get_minibatch
 
 batch_size = config['data']['batch_size']
 src_vocab_size = len(src_train['word2id'])
@@ -191,6 +189,6 @@ torch.save(
         model.state_dict(),
         open(os.path.join('models', 'model.pt'),'wb')
 )
-json.dump(vocab, open('resource/vocab.json','w'), ensure_ascii=False, indent=4)
 json.dump(src_word2id, open('resource/src_word2id.json','w'), ensure_ascii=False, indent=4)
 json.dump(trg_word2id, open('resource/trg_word2id.json','w'), ensure_ascii=False, indent=4)
+
