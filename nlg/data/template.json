@@ -1,0 +1,1154 @@
+[
+    {
+        "intent": "request_title",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "告訴",
+            "我",
+            "課名",
+            "是",
+            "什麼"
+        ]
+    },
+    {
+        "intent": "request_title",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "告訴",
+            "我",
+            "課程名稱",
+            "是",
+            "什麼"
+        ]
+    },
+    {
+        "intent": "request_instructor",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "跟",
+            "我",
+            "說",
+            "是",
+            "哪位",
+            "老師",
+            "的",
+            "課",
+            "呢"
+        ]
+    },
+    {
+        "intent": "request_instructor",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "告訴",
+            "我",
+            "老師",
+            "是",
+            "哪位"
+        ]
+    },
+    {
+        "intent": "request_schedule_str",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "告訴",
+            "我",
+            "是",
+            "什麼",
+            "時候",
+            "的",
+            "課"
+        ]
+    },
+    {
+        "intent": "request_schedule_str",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "告訴",
+            "我",
+            "上課",
+            "時間",
+            "在",
+            "什麼",
+            "時候"
+        ]
+    },
+    {
+        "intent": "request_classroom",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "告訴",
+            "我",
+            "你",
+            "想",
+            "在",
+            "哪裡",
+            "上課"
+        ]
+    },
+    {
+        "intent": "request_classroom",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "跟",
+            "我",
+            "說",
+            "在",
+            "哪間",
+            "教室",
+            "上課",
+            "呢"
+        ]
+    },
+    {
+        "intent": "request_review",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "告訴",
+            "我",
+            "你",
+            "知道",
+            "的",
+            "評價"
+        ]
+    },
+    {
+        "intent": "request_designated_for",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "告訴",
+            "我",
+            "你",
+            "想要",
+            "選",
+            "哪個",
+            "系",
+            "的",
+            "課",
+            "呢"
+        ]
+    },
+    {
+        "intent": "request_required_elective",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_required_elective",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "跟",
+            "我",
+            "說",
+            "是",
+            "必修",
+            "還",
+            "選修"
+        ]
+    },
+    {
+        "intent": "request_sel_method",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "請",
+            "告訴",
+            "我",
+            "你",
+            "想要",
+            "哪種",
+            "加選",
+            "方式",
+            "呢"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "97203",
+            "，",
+            "真是",
+            "個",
+            "難記",
+            "的",
+            "數字"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "89134",
+            "上課",
+            "老師",
+            "是",
+            "{",
+            "{",
+            "instructor",
+            "}"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "O",
+            "O",
+            "O",
+            "B_classroom"
+        ],
+        "tokens": [
+            "流水號",
+            "81445",
+            "上課",
+            "地點",
+            "在",
+            "生科4C"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "O",
+            "B_when",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "88142",
+            "在",
+            "星期五",
+            "上課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_instructor",
+            "O",
+            "O",
+            "O",
+            "B_title",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "53720",
+            "吳賴雲",
+            "老師",
+            "開",
+            "的",
+            "工程數學四",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_when",
+            "B_instructor",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "11476",
+            "星期一",
+            "謝志豪",
+            "老師",
+            "的",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_when",
+            "O",
+            "B_title",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "21883",
+            "星期四",
+            "的",
+            "理論演化生態學導論",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_title",
+            "O",
+            "O",
+            "B_classroom",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "16004",
+            "作物學甲",
+            "課是",
+            "在",
+            "農經二",
+            "上課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_when",
+            "O",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_classroom"
+        ],
+        "tokens": [
+            "流水號",
+            "50210",
+            "星期四",
+            "的",
+            "固液二相流導論",
+            "課",
+            "上課",
+            "地點",
+            "是",
+            "工綜209"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_instructor",
+            "O",
+            "O",
+            "B_when",
+            "O",
+            "O",
+            "B_title",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "21495",
+            "鄭宗記",
+            "老師",
+            "在",
+            "星期四",
+            "開",
+            "的",
+            "專題討論",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_instructor",
+            "O",
+            "O",
+            "B_when",
+            "O",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_classroom"
+        ],
+        "tokens": [
+            "流水號",
+            "20016",
+            "王珊珊",
+            "老師",
+            "的",
+            "星期三",
+            "的",
+            "語言學概論下",
+            "課",
+            "上課",
+            "地點",
+            "是",
+            "普504"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_designated_for",
+            "O",
+            "O",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_classroom"
+        ],
+        "tokens": [
+            "流水號",
+            "52191",
+            "綠色精密學程",
+            "開",
+            "的",
+            "固態燃料電池原理與技術",
+            "課",
+            "上課",
+            "地點",
+            "是",
+            "工綜207"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_designated_for",
+            "O",
+            "O",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_instructor"
+        ],
+        "tokens": [
+            "流水號",
+            "33399",
+            "大氣系",
+            "開",
+            "的",
+            "大氣科學研究導論",
+            "課",
+            "的",
+            "老師",
+            "是",
+            "羅敏輝"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_designated_for",
+            "O",
+            "O",
+            "B_title",
+            "O",
+            "B_classroom",
+            "O",
+            "O",
+            "O",
+            "B_instructor"
+        ],
+        "tokens": [
+            "流水號",
+            "16370",
+            "中文系",
+            "開",
+            "的",
+            "文學概論下",
+            "課在",
+            "普304",
+            "上課",
+            "老師",
+            "是",
+            "陳昭瑛"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_instructor",
+            "O",
+            "O",
+            "B_title",
+            "O",
+            "B_designated_for",
+            "O",
+            "B_required_elective",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "46768",
+            "蔡兆勳",
+            "老師",
+            "的",
+            "衛生保健",
+            "課是",
+            "醫衛共同課程",
+            "的",
+            "選修",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_serial_no",
+            "B_designated_for",
+            "O",
+            "B_required_elective",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_instructor",
+            "O",
+            "B_classroom",
+            "O"
+        ],
+        "tokens": [
+            "流水號",
+            "89980",
+            "海洋所漁業組",
+            "的",
+            "選修",
+            "生態模擬以C語言為例",
+            "課",
+            "授課",
+            "老師",
+            "是",
+            "三木健",
+            "在",
+            "海研232",
+            "上課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_instructor",
+            "O",
+            "O",
+            "O",
+            "B_title",
+            "O"
+        ],
+        "tokens": [
+            "李錫鎮",
+            "老師",
+            "開",
+            "的",
+            "庾信賦",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_when",
+            "B_instructor",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "禮拜五",
+            "蔡天怡",
+            "老師",
+            "的",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_when",
+            "O",
+            "B_title",
+            "O"
+        ],
+        "tokens": [
+            "星期五",
+            "的",
+            "重複測量統計分析",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_title",
+            "O",
+            "B_when",
+            "O"
+        ],
+        "tokens": [
+            "合成有機化學",
+            "在",
+            "星期五",
+            "上課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_title",
+            "O",
+            "O",
+            "B_classroom",
+            "O"
+        ],
+        "tokens": [
+            "鉀離子通道特論",
+            "課是",
+            "在",
+            "口生所討論室",
+            "上課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_when",
+            "O",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_classroom"
+        ],
+        "tokens": [
+            "星期四",
+            "的",
+            "製藥技術",
+            "課",
+            "的",
+            "上課",
+            "地點",
+            "是",
+            "基醫304"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_instructor",
+            "O",
+            "O",
+            "B_when",
+            "O",
+            "O",
+            "B_title",
+            "O"
+        ],
+        "tokens": [
+            "巫雪如",
+            "老師",
+            "在",
+            "星期四",
+            "開",
+            "的",
+            "國文下",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_instructor",
+            "O",
+            "O",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_classroom"
+        ],
+        "tokens": [
+            "管傑雄",
+            "老師",
+            "的",
+            "電子束技術實習",
+            "課",
+            "上課",
+            "地點",
+            "是",
+            "電二102"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_instructor",
+            "O",
+            "O",
+            "B_when",
+            "O",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_classroom"
+        ],
+        "tokens": [
+            "周仲島",
+            "老師",
+            "的",
+            "星期三",
+            "的",
+            "雷達氣象學",
+            "課",
+            "上課",
+            "地點",
+            "是",
+            "大氣系A100"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_designated_for",
+            "O",
+            "O",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_classroom"
+        ],
+        "tokens": [
+            "中文系",
+            "開",
+            "的",
+            "近現代文化與思想下",
+            "課",
+            "上課",
+            "地點",
+            "是",
+            "博雅304"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_designated_for",
+            "O",
+            "O",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_instructor"
+        ],
+        "tokens": [
+            "華教碩士學程",
+            "開",
+            "的",
+            "國際生新聞華語",
+            "課",
+            "的",
+            "老師",
+            "是",
+            "洪塘忻"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_designated_for",
+            "O",
+            "O",
+            "B_title",
+            "O",
+            "B_classroom",
+            "O",
+            "O",
+            "O",
+            "B_instructor"
+        ],
+        "tokens": [
+            "生技系",
+            "開",
+            "的",
+            "問題導向的轉譯研究二",
+            "課在",
+            "共202",
+            "上課",
+            "老師",
+            "是",
+            "陳進庭"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "B_instructor",
+            "O",
+            "O",
+            "B_title",
+            "O",
+            "B_designated_for",
+            "O",
+            "B_required_elective",
+            "O"
+        ],
+        "tokens": [
+            "何傳愷",
+            "老師",
+            "的",
+            "碩士班專題討論",
+            "課是",
+            "生態演化所",
+            "的",
+            "必修",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_required_elective",
+            "B_title",
+            "O",
+            "O",
+            "O",
+            "O",
+            "B_instructor",
+            "O",
+            "B_classroom",
+            "O"
+        ],
+        "tokens": [
+            "的",
+            "必修",
+            "壁球中級",
+            "課",
+            "授課",
+            "老師",
+            "是",
+            "林聯喜",
+            "在",
+            "綜館壁球室",
+            "上課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "O",
+            "B_title"
+        ],
+        "tokens": [
+            "課程名稱",
+            "是",
+            "國內外資本市場募集與會計師實務"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_when",
+            "O",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "在",
+            "禮拜三",
+            "上課",
+            "，",
+            "要",
+            "準時",
+            "喔"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_instructor",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "是",
+            "洪惠敏",
+            "老師",
+            "的",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "B_classroom",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "上課",
+            "地點",
+            "是",
+            "新202",
+            "，",
+            "不要",
+            "走錯",
+            "囉"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_designated_for",
+            "O",
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "是",
+            "植物科學所",
+            "開",
+            "的",
+            "課",
+            "喔"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "B_required_elective",
+            "O"
+        ],
+        "tokens": [
+            "是",
+            "必帶",
+            "課"
+        ]
+    },
+    {
+        "intent": "inform",
+        "labels": [
+            "O",
+            "O",
+            "O",
+            "B_sel_method"
+        ],
+        "tokens": [
+            "加選",
+            "方法",
+            "是",
+            "3"
+        ]
+    },
+    {
+        "intent": "inform_unknown",
+        "labels": [
+            "O",
+            "O",
+            "O"
+        ],
+        "tokens": [
+            "不",
+            "知道",
+            "耶"
+        ]
+    },
+    {
+        "intent": "thanks",
+        "labels": [
+            "O"
+        ],
+        "tokens": [
+            "感恩"
+        ]
+    },
+    {
+        "intent": "closing",
+        "labels": [
+            "O"
+        ],
+        "tokens": [
+            "再見"
+        ]
+    }
+]

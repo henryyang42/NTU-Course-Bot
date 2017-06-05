@@ -1,0 +1,27 @@
+{
+    "intent": [
+        "request_title",
+        "request_instructor",
+        "request_schedule_str",
+        "request_classroom",
+        "request_designated_for",
+        "request_required_elective",
+        "request_sel_method",
+        "inform",
+        "inform_unknown",
+        "thanks",
+        "deny",
+        "closing"
+    ],
+    "slots": [
+        "title",
+        "when",
+        "instructor",
+        "classroom",
+        "designated_for",
+        "required_elective",
+        "sel_method",
+	"serial_no",
+	"schedule_str"
+    ]
+}
