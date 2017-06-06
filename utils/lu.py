@@ -22,7 +22,7 @@ def DST_update(old_state, sem_frame):
         sem_frame['slot'].pop('when')
 
     # handle inform_unknown
-    if sem_frame['intent'] == 'inform_unknown' and 'agent_action' in old_state:
+    if sem_frame['intent'] == 'inform_unknown' and old_state['agent_action'] is not None:
         for slot in old_state['agent_action']['request_slots']:
             state['request_slots'][slot] = '?'
 
@@ -133,6 +133,8 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         action = {'diaact': 'thanks'}
     else:
         action = get_action_from_frame(status)
+
+    status['agent_action'] = action
 
     # add system retrived information to dialogue state (as if user informed these slots)
     #FIXME
