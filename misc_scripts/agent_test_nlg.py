@@ -54,7 +54,7 @@ templates = {
         Template('這門課是{{designated_for}}開的課。'),
     ],
     'inform_required_elective': [
-        Template('是是一門{{required_elective}}。'),
+        Template('這是一門{{required_elective}}。'),
         Template('這門課是{{required_elective}}課。'),
     ],
     'inform_sel_method':[ 

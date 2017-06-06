@@ -5,7 +5,7 @@ import numpy as np
 from crawler.models import *
 from .decorator import run_once
 
-possible_slots = ['title', 'when', 'instructor', 'classroom', 'designated_for', 'required_elective', 'sel_method']
+possible_slots = ['serial_no', 'title', 'when', 'instructor', 'classroom', 'designated_for', 'required_elective', 'sel_method']
 
 
 def trim_attr(s):

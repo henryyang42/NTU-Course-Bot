@@ -17,3 +17,5 @@ word2vec==0.9.1 # rememver to check the bug -> vim ../site-packages/word2vec/wor
 # Whoosh
 # git+https://github.com/henryyang42/django-haystack.git@chinese-analyzer
 matplotlib
+pytorch==0.1.2
+torchvision==0.1.8
