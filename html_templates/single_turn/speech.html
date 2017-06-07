@@ -217,16 +217,14 @@
   }
 
   function showInfo(s) {
-    if (s) {
-      for (var child = info.firstChild; child; child = child.nextSibling) {
-        if (child.style) {
-          child.style.display = child.id == s ? 'inline' : 'none';
-        }
+    var info_html = '';
+    for (var child = info.firstChild; child; child = child.nextSibling) {
+      if (child.id == s) {
+        info_html = child.innerText;
       }
-      info.style.visibility = 'visible';
-    } else {
-      info.style.visibility = 'hidden';
     }
+    $('#start_button').attr('title', info_html).tooltip({    'container':'body'});
+    return info_html;
   }
 
 </script>
