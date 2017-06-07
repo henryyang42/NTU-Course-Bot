@@ -254,6 +254,9 @@ button{
         <div class="panel-heading" style="height: 7%;">
           <h3 class="panel-title">
             Course Chatbot
+            <a href="#helper-popup" class="open-popup-link">
+              <span class="glyphicon glyphicon-question-sign"></span>
+            </a>
             <a href="#schedule-popup" class="open-popup-link" style="float: right; position: relative;">
               <img src="https://image.flaticon.com/icons/svg/148/148982.svg" style="height: 70%; margin: 5px;">
               <span class="notification-counter">{{ added_course.length }}</span>
@@ -283,6 +286,34 @@ button{
               </div>
           </div>
         </div>
+
+        <div id="helper-popup" class="white-popup mfp-hide">
+<h4>查詢方法</h4>
+<p>
+查課程：<b>星期五</b>的<b>機器學習</b><br>
+查時間：<b>陳縕儂</b>老師在星期幾有課<br>
+查系所：<b>自然語言處理</b>是哪個系所的課<br>
+查評價：我想查<b>機器學習</b>的評價<br>
+查教室：<b>智慧對話機器人</b>在哪上課<br>
+查加選方式：<b>資料結構與演算法</b>的加選方式<br>
+</p>
+<hr>
+<h4>選課方法</h4>
+<p>
+點選流水號即會加入右上角的課表，可查看課程大綱及退選<br>
+</p>
+<hr>
+<h4>回饋方法</h4>
+<p>
+若有不合理的回答請按 <i class="fa fa-thumbs-down" aria-hidden="true"></i>
+<br>
+需要重置請打 "<b>謝謝</b>"<br>
+也可用左下角麥克風問問題喔<br>
+<br>
+結束請和我說 "<b>謝謝</b>" 以及給我評價喔 <(_ _)>
+</p>
+        </div>
+
         <div id="schedule-popup" class="white-popup mfp-hide">
           <table class="table table-bordered table-hover" id="selected-table">
             <thead>
