@@ -103,6 +103,12 @@
     outline : none;
   }
 
+  .img-xsm {
+    width: 25px;
+    height: 25px;
+    outline : none;
+  }
+
   .media-block .media-body {
     display: block;
     overflow: hidden;
@@ -243,6 +249,11 @@
 button{
   outline : none;
 }
+#start_button {
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+}
 </style>
 
 <body>
@@ -300,15 +311,16 @@ button{
 <hr>
 <h4>選課方法</h4>
 <p>
-點選流水號即會加入右上角的課表，可查看課程大綱及退選<br>
+點選流水號即會加入右上角的課表 <img src="https://image.flaticon.com/icons/svg/148/148982.svg" class="img-xsm">，可查看課程大綱及退選<br>
 </p>
 <hr>
 <h4>回饋方法</h4>
+<img src="https://www.csie.ntu.edu.tw/~r05922062/show_dialogue.png" style="width:200px;">
 <p>
 若有不合理的回答請按 <i class="fa fa-thumbs-down" aria-hidden="true"></i>
 <br>
 需要重置請打 "<b>謝謝</b>"<br>
-也可用左下角麥克風問問題喔<br>
+也可用左下角麥克風<img src="https://www.csie.ntu.edu.tw/~r05922062/mic.gif" class="img-xsm">問問題喔<br>
 <br>
 結束請和我說 "<b>謝謝</b>" 以及給我評價喔 <(_ _)>
 </p>
@@ -363,7 +375,7 @@ button{
 <script type="text/javascript">
   // Chat templates
   var client_tpl = "\n  <li class=\"mar-btm\">\n    <div class=\"media-right\">\n      <img src=\"https://i.imgur.com/1fxNgjD.png\" class=\"img-circle img-sm\" alt=\"Profile Picture\">\n    </div>\n    <div class=\"media-body pad-hor speech-right\">\n      <div class=\"speech\">\n        <p>{0}</p>\n        <p class=\"speech-time\">\n          <i class=\"fa fa-clock-o fa-fw\"></i> {1}\n        </p>\n      </div>\n    </div>\n  </li>";
-  var server_tpl = "\n  <li class=\"mar-btm\">\n    <div class=\"media-left\">\n      <img src=\"https://i.imgur.com/lITE2bq.png\" class=\"img-circle img-sm\" alt=\"Profile Picture\">\n    </div>\n    <div class=\"media-body pad-hor\">\n      <div class=\"speech\">\n        <p>{0}</p>\n        <p class=\"speech-time\">\n          <i class=\"fa fa-clock-o fa-fw\"></i>{1}\n        </p>\n      </div>\n    </div>\n  </li>";
+  var server_tpl = "\n  <li class=\"mar-btm\">\n    <div class=\"media-left\">\n      <img src=\"https://www.csie.ntu.edu.tw/~r05922062/vivian.jpg\" class=\"img-circle img-sm\" alt=\"Profile Picture\">\n    </div>\n    <div class=\"media-body pad-hor\">\n      <div class=\"speech\">\n        <p>{0}</p>\n        <p class=\"speech-time\">\n          <i class=\"fa fa-clock-o fa-fw\"></i>{1}\n        </p>\n      </div>\n    </div>\n  </li>";
   // Utils
   String.prototype.format = function () {
     var str = this;
