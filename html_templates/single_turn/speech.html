@@ -1,102 +1,10 @@
 <style>
-  #info {
-    font-size: 20px;
-  }
-
-  #div_start {
-    float: right;
-  }
-
-  #headline {
-    text-decoration: none
-  }
-
-  #results {
-    font-size: 14px;
-    font-weight: bold;
-    border: 1px solid #ddd;
-    padding: 15px;
-    text-align: left;
-    min-height: 150px;
-  }
-
   #start_button {
     border: 0;
     background-color: transparent;
     padding: 0;
   }
-
-  .interim {
-    color: gray;
-  }
-
-  .final {
-    color: black;
-    padding-right: 3px;
-  }
-
-  .button {
-    display: none;
-  }
-
-  .marquee {
-    margin: 20px auto;
-  }
-
-  #buttons {
-    margin: 10px 0;
-    position: relative;
-    top: -50px;
-  }
-
-  #copy {
-    margin-top: 20px;
-  }
-
-  #copy>div {
-    display: none;
-    margin: 0 70px;
-  }
-
-  a.c1 {
-    font-weight: normal;
-  }
 </style>
-
-<div id="info" style="visibility: hidden;">
-  <p id="info_start" style="display: none;">
-    Click on the microphone icon and begin speaking for as long as you like.
-  </p>
-  <p id="info_speak_now" style="display: none;">
-    Speak now.
-  </p>
-  <p id="info_no_speech" style="display:none">
-    No speech was detected. You may need to adjust your <a href="https://support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone
-            settings</a>.
-  </p>
-  <p id="info_no_microphone" style="display:none">
-    No microphone was found. Ensure that a microphone is installed and that
-    <a href="https://support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">
-            microphone settings</a> are configured correctly.
-  </p>
-  <p id="info_allow" style="display: none;">
-    Click the "Allow" button above to enable your microphone.
-  </p>
-  <p id="info_denied" style="display:none">
-    Permission to use microphone was denied.
-  </p>
-  <p id="info_blocked" style="display:none">
-    Permission to use microphone is blocked. To change, go to chrome://settings/contentExceptions#media-stream
-  </p>
-  <p id="info_upgrade" style="display:none">
-    Web Speech API is not supported by this browser. Upgrade to <a href="https://www.google.com/chrome">Chrome</a> version
-    25 or later.
-  </p>
-</div>
-
-<div id="results">
-
-</div>
 
 <script>
   //['cmn-Hant-TW', '中文 (台灣)']
@@ -150,12 +58,6 @@
         return;
       }
       showInfo('');
-      /*if (window.getSelection) {
-        window.getSelection().removeAllRanges();
-        var range = document.createRange();
-        range.selectNode(document.getElementById('final_span'));
-        window.getSelection().addRange(range);
-      }*/
     };
 
     recognition.onresult = function (event) {
@@ -220,11 +122,9 @@
 
   function showInfo(s) {
     var info_html = '';
-    for (var child = info.firstChild; child; child = child.nextSibling) {
-      if (child.id == s) {
-        info_html = child.innerText;
-      }
-    }
+    var info_qa = {"info_start":"\n    Click on the microphone icon and begin speaking for as long as you like.\n  ","info_speak_now":"\n    Speak now.\n  ","info_no_speech":"\n    No speech was detected. You may need to adjust your microphone\n            settings.\n  ","info_no_microphone":"\n    No microphone was found. Ensure that a microphone is installed and that\n    \n            microphone settings are configured correctly.\n  ","info_allow":"\n    Click the \"Allow\" button above to enable your microphone.\n  ","info_denied":"\n    Permission to use microphone was denied.\n  ","info_blocked":"\n    Permission to use microphone is blocked. To change, go to chrome://settings/contentExceptions#media-stream\n  ","info_upgrade":"\n    Web Speech API is not supported by this browser. Upgrade to Chrome version\n    25 or later.\n  "}
+    if(info_qa[s])
+      info_html = info_qa[s];
     $('#start_button').attr('data-original-title', info_html).tooltip({'container':'body'});
     return info_html;
   }
