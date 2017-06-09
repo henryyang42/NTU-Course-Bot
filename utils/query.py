@@ -48,11 +48,13 @@ def query_course(constraints):
 
     # Generate corresponding response to each intent.
     courses = unique_courses.filter(**query_term).filter(expand_title(constraints.get('title', '')))
-
+    #courses = Course.objects.filter(**query_term).filter(expand_title(constraints.get('title', '')))
     return courses
 
 
 def query_review(constraints):
+    if not constraints:
+        return Review.objects.none()
     query = Q()
     for k, v in constraints.items():
         query &= expand_title(v)
