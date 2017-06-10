@@ -66,8 +66,12 @@ agent_request_tpl = {
         Template('請問是誰開的?')
     ],
     'schedule_str': [
-        Template('什麼時候的課?'),
-        Template('請問是哪個時間上課的?')
+        Template('請問是星期幾的課?'),
+        Template('請問是星期幾上課的?')
+    ],
+    'designated_for': [
+        Template('請問是哪個系開的?'),
+        Template('請問是哪個系的課?')
     ],
     'classroom': [
         Template('請問是在哪上課的?'),
@@ -144,7 +148,7 @@ def agent2nl(sys_act):
 
     # request in a pre-defined order
     if sys_act["diaact"] == "request":
-        for slot in ["title", "instructor", "classroom", "schedule_str"]:
+        for slot in ["title", "instructor", "designated_for", "schedule_str"]:
             if slot in sys_act["request_slots"]:
                 tpl = random.choice(agent_request_tpl[slot])
                 res_str = tpl.render(Context(sys_act["request_slots"]))
