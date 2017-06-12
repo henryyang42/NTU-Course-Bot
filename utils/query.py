@@ -16,7 +16,7 @@ def course_attr_blank(c):
 
 
 def course_equal(c1, c2):
-    return c1.title == c2.title and c1.instructor == c2.instructor and c2.schedule_str[0] == c1.schedule_str[0]
+    return c1.title == c2.title and c1.instructor == c2.instructor and c1.designated_for == c2.designated_for and c2.schedule_str[0] == c1.schedule_str[0]
 
 
 @run_once
