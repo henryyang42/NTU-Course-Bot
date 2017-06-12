@@ -8,6 +8,7 @@ from django.template import Context, Template
 from utils.nlg import *
 from utils.tagger import *
 from utils.query import *
+import sys
 # Templates
 # possible_slots = [
 # 'title',
@@ -230,6 +231,7 @@ templates = {
         Template('不重要'),
         Template('我不在乎'),
         Template('隨便'),
+        Template('隨意'),
     ],
     'thanks': [
         Template('謝謝'),
@@ -309,8 +311,12 @@ if __name__ == '__main__':
     """
     print('[Info] Start generating templates')
     # TODO Change to argparse
+    '''
     filename = 'training_template.txt'
     N = 1000
+    '''
+    filename = sys.argv[2]
+    N = int(sys.argv[1])
     courses = query_course({}).values()  # Get all course
     # TODO Refine request_schedule_str to when
     #
