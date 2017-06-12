@@ -23,9 +23,11 @@ def DST_update(old_state, sem_frame):
 
     # handle inform_unknown
     if sem_frame['intent'] == 'inform_unknown' and old_state['agent_action'] is not None:
-        for slot in old_state['agent_action']['request_slots']:
-            state['request_slots'][slot] = '?'
-            if slot in state['inform_slots']: # remove incorrectly recognized slot
+        if old_state['agent_action']['diaact'] == "request":
+            for slot in old_state['agent_action']['request_slots']:
+                state['request_slots'][slot] = '?'
+        elif old_state['agent_action']['diaact'] == "confirm":
+            for slot in old_state['agent_action']['inform_slots']: # remove incorrectly recognized slot
                 del state['inform_slots'][slot]
 
     # user-requested slots
