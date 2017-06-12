@@ -29,6 +29,8 @@ def DST_update(old_state, sem_frame):
         elif old_state['agent_action']['diaact'] == "confirm":
             for slot in old_state['agent_action']['inform_slots']: # remove incorrectly recognized slot
                 del state['inform_slots'][slot]
+                state['request_slots'][slot] = '?'
+        # TODO multiple_choice
 
     # user-requested slots
     if sem_frame['intent'].startswith('request'):
