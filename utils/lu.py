@@ -137,7 +137,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         return d, status, {}, '\n'.join(review_resp)
     if d['intent'] == 'thanks':  # Reset dialogue state
         action = {'diaact': 'thanks'}
-    elif semantic_frame['intent'] == 'other':
+    elif d['intent'] == 'other':
         action = {'diaact': 'unknown'}
     else:
         action = get_action_from_frame(status)
