@@ -122,6 +122,9 @@ def agent2nl(sys_act):
     if sys_act["diaact"] == "thanks":
         return "很高興能為您服務。"
 
+    if sys_act["diaact"] == "unknown":
+        return "我不太懂您的意思耶QQ"
+
     res_list = []
     # response in a pre-defined order
     if sys_act["diaact"] == "inform":
