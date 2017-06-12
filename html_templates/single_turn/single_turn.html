@@ -19,6 +19,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
   <!-- Latest rateYo compiled and minified JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
+  <!-- Bootstrap Toogle -->
+  <link href="https://cdn.rawgit.com/ziscloud/angular-bootstrap-toggle/master/dist/angular-bootstrap-toggle.min.css"  rel="stylesheet"></link>
+  <script src="https://cdn.rawgit.com/ziscloud/angular-bootstrap-toggle/master/dist/angular-bootstrap-toggle.min.js"></script>
+
 </head>
 <style type="text/css">
   .panel-footer {
@@ -268,6 +272,9 @@ button{
             <a href="#helper-popup" class="open-popup-link">
               <span class="glyphicon glyphicon-question-sign"></span>
             </a>
+            <span style="margin:30px">
+              機器人： <toggle ng-model="speech_on" on="說話" off="閉嘴"></toggle>
+            </span>
             <a href="#schedule-popup" class="open-popup-link" style="float: right; position: relative;">
               <img src="https://image.flaticon.com/icons/svg/148/148982.svg" style="height: 70%; margin: 5px;">
               <span class="notification-counter">{{ added_course.length }}</span>
@@ -405,8 +412,6 @@ button{
   }
   function speak(utterance) {
     utterance = utterance.replace(/(<([^>]+)>)/ig, '');
-
-
     // convert numbers to Chinese characters
     ch_num_chars = ["零","一","二","三","四","五","六","七","八","九"];
       for(d=0; d<=9; ++d)
@@ -455,11 +460,11 @@ button{
   }
 
   // angularjs thing
-  var app = angular.module('chat', []);
+  var app = angular.module('chat', ['ui.toggle']);
   app.controller('chatController', function ($scope) {
     function initial() {
-      add_message(server_tpl.format('歡迎來到NTUCB！我能幫您做什麼？', now()));
-      speak('歡迎來到NTUCB！我能幫您做什麼？');
+      add_message(server_tpl.format('歡迎來到NTU Course Bot！我能幫您做什麼？', now()));
+      speak('歡迎來到NTU Course Bot！我能幫您做什麼？');
       $scope.credit = 0;
       $scope.added_course = [];
       try {
@@ -474,6 +479,7 @@ button{
         //
       }
       toastr.options.timeOut = 1000;
+      $scope.speech_on = true;
     }
     initial();
     $scope.add_course = function(serial_no) {
@@ -538,7 +544,8 @@ button{
             add_message(server_tpl.format(
               '{0}<br><i id="sucks{1}" onClick="sucks({1})" class="fa fa-thumbs-down not-disliked" aria-pressed="false" style="cursor:pointer"></i>'.format(data.resp_str, data.id), now()));
           }
-          speak(data.resp_str);
+          if($scope.speech_on)
+            speak(data.resp_str);
           // On recieve, bind event to links
           $('.selection').off('click').click(function () {
             $scope.send($(this).html());
