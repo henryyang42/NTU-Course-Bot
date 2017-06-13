@@ -137,7 +137,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         return d, status, {}, '\n'.join(review_resp)
     if d['intent'] == 'thanks':  # Reset dialogue state
         action = {'diaact': 'thanks'}
-    elif d['intent'] == 'other':
+    elif d['intent'] == 'other' and len(d["slot"]) == 0:
         action = {'diaact': 'unknown'}
     else:
         action = get_action_from_frame(status)
@@ -223,7 +223,7 @@ def multi_turn_rl(user_id, sentence, reset=False):
         return semantic_frame, status, {}, '\n'.join(review_resp)
     if semantic_frame['intent'] == 'thanks':  # Reset dialogue state
         action = {'diaact': 'thanks'}
-    elif semantic_frame['intent'] == 'other':
+    elif semantic_frame['intent'] == 'other' and len(semantic_frame['slot']) == 0:
         action = {'diaact': 'unknown'}
     else:
         act_slot_response = agent.feasible_actions[np.argmax(agent.model.predict(
