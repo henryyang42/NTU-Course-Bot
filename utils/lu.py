@@ -135,7 +135,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
             for review in reviews:
                 review_resp.append('<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
         return d, status, {}, '\n'.join(review_resp)
-    if d['intent'] == 'thanks':  # Reset dialogue state
+    if d['intent'] == 'thanks' or d['intent'] == 'closing':  # Reset dialogue state
         action = {'diaact': 'thanks'}
     elif d['intent'] == 'other' and len(d["slot"]) == 0:
         action = {'diaact': 'unknown'}
@@ -221,7 +221,7 @@ def multi_turn_rl(user_id, sentence, reset=False):
                 review_resp.append(
                     '<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
         return semantic_frame, status, {}, '\n'.join(review_resp)
-    if semantic_frame['intent'] == 'thanks':  # Reset dialogue state
+    if semantic_frame['intent'] == 'thanks' or semantic_frame['intent'] == 'closing':  # Reset dialogue state
         action = {'diaact': 'thanks'}
     elif semantic_frame['intent'] == 'other' and len(semantic_frame['slot']) == 0:
         action = {'diaact': 'unknown'}
