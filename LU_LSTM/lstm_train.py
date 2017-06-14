@@ -220,7 +220,7 @@ embedding = Dropout(args.dropout)(embedding)
 
 # [LSTM for slot]
 if args.bi_direct:
-    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True), name='slot LSTM', recurrent_regularizer=r_reg)(embedding)
+    slot_lstm_out = Bidirectional(LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True, name='slot LSTM', recurrent_regularizer=r_reg))(embedding)
 else:
     slot_lstm_out = LSTM(args.emb_size, dropout=args.dropout, recurrent_dropout=args.dropout, return_sequences=True, name='slot LSTM', recurrent_regularizer=r_reg)(embedding)
 

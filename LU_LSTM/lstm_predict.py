@@ -46,15 +46,24 @@ def get_intent_slot(model, tokens, word2idx, idx2label, idx2intent):
     #print pred_intent
 
     # convert result
-    intent_idx = pred_intent[0].argmax()
-    intent = idx2intent[intent_idx]
-
     slot_idx_seq = pred_slot[0].argmax(axis=-1)
     #print slot_idx_seq
     labels = seq_idx2word(slot_idx_seq[-len(tokens) : ], idx2label)
+    B_cnt = 0
     for i, l in enumerate(labels):
         if l == '#':
             labels[i] = 'O'
+        if labels[i] != 'O':
+            B_cnt += 1
+
+    sorted_intent_indice = (-pred_intent[0]).argsort()
+    print (sorted_intent_indice)
+    intent = idx2intent[sorted_intent_indice[0]]
+    # if intent=inform but no slot, predict the one with second highest prob.
+    if intent == "inform" and B_cnt == 0:
+        print (intent)
+        intent = idx2intent[sorted_intent_indice[1]]
+        print ("=>", intent)
 
     return intent, tokens, labels
 
