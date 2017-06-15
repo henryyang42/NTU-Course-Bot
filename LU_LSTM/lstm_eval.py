@@ -61,7 +61,8 @@ def eval_slot(true_labels_list, pred_labels_list):
                     TP[slot] = 0.0
                     FP[slot] = 0.0
                     FN[slot] = 0.0
-                FP[slot] += 1
+                if pred_labels[j] != true_labels[j]:
+                    FP[slot] += 1
 
     stat["precision"] = {}
     stat["recall"] = {}
