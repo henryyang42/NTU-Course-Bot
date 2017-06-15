@@ -264,7 +264,7 @@ def single_turn_lu_setup():
         word2idx[w] = i
 
     # load model
-    lu_model = load_model('%s/LU_LSTM/PY3--re_seg.1K+log_extend_1000--LSTM.model' % settings.BASE_DIR)
+    lu_model = load_model('%s/LU_LSTM/PY3--re_seg.1K+log_extend_1000--bi-LSTM.model' % settings.BASE_DIR)
     print('[Info] Single-turn LU model loaded.')
 
 
