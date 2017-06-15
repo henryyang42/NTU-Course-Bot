@@ -57,7 +57,7 @@ def get_intent_slot(model, tokens, word2idx, idx2label, idx2intent):
             B_cnt += 1
 
     sorted_intent_indice = (-pred_intent[0]).argsort()
-    print (sorted_intent_indice)
+    #print (sorted_intent_indice)
     intent = idx2intent[sorted_intent_indice[0]]
     # if intent=inform but no slot, predict the one with second highest prob.
     if intent == "inform" and B_cnt == 0:
