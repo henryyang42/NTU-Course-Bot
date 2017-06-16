@@ -2,6 +2,7 @@ from crawler.models import *
 import numpy as np
 from django.db.models import Q
 from .decorator import run_once
+import editdistance
 
 
 def expand_title(title):
@@ -48,7 +49,16 @@ def query_course(constraints):
 
     # Generate corresponding response to each intent.
     courses = unique_courses.filter(**query_term).filter(expand_title(constraints.get('title', '')))
-    #courses = Course.objects.filter(**query_term).filter(expand_title(constraints.get('title', '')))
+    # courses = Course.objects.filter(**query_term).filter(expand_title(constraints.get('title', '')))
+
+    if courses.count() < 100 and 'title' in constraints:
+        # Re-order queryset by edit distance.
+        ordered_courses = sorted(courses, key=lambda x: editdistance.eval(x.title, constraints['title']))
+        pk_list = [course.pk for course in ordered_courses]
+        clauses = ' '.join(['WHEN id=%s THEN %s' % (pk, i) for i, pk in enumerate(pk_list)])
+        ordering = 'CASE %s END' % clauses
+        courses = courses.extra(select={'ordering': ordering}, order_by=('ordering',))
+
     return courses
 
 
