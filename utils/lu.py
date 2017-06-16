@@ -34,10 +34,13 @@ def DST_update(old_state, sem_frame):
 
     # user-requested slots
     if sem_frame['intent'].startswith('request'):
-        state['request_slots'][sem_frame['intent'][8:]] = '?'
+        req_slot = sem_frame['intent'][8:]
+        state['request_slots'][req_slot] = '?'
 
     # user-informed slots
     for k, v in sem_frame['slot'].items():
+        if k == req_slot:
+            continue
         if len(v) > 1 or k in ['schedule_str', 'sel_method']:
             state['inform_slots'][k] = v
 
