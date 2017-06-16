@@ -32,6 +32,8 @@ def DST_update(old_state, sem_frame):
                 state['request_slots'][slot] = '?'
         # TODO multiple_choice
 
+        return state # should not have informed slot in this case
+
     # user-requested slots
     req_slot = None
     if sem_frame['intent'].startswith('request'):
