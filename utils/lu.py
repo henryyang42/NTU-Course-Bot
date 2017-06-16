@@ -33,13 +33,14 @@ def DST_update(old_state, sem_frame):
         # TODO multiple_choice
 
     # user-requested slots
+    req_slot = None
     if sem_frame['intent'].startswith('request'):
         req_slot = sem_frame['intent'][8:]
         state['request_slots'][req_slot] = '?'
 
     # user-informed slots
     for k, v in sem_frame['slot'].items():
-        if k == req_slot:
+        if req_slot is not None and k == req_slot:
             continue
         if len(v) > 1 or k in ['schedule_str', 'sel_method']:
             state['inform_slots'][k] = v
