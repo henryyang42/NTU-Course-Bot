@@ -425,12 +425,11 @@ button{
     for(i = 0; i < voices.length; ++i) {
       if(voices[i].name === "Google 國語（臺灣）") {
         utter.voice = voices[i];
+        utter.rate = 1;
+        utter.pitch = 1;
+        synthesis.speak(utter);
       }
     }
-
-    utter.rate = 1;
-    utter.pitch = 1;
-    synthesis.speak(utter);
   }
 
   function save_schedule(added_course) {
