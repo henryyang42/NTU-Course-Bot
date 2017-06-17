@@ -51,6 +51,30 @@ def tag_data(request):
                    'sementic': json.dumps(sementic, ensure_ascii=False)
                    })
 
+def tag_data_bad_rating(request):
+    if request.method == 'POST':
+        d_log = get_object_or_404(DialogueLog, id=request.POST['id'])
+        d_log.tagged_data = request.POST['tagged_data']
+        d_log.tagged = True
+        d_log.save()
+        return HttpResponse("OK")
+    untagged = DialogueLog.objects.filter(tagged=False, rating=-1)
+    tagged = DialogueLog.objects.filter(tagged=True, rating=-1)
+    sementic = {}
+    for _ in range(100):
+        dialogue = untagged[random.randint(0, untagged.count() - 1)]
+        try:
+            debug = json.loads(dialogue.debug.replace("'", '"'))
+            sementic = debug['sementic']
+            break
+        except:
+            pass
+    return render(request, 'web_api/tag_data.html',
+                  {'untagged_count': untagged.count(),
+                   'tagged_count': tagged.count(),
+                   'dialogue': dialogue,
+                   'sementic': json.dumps(sementic, ensure_ascii=False)
+                   })
 
 def delete_dialogue(request, id):
     d_log = get_object_or_404(DialogueLog, id=id)
