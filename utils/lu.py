@@ -64,11 +64,9 @@ def DST_update(old_state, sem_frame):
 
     # move informed slots to constraints
     if old_state['agent_action'] is not None and old_state['agent_action']['diaact'] == "inform":
-        if 'contraints' not in state:
-            state['contraints'] = {}
         for slot in old_state['agent_action']['inform_slots']:
             if slot not in ['serial_no', 'title'] and slot in state['request_slots']:
-                state['contraints'][slot] = old_state['agent_action']['inform_slots'][slot]
+                state['constraints'][slot] = old_state['agent_action']['inform_slots'][slot]
                 del state['request_slots'][slot]
 
     return state
