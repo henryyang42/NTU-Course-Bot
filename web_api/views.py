@@ -1,3 +1,4 @@
+import ast
 import json
 import random
 
@@ -39,8 +40,11 @@ def tag_data(request):
     for _ in range(100):
         dialogue = untagged[random.randint(0, untagged.count() - 1)]
         try:
-            debug = json.loads(dialogue.debug.replace("'", '"'))
-            sementic = debug['sementic']
+            debug = ast.literal_eval(dialogue.debug)
+            if 'sementic' in debug:
+                sementic = debug['sementic']
+            else:
+                sementic = debug
             break
         except:
             pass
@@ -50,6 +54,7 @@ def tag_data(request):
                    'dialogue': dialogue,
                    'sementic': json.dumps(sementic, ensure_ascii=False)
                    })
+
 
 def tag_data_bad_rating(request):
     if request.method == 'POST':
@@ -64,8 +69,11 @@ def tag_data_bad_rating(request):
     for _ in range(100):
         dialogue = untagged[random.randint(0, untagged.count() - 1)]
         try:
-            debug = json.loads(dialogue.debug.replace("'", '"'))
-            sementic = debug['sementic']
+            debug = ast.literal_eval(dialogue.debug)
+            if 'sementic' in debug:
+                sementic = debug['sementic']
+            else:
+                sementic = debug
             break
         except:
             pass
@@ -75,6 +83,7 @@ def tag_data_bad_rating(request):
                    'dialogue': dialogue,
                    'sementic': json.dumps(sementic, ensure_ascii=False)
                    })
+
 
 def delete_dialogue(request, id):
     d_log = get_object_or_404(DialogueLog, id=id)
