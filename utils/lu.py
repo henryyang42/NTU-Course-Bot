@@ -42,8 +42,11 @@ def DST_update(old_state, sem_frame):
 
     # user-informed slots
     for k, v in sem_frame['slot'].items():
+        # FIXME intent might not be always correct...
+        '''
         if req_slot is not None and k == req_slot:
             continue
+        '''
         if len(v) > 1 or k in ['schedule_str', 'sel_method']:
             # trim suffix for DB query
             if k == 'title' and v.endswith("課"):
