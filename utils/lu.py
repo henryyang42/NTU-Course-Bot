@@ -48,7 +48,7 @@ def DST_update(old_state, sem_frame):
             # trim suffix for DB query
             if k == 'title' and v.endswith("課"):
                 v = v[-1]
-            if k == 'instructor' and (v.endswith("教授") or v.endswith("老師"))
+            if k == 'instructor' and (v.endswith("教授") or v.endswith("老師")):
                 v = v[-2]
 
             state['inform_slots'][k] = v
