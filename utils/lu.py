@@ -54,6 +54,10 @@ def DST_update(old_state, sem_frame):
             if k == 'instructor' and (v.endswith("教授") or v.endswith("老師")):
                 v = v[:-2]
 
+            # classroom slot is seldom recognized correctly so exclude it
+            if k == 'classroom':
+                continue
+
             state['inform_slots'][k] = v
 
     return state
