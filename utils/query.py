@@ -1,3 +1,4 @@
+import re
 from crawler.models import *
 import numpy as np
 from django.db.models import Q
@@ -54,11 +55,13 @@ def query_course(constraints):
     if courses.count() < 100 and 'title' in constraints:
         # Re-order queryset by edit distance.
         ordered_courses = sorted(courses, key=lambda x: editdistance.eval(x.title, constraints['title']))
-        pk_list = [course.pk for course in ordered_courses]
+        pk_list = [course.pk for course in ordered_courses if re.search(".*".join(constraints['title']), course.title)]
         clauses = ' '.join(['WHEN id=%s THEN %s' % (pk, i) for i, pk in enumerate(pk_list)])
         ordering = 'CASE %s END' % clauses
-        courses = courses.extra(select={'ordering': ordering}, order_by=('ordering',))
-
+        if pk_list:
+            courses = courses.extra(select={'ordering': ordering}, order_by=('ordering',))
+        else:
+            courses = Course.objects.none()
     return courses
 
 
