@@ -154,7 +154,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         for slot in ['title', 'instructor']:
             if slot in status['inform_slots']:
                 review_constraints[slot] = status['inform_slots'][slot] 
-            if slot in status['constraints']:
+            elif slot in status['constraints']:
                 review_constraints[slot] = status['constraints'][slot]
 
         reviews = query_review(review_constraints).order_by('-id')[:20]
@@ -242,7 +242,7 @@ def multi_turn_rl(user_id, sentence, reset=False):
         for slot in ['title', 'instructor']:
             if slot in status['inform_slots']:
                 review_constraints[slot] = status['inform_slots'][slot]
-            if slot in status['constraints']:
+            elif slot in status['constraints']:
                 review_constraints[slot] = status['constraints'][slot]
         reviews = query_review(review_constraints).order_by('-id')[:20]
         review_resp = []
