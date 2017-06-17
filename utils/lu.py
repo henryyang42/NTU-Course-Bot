@@ -53,12 +53,23 @@ def DST_update(old_state, sem_frame):
                 v = v[:-1]
             if k == 'instructor' and (v.endswith("教授") or v.endswith("老師")):
                 v = v[:-2]
+            if k == 'required_elective' and v.endswith("課"):
+                v = v[:-1]
 
-            # classroom slot is seldom recognized correctly so exclude it
+            # classroom slot is seldom recognized correctly so we exclude it
             if k == 'classroom':
                 continue
 
             state['inform_slots'][k] = v
+
+    # move informed slots to constraints
+    if old_state['agent_action'] is not None and old_state['agent_action']['diaact'] == "inform":
+        if 'contraints' not in state:
+            state['contraints'] = {}
+        for slot in old_state['agent_action']['inform_slots']:
+            if slot not in ['serial_no', 'title'] and slot in state['request_slots']:
+                state['contraints'][slot] = old_state['agent_action']['inform_slots'][slot]
+                del state['request_slots'][slot]
 
     return state
 
@@ -115,7 +126,7 @@ def multi_turn_lu_setup():
 
 def set_status(user_id, status=None):
     if not status:  # Generate an id for new status.
-        status = {'current_slots': {}, 'request_slots': {}, 'inform_slots': {}, 'group_id': id_generator(), 'user_action': None, 'agent_action': None, 'turn': 0}
+        status = {'current_slots': {}, 'request_slots': {}, 'inform_slots': {}, 'constraints': {}, 'group_id': id_generator(), 'user_action': None, 'agent_action': None, 'turn': 0}
     DialogueLogGroup.objects.update_or_create(
         user_id=user_id, group_id=status['group_id'],
         defaults={'status': json.dumps(status, ensure_ascii=False)}
@@ -144,7 +155,10 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         review_constraints = {}
         for slot in ['title', 'instructor']:
             if slot in status['inform_slots']:
-                review_constraints[slot] = status['inform_slots'][slot]
+                review_constraints[slot] = status['inform_slots'][slot] 
+            if slot in status['constraints']:
+                review_constraints[slot] = status['constraints'][slot]
+
         reviews = query_review(review_constraints).order_by('-id')[:20]
         review_resp = []
         if reviews.count() == 0:
@@ -230,6 +244,8 @@ def multi_turn_rl(user_id, sentence, reset=False):
         for slot in ['title', 'instructor']:
             if slot in status['inform_slots']:
                 review_constraints[slot] = status['inform_slots'][slot]
+            if slot in status['constraints']:
+                review_constraints[slot] = status['constraints'][slot]
         reviews = query_review(review_constraints).order_by('-id')[:20]
         review_resp = []
         if reviews.count() == 0:
