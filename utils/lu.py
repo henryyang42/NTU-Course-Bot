@@ -32,13 +32,28 @@ def DST_update(old_state, sem_frame):
                 state['request_slots'][slot] = '?'
         # TODO multiple_choice
 
+        return state # should not have informed slot in this case
+
     # user-requested slots
+    req_slot = None
     if sem_frame['intent'].startswith('request'):
-        state['request_slots'][sem_frame['intent'][8:]] = '?'
+        req_slot = sem_frame['intent'][8:]
+        state['request_slots'][req_slot] = '?'
 
     # user-informed slots
     for k, v in sem_frame['slot'].items():
+        # FIXME intent might not be always correct...
+        '''
+        if req_slot is not None and k == req_slot:
+            continue
+        '''
         if len(v) > 1 or k in ['schedule_str', 'sel_method']:
+            # trim suffix for DB query
+            if k == 'title' and v.endswith("課"):
+                v = v[:-1]
+            if k == 'instructor' and (v.endswith("教授") or v.endswith("老師")):
+                v = v[:-2]
+
             state['inform_slots'][k] = v
 
     return state

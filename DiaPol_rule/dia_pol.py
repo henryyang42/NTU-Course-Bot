@@ -88,7 +88,7 @@ def get_action_from_frame(dia_state, verbose=False):
 
             if n_values > req_max_n:
                 if n_values > MAX_N_CHOICE: # not taking `multiple_choice` action
-                    # don't ask users something they are askin
+                    # don't ask users something they are asking
                     if slot in dia_state["request_slots"]:
                         continue
                 # don't ask users something already known
@@ -102,7 +102,7 @@ def get_action_from_frame(dia_state, verbose=False):
 
         if req_max_n <= 1: # only one course satisfy the constraints
             unique_found = True
-        elif req_max_n <= MAX_N_CHOICE: # no more than 5 values => `multiple_choice`
+        elif req_max_n <= MAX_N_CHOICE: # not too many values => `multiple_choice`
             sys_act["diaact"] = "multiple_choice"
             sys_act["choice"] = [{req_slot:v} for v in choice_set] # pass list to user
         elif req_slot is not None: # `request`
