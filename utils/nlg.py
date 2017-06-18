@@ -122,7 +122,7 @@ def agent2nl(sys_act):
     if sys_act["diaact"] == "thanks":
         return "很高興能為您服務。"
 
-    if sys_act["diaact"] == "unknown":
+    if sys_act["diaact"] == "inform_unknown":
         return "我不太懂您的意思耶QQ您可以告訴我課名、授課教師或者星期幾上課。"
 
     res_list = []
