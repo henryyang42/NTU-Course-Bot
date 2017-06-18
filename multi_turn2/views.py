@@ -43,7 +43,7 @@ def multi_turn(request):
 
 def multi_turn_rlmodel(request):
     if request.method == 'POST':
-        resp = {'resp_str': '我壞掉惹QQ', 'diaact': 'closing'}
+        resp = {'resp_str': '我壞掉惹QQ', 'action':{'diaact': 'closing'}}
         user_input = request.POST['input']
         uid = request.COOKIES['csrftoken']
         if user_input == 'reset':
