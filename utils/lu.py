@@ -38,7 +38,8 @@ def DST_update(old_state, sem_frame):
     req_slot = None
     if sem_frame['intent'].startswith('request'):
         req_slot = sem_frame['intent'][8:]
-        state['request_slots'][req_slot] = '?'
+        if req_slot != 'review':
+            state['request_slots'][req_slot] = '?'
 
     # user-informed slots
     for k, v in sem_frame['slot'].items():
@@ -166,7 +167,6 @@ def multi_turn_lu3(user_id, sentence, reset=False):
             for review in reviews:
                 review_resp.append('<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
 
-        status['agent_action'] = action
         set_status(user_id, status)
 
         return d, status, {}, '\n'.join(review_resp)
@@ -249,7 +249,6 @@ def multi_turn_rl(user_id, sentence, reset=False):
             for review in reviews:
                 review_resp.append(
                     '<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
-
         status['agent_action'] = {'diaact': 'inform', 'inform_slots': {}, 'request_slots': {}}
         status['turn'] += 1
         set_status(user_id, status)
