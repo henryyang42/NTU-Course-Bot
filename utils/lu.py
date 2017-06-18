@@ -165,6 +165,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
             review_resp.append('幫您搜尋到%d筆相關評價：<br>' % reviews.count())
             for review in reviews:
                 review_resp.append('<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
+        set_status(user_id, status)
         return d, status, {}, '\n'.join(review_resp)
     if d['intent'] == 'thanks' or d['intent'] == 'closing':  # Reset dialogue state
         action = {'diaact': 'thanks'}
@@ -244,6 +245,7 @@ def multi_turn_rl(user_id, sentence, reset=False):
             for review in reviews:
                 review_resp.append(
                     '<a target="_blank" href="https://www.ptt.cc/bbs/NTUCourse/%s.html">%s</a><br>' % (review.article_id, review.title))
+        set_status(user_id, status)
         return semantic_frame, status, {}, '\n'.join(review_resp)
     if semantic_frame['intent'] == 'thanks' or semantic_frame['intent'] == 'closing':  # Reset dialogue state
         action = {'diaact': 'thanks'}
