@@ -175,15 +175,6 @@ def multi_turn_lu3(user_id, sentence, reset=False):
 
     status['agent_action'] = action
 
-    # add system retrived information to dialogue state (as if user informed these slots)
-    #FIXME
-    '''
-    if action['diaact'] == 'inform':
-        for slot in ['title', 'instructor']:
-            if slot not in status['inform_slots']:
-                status['inform_slots'][slot] = action['inform_slots'][slot]
-    '''
-
     if action['diaact'] in ['closing', 'thanks']:
         set_status(user_id)
     else:
@@ -266,15 +257,6 @@ def multi_turn_rl(user_id, sentence, reset=False):
         print("lu - action:\n\t", action, '\n')
 
     status['agent_action'] = action
-
-    # add system retrived information to dialogue state (as if user informed these slots)
-    # FIXME
-    '''
-    if action['diaact'] == 'inform':
-        for slot in ['title', 'instructor']:
-            if slot not in status['inform_slots']:
-                status['inform_slots'][slot] = action['inform_slots'][slot]
-    '''
 
     status['turn'] += 1  # turn added by agent action
     if action['diaact'] in ['closing', 'thanks']:
