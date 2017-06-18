@@ -257,7 +257,7 @@ def multi_turn_rl(user_id, sentence, reset=False):
     if semantic_frame['intent'] == 'thanks' or semantic_frame['intent'] == 'closing':  # Reset dialogue state
         action = {'diaact': 'thanks'}
     elif semantic_frame['intent'] == 'other' and len(semantic_frame['slot']) == 0:
-        action = {'diaact': 'inform_unknown'}
+        action = {'diaact': 'inform_unknown', 'inform_slots': {}, 'request_slots': {}}
     else:
         act_slot_response = agent.feasible_actions[np.argmax(agent.model.predict(
             agent.prepare_state_representation(status)))]
