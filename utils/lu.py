@@ -33,6 +33,14 @@ def DST_update(old_state, sem_frame):
         # TODO multiple_choice
 
         return state # should not have informed slot in this case
+    
+    # move informed slots to constraints
+    if old_state['agent_action'] is not None and old_state['agent_action']['diaact'] == "inform":
+        for slot in old_state['agent_action']['inform_slots']:
+            state['constraints'][slot] = old_state['agent_action']['inform_slots'][slot]
+            if slot in state['request_slots']:
+                del state['request_slots'][slot]
+
 
     # user-requested slots
     req_slot = None
@@ -62,13 +70,6 @@ def DST_update(old_state, sem_frame):
                 continue
 
             state['inform_slots'][k] = v
-
-    # move informed slots to constraints
-    if old_state['agent_action'] is not None and old_state['agent_action']['diaact'] == "inform":
-        for slot in old_state['agent_action']['inform_slots']:
-            state['constraints'][slot] = old_state['agent_action']['inform_slots'][slot]
-            if slot in state['request_slots']:
-                del state['request_slots'][slot]
 
     return state
 
