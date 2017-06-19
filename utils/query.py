@@ -43,10 +43,8 @@ def query_course(constraints):
     for k, v in constraints.items():
         ## alias ##
         if k == 'designated_for':
-            if v == '資工系':
-                v = '資訊系'
-            elif v == '資工所':
-                v = '資訊所'
+            if '資工' in v:
+                v = v.replace('資工', '資訊')
         ###########
         if k == 'when':
             query_term['schedule_str__contains'] = v[-1]
