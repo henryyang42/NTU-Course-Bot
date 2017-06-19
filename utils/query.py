@@ -41,13 +41,17 @@ def query_course(constraints):
     # Transform slot to query terms.
     query_term = {}
     for k, v in constraints.items():
+        ## alias ##
+        if k == 'designated_for':
+            if v == '資工系':
+                v = '資訊系'
+        ###########
         if k == 'when':
             query_term['schedule_str__contains'] = v[-1]
         elif k == 'title':
             pass
         else:
             query_term[k + '__contains'] = v
-    # TODO alias 資訊系 資工系
 
     # Generate corresponding response to each intent.
     courses = unique_courses.filter(**query_term).filter(expand_title(constraints.get('title', '')))
