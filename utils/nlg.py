@@ -70,7 +70,7 @@ agent_inform_tpl = {
         Template('在{{classroom}}上課。')
     ],
     'schedule_str': [
-        Template('上課時間是{{schefule_str}}。')
+        Template('上課時間是{{schedule_str}}。')
     ],
     'designated_for': [
         Template('系所：{{designated_for}}。')
