@@ -47,6 +47,7 @@ def query_course(constraints):
             pass
         else:
             query_term[k + '__contains'] = v
+    # TODO alias 資訊系 資工系
 
     # Generate corresponding response to each intent.
     courses = unique_courses.filter(**query_term).filter(expand_title(constraints.get('title', '')))
