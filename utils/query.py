@@ -45,6 +45,8 @@ def query_course(constraints):
         if k == 'designated_for':
             if v == '資工系':
                 v = '資訊系'
+            elif v == '資工所':
+                v = '資訊所'
         ###########
         if k == 'when':
             query_term['schedule_str__contains'] = v[-1]
