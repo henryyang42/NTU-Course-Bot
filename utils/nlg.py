@@ -56,6 +56,33 @@ inform_tpl = {
     ]
 }
 
+agent_inform_tpl = {
+    'serial_no': [
+        Template('流水號<a href="#" class="serial_no">{{serial_no}}</a>。')
+    ],
+    'title': [
+        Template('課名是{{title}}。')
+    ],
+    'instructor': [
+        Template('授課教師是{{instructor}}。')
+    ],
+    'classroom': [
+        Template('在{{classroom}}上課。')
+    ],
+    'schedule_str': [
+        Template('上課時間是{{schefule_str}}。')
+    ],
+    'designated_for': [
+        Template('系所：{{designated_for}}。')
+    ],
+    'required_elective': [
+        Template('必選修：{{required_elective}}。')
+    ],
+    'sel_method': [
+        Template('加選方式：{{sel_method}}。')
+    ]
+}
+
 agent_request_tpl = {
     'title': [
         Template('請問要找哪門課?'),
@@ -131,6 +158,7 @@ def agent2nl(sys_act):
     if sys_act["diaact"] == "inform":
         for slot in ["serial_no", "title", "instructor", "designated_for", "required_elective", "classroom", "schedule_str", "sel_method"]:
             if slot in sys_act["inform_slots"]:
+                '''
                 if slot == "serial_no":
                     res_str = "流水號<a href='#' class='serial_no'>%s</a>。"
                 elif slot == "title":
@@ -148,6 +176,11 @@ def agent2nl(sys_act):
                 elif slot == "sel_method":
                     res_str = "加選方式：%s。"
                 res_str = res_str % sys_act["inform_slots"][slot]
+                '''
+                
+                tpl = random.choice(agent_inform_tpl[slot])
+                res_str = tpl.render(Context(sys_act["request_slots"]))
+
                 res_list.append(res_str)
 
     # request in a pre-defined order
