@@ -179,7 +179,7 @@ def agent2nl(sys_act):
                 '''
                 
                 tpl = random.choice(agent_inform_tpl[slot])
-                res_str = tpl.render(Context(sys_act["request_slots"]))
+                res_str = tpl.render(Context(sys_act["inform_slots"]))
 
                 res_list.append(res_str)
 
