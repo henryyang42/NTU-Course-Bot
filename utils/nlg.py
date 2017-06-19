@@ -58,28 +58,37 @@ inform_tpl = {
 
 agent_inform_tpl = {
     'serial_no': [
-        Template('流水號<a href="#" class="serial_no">{{serial_no}}</a>。')
+        Template('流水號<a href="#" class="serial_no">{{serial_no}}</a>。'),
+        Template('[<a href="#" class="serial_no">{{serial_no}}</a>]')
     ],
     'title': [
-        Template('課名是{{title}}。')
+        Template('課名是{{title}}。'),
+        Template('{{title}}。')
     ],
     'instructor': [
-        Template('授課教師是{{instructor}}。')
+        Template('授課教師是{{instructor}}。'),
+        Template('由{{instructor}}授課。'),
+        Template('{{instructor}}老師的課。')
     ],
     'classroom': [
-        Template('在{{classroom}}上課。')
+        Template('在{{classroom}}上課。'),
+        Template('教室是{{classroom}}。')
     ],
     'schedule_str': [
-        Template('上課時間是{{schedule_str}}。')
+        Template('上課時間是{{schedule_str}}。'),
+        Template('在{{schedule_str}}上課。')
     ],
     'designated_for': [
-        Template('系所：{{designated_for}}。')
+        Template('系所：{{designated_for}}。'),
+        Template('{{designated_for}}開的。')
     ],
     'required_elective': [
-        Template('必選修：{{required_elective}}。')
+        Template('必選修：{{required_elective}}。'),
+        Template('{{required_elective}}課。')
     ],
     'sel_method': [
-        Template('加選方式：{{sel_method}}。')
+        Template('加選方式：{{sel_method}}。'),
+        Template('第{{sel_method}}類加選。')
     ]
 }
 
