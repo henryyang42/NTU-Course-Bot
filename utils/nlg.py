@@ -63,24 +63,36 @@ agent_inform_tpl = {
     ],
     'title': [
         Template('課名是{{title}}。'),
-        Template('{{title}}。')
+        Template('{{title}}。'),
+        Template('課程名稱是{{title}}。'),
+        Template('課名叫做{{title}}。')
     ],
     'instructor': [
         Template('授課教師是{{instructor}}。'),
         Template('由{{instructor}}授課。'),
-        Template('{{instructor}}老師的課。')
+        Template('{{instructor}}老師的課。'),
+        Template('老師的名字叫做{{instructor}}。'),
+        Template('老師是{{instructor}}唷。'),
+        Template('教授的名字是{{instructor}}。')
     ],
     'classroom': [
         Template('在{{classroom}}上課。'),
-        Template('教室是{{classroom}}。')
+        Template('教室是{{classroom}}。'),
+        Template('上課地點是{{classroom}}，不要走錯囉。'),
+        Template('上課教室在{{classroom}}。'),
+        Template('要到{{classroom}}上課。'),
+        Template('請到{{classroom}}上課。')
     ],
     'schedule_str': [
         Template('上課時間是{{schedule_str}}。'),
-        Template('在{{schedule_str}}上課。')
+        Template('在{{schedule_str}}上課。'),
+        Template('在{{schedule_str}}上課，要準時喔。')
     ],
     'designated_for': [
         Template('系所：{{designated_for}}。'),
-        Template('{{designated_for}}開的。')
+        Template('{{designated_for}}開的。'),
+        Template('{{designated_for}}開的課喔。'),
+        Template('這是{{designated_for}}的課。')
     ],
     'required_elective': [
         Template('必選修：{{required_elective}}。'),
@@ -95,23 +107,30 @@ agent_inform_tpl = {
 agent_request_tpl = {
     'title': [
         Template('請問要找哪門課?'),
-        Template('請問課程名稱是?')
+        Template('請問課程名稱是?'),
+        Template('請告訴我課名是什麼?'),
+        Template('請告訴我課程名稱?')
     ],
     'instructor': [
         Template('請問是哪位老師開的?'),
-        Template('請問是誰開的?')
+        Template('請問是誰開的?'),
+        Template('請跟我說是哪位老師的課'),
+        Template('請跟我說是教授的名字')
     ],
     'schedule_str': [
         Template('請問是星期幾的課?'),
-        Template('請問是星期幾上課的?')
+        Template('請問是星期幾上課的?'),
+        Template('請問要星期幾的課呢?')
     ],
     'designated_for': [
         Template('請問是哪個系開的?'),
-        Template('請問是哪個系的課?')
+        Template('請問是哪個系的課?'),
+        Template('請告訴我你想要選哪個系的課呢?')
     ],
     'classroom': [
         Template('請問是在哪上課的?'),
-        Template('請問是在哪間教室的?')
+        Template('請問是在哪間教室的?'),
+        Template('請告訴我你想在哪裡上課')
     ]
 }
 
