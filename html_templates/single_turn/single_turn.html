@@ -465,7 +465,7 @@ button{
   var app = angular.module('chat', ['ui.toggle']);
   app.controller('chatController', function ($scope) {
     function initial() {
-      add_message(server_tpl.format('歡迎來到NTU Course Bot！我能幫您做什麼？', now()));
+      add_message(server_tpl.format('歡迎來到NTU Course Bot！我能幫您做什麼？<br>請按<a href="#helper-popup" class="open-popup-link"> <b>說明</b> </a>以獲得更多資訊。', now()));
       speak('歡迎來到NTU Course Bot！我能幫您做什麼？');
       $scope.credit = 0;
       $scope.added_course = [];
