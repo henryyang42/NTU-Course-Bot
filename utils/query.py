@@ -55,7 +55,7 @@ def query_course(constraints):
 
     # Generate corresponding response to each intent.
     courses = unique_courses.filter(**query_term).filter(expand_title(constraints.get('title', '')))
-    # courses = Course.objects.filter(**query_term).filter(expand_title(constraints.get('title', '')))
+    #courses = Course.objects.filter(**query_term).filter(expand_title(constraints.get('title', '')))
 
     if courses.count() < 100 and 'title' in constraints:
         # Re-order queryset by edit distance.
@@ -64,7 +64,7 @@ def query_course(constraints):
         clauses = ' '.join(['WHEN id=%s THEN %s' % (pk, i) for i, pk in enumerate(pk_list)])
         ordering = 'CASE %s END' % clauses
         if pk_list:
-            courses = courses.extra(select={'ordering': ordering}, order_by=('ordering',))
+            courses = Course.objects.filter(pk__in=pk_list).extra(select={'ordering': ordering}, order_by=('ordering',))
         else:
             courses = Course.objects.none()
     return courses
