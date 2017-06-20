@@ -64,6 +64,9 @@ def get_intent_slot(model, tokens, word2idx, idx2label, idx2intent):
         print (intent)
         intent = idx2intent[sorted_intent_indice[1]]
         print ("=>", intent)
+    if intent == "deny":
+        intent = "inform_unknown"
+        print ("=>", intent)
 
     return intent, tokens, labels
 
