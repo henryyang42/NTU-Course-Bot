@@ -115,7 +115,7 @@ agent_request_tpl = {
         Template('請問是哪位老師開的?'),
         Template('請問是誰開的?'),
         Template('請跟我說是哪位老師的課'),
-        Template('請跟我說是教授的名字')
+        Template('請跟我說教授的名字')
     ],
     'schedule_str': [
         Template('請問是星期幾的課?'),
