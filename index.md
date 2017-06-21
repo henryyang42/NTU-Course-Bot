@@ -1,5 +1,5 @@
 # 和 [選課伙伴](http://ntu-course-chatbot.ml/) 對話吧！
-[![操作範例](https://img.youtube.com/vi/K-hj28wTTT4/0.jpg)](https://www.youtube.com/watch?v=K-hj28wTTT4)
+[![操作範例](http://i.imgur.com/knzNhKw.png)](https://www.youtube.com/watch?v=K-hj28wTTT4)
 
 # Architecture
 
