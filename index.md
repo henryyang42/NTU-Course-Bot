@@ -19,7 +19,8 @@
 
 ## Natural Language Generation
 - Seq2seq LSTM model
+![](https://i.imgur.com/9a78h0k.png)
 
 ## Dialogue Management
 - Rule-based & DQN model with rule-based user simulator
-
+![](https://i.imgur.com/KRXrtIX.png)
