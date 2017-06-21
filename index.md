@@ -4,7 +4,8 @@
 # Architecture
 
 ## Ontology
-
+- Overview
+![](https://i.imgur.com/1rz7v9b.png)
 - Course from 台大課程網 (~20K courses)
 ![](https://i.imgur.com/IMLGD5g.png)
 
@@ -16,11 +17,23 @@
 ## Natural Language Understanding
 - Two layers LSTM to predict slot **BIO-tagging** and **intent**
 ![](https://i.imgur.com/Yh0s8Qq.png)
+- Experiment results
+![](https://i.imgur.com/FRNjWBf.png)
 
 ## Natural Language Generation
 - Seq2seq LSTM model
 ![](https://i.imgur.com/9a78h0k.png)
+- Experiment results
 
 ## Dialogue Management
-- Rule-based & DQN model with rule-based user simulator
+- Rule-based model
+![](https://i.imgur.com/clb088e.png)
+- Experiment results
+![](https://i.imgur.com/9fCR4mc.png)
+
+- DQN model
 ![](https://i.imgur.com/KRXrtIX.png)
+- Experiment results
+![](https://i.imgur.com/q1BLsq7.png)
+
+- Rule-base user sumulator
