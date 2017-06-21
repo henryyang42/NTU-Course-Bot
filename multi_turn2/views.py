@@ -14,12 +14,13 @@ logger = logging.getLogger(__name__)
 
 def multi_turn(request):
     if request.method == 'POST':
-        resp = {'resp_str': '我壞掉惹QQ'}
+        resp = {'resp_str': '我壞掉惹QQ', 'action':{'diaact': 'broken'}}
         user_input = request.POST['input']
         uid = request.COOKIES['csrftoken']
         if user_input == 'reset':
             user_input = '我想選課'
             resp['resp_str'] = '已重設'
+            resp['action']['diaact'] = 'reset'
             multi_turn_lu3(uid, user_input, reset=True)
             return HttpResponse(json.dumps(resp), content_type="application/json")
         try:
@@ -49,6 +50,7 @@ def multi_turn_rlmodel(request):
         if user_input == 'reset':
             user_input = '我想選課'
             resp['resp_str'] = '已重設'
+            resp['action']['diaact'] = 'reset'
             multi_turn_rl(uid, user_input, reset=True)
             return HttpResponse(json.dumps(resp), content_type="application/json")
         try:
