@@ -14,7 +14,7 @@ from utils.tagger import *
 
 # from generate_template.py
 def trim_course(course):
-    course['when'] = random.choice(['星期', '禮拜', '周', '週']) + course['schedule_str'][0]
+    course['when'] = random.choice(['星期', '禮拜', '周', '週', '']) + course['schedule_str'][0]
     for k in ['title', 'instructor', 'classroom']:
         course[k] = trim_attr(course[k])
     return course
@@ -69,7 +69,7 @@ with codecs.open(args.dataset, "r", "utf-8") as f_in:
                         if " " in t:
                             t = t.replace(" ", "")
                     elif slot == "when":
-                        t = random.choice(['星期', '禮拜', '週', '周']) + course['schedule_str'][0]
+                        t = random.choice(['星期', '禮拜', '週', '周', '']) + course['schedule_str'][0]
 
 
                 new_tokens.append(t)

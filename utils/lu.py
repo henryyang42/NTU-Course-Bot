@@ -185,6 +185,7 @@ def multi_turn_lu3(user_id, sentence, reset=False):
         set_status(user_id)
     else:
         set_status(user_id, status)
+    # TODO remind the need of "thanks" when some action is repeated
     return d, status, action, agent2nl(action)
 
 

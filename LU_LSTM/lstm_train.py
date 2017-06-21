@@ -188,6 +188,7 @@ if args.word_emb is not None:
             chars = list(w)
             keys = []
             for i, c in enumerate(chars):
+                '''
                 if i == 0:
                     p = 's'
                 elif i == len(chars)-1:
@@ -195,6 +196,9 @@ if args.word_emb is not None:
                 else:
                     p = 'm'
                 keys.append( (c, p) )
+                '''
+                for p in ['s', 'e', 'm']:
+                    keys.append( (c, p) )
 
             found = False
             for k in keys:
