@@ -302,8 +302,10 @@ button{
                 <input id="chat_input" type="text" name="chat" ng-model="chat_input" ng-keypress="chat_input && $event.keyCode == 13 && send(chat_input)"
                   placeholder="請輸入想詢問的事情" class="form-control chat-input">
               </div>
-              <div class="col-xs-3 col-md-3">
+              <div class="col-xs-2 col-md-2">
                 <button class="btn btn-primary btn-block" ng-click="chat_input && send(chat_input)">Send</button>
+              </div>
+			  <div class="col-xs-1 col-md-1">
                 <button class="btn btn-primary btn-block" ng-click="">Reset</button>
               </div>
           </div>
