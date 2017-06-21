@@ -284,9 +284,9 @@ print ("== model compilation done ==")
 
 if args.balanced:
     #model.fit(X, [Y, Y2], validation_split=0.1, epochs=args.epoch, callbacks=cb, class_weight=[slot_cw, intent_cw])
-    model.fit(X, [Y, Y2], validation_split=0.1, epochs=args.epoch, callbacks=cb, class_weight=[None, intent_cw])
+    model.fit(X, [Y, Y2], validation_split=0.05, epochs=args.epoch, callbacks=cb, class_weight=[None, intent_cw])
 else:
-    model.fit(X, [Y, Y2], validation_split=0.1, epochs=args.epoch, callbacks=cb)
+    model.fit(X, [Y, Y2], validation_split=0.05, epochs=args.epoch, callbacks=cb)
 
 
 model.load_weights(best_weights_filepath)

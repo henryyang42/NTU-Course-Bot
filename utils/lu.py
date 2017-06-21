@@ -300,7 +300,7 @@ def single_turn_lu_setup_new():  # load new LU models (output new intents)
     global lu_model, idx2label, idx2intent, word2idx
 
     # load vocab
-    obj = json.load(open('%s/LU_LSTM/log0619_1K+template1K+log0619.vocab.json' % settings.BASE_DIR, "r"))
+    obj = json.load(open('%s/LU_LSTM/log0621_1K+template1K+log0621.vocab.json' % settings.BASE_DIR, "r"))
     idx2label = obj["slot_vocab"]
     idx2intent = obj["intent_vocab"]
     word2idx = {}
@@ -308,7 +308,7 @@ def single_turn_lu_setup_new():  # load new LU models (output new intents)
         word2idx[w] = i
 
     # load model
-    lu_model = load_model('%s/LU_LSTM/PY3--log0619_1K+template1K+log0619--NTUCourse.CWE--LSTM.iw0.8.model' % settings.BASE_DIR)
+    lu_model = load_model('%s/LU_LSTM/PY3--log0621_1K+template1K+log0621--NTUCourse.CWE--bi-LSTM.iw0.8.model' % settings.BASE_DIR)
     print('[Info] Single-turn LU model loaded.')
 
 
