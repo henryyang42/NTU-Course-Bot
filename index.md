@@ -4,11 +4,14 @@
 # Architecture
 
 ## Ontology
-- Source: 台大課程網, PTT
 
-* **Course**
+- Course from 台大課程網 (~20K courses)
+![](https://i.imgur.com/IMLGD5g.png)
 
-* **Review**
+
+- Review from PTT (~4K articles)
+![](https://i.imgur.com/gXV4nPB.png)
+
 
 ## Natural Language Understanding
 - Two layers LSTM to predict slot **BIO-tagging** and **intent**
