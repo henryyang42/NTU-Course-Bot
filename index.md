@@ -15,6 +15,7 @@
 
 ## Natural Language Understanding
 - Two layers LSTM to predict slot **BIO-tagging** and **intent**
+![](https://i.imgur.com/Yh0s8Qq.png)
 
 ## Natural Language Generation
 - Seq2seq LSTM model
