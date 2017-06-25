@@ -1,4 +1,4 @@
-# NTUCB
+# [NTUCB](https://yvchen.github.io/CourseBot2/)
 
 ## Website
 [https://ntu-course-chatbot.ml/](http://ntu-course-chatbot.ml/)
