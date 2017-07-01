@@ -1,18 +1,22 @@
-# NTUCB
+# [NTUCB](https://yvchen.github.io/CourseBot2/)
 
 ## Website
-http://ntu-course-chatbot.ml/
+[https://ntu-course-chatbot.ml/](http://ntu-course-chatbot.ml/)
 
 ## Installation
 
 Create a Python3 ``virtualenv`` and run ``sh install.sh``.
+
+We used ``theano`` backend, which can be set in ``~/.keras/keras.json``.
 
 ## Functionalities
 
 After install, you may access
 
 - ``python3 manage.py runserver``
-    - Interactive demo site [http://localhost:8000](http://localhost:8000)
+    - Interactive demo site
+    	- Rule-based: [http://localhost:8000](http://localhost:8000)
+    	- RL: [http://localhost:8000/rl](http://localhost:8000/rl)
 	-  Django admin [http://localhost:8000/admin](http://localhost:8000/admin)
 - ``python3 manage.py shell``
 	-  Making queries in Django interactive shell
